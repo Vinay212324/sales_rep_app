@@ -1,0 +1,47 @@
+.date{
+            display: flex;
+            justify-content: center;
+}
+.date-container {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007bff;
+            background: white;
+            padding: 15px 30px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+
+
+.forcustonbtn {
+    position: fixed;
+    bottom: 20px; /* Keeps it above the bottom edge */
+    right: 10px; /* Aligns it to the right */
+    z-index: 1000; /* Ensures it stays on top */
+    padding: 10px 15px; /* Adds spacing inside the button */
+    border-radius: 8px; /* Rounds the button edges */
+    background-color: #007bff; /* Bootstrap primary blue */
+    color: white; /* Text color */
+    font-size: 16px; /* Adjusts text size */
+    cursor: pointer; /* Adds pointer effect */
+}
+
+/* Responsive Fixes */
+@media (max-width: 768px) { /* For tablets and smaller screens */
+    .forcustonbtn {
+        bottom: 15px;
+        right: 5px;
+        font-size: 14px; /* Slightly smaller text */
+        padding: 8px 12px;
+    }
+}
+
+@media (max-width: 480px) { /* For mobile devices */
+    .forcustonbtn {
+        bottom: 10px;
+        right: 5px;
+        font-size: 12px;
+        padding: 6px 10px;
+    }
+}

@@ -1,0 +1,188 @@
+<odoo>
+    <data>
+          <template id="customers_form" name="customers form">
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8"/>
+                <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+                <title>User Data Form</title>
+
+                <!-- Bootstrap CSS -->
+                <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+
+                <!-- Google Font -->
+
+
+                <style>
+                    body {
+                        font-family: 'Poppins', sans-serif;
+                        background: linear-gradient(to right, #74ebd5, #acb6e5);
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        min-height: 100vh;
+                        padding: 20px;
+                    }
+
+                    .form-container {
+                        background: white;
+                        border-radius: 12px;
+                        padding: 30px;
+                        max-width: 100%;
+                        width: 450px;
+                        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+                    }
+
+                    .form-control {
+                        border-radius: 8px;
+                        padding: 10px;
+                        font-size: 16px;
+                        cursor: pointer;
+                        background-color: #f8f9fa;
+                    }
+
+                    .form-control:focus {
+                        border-color: #74ebd5;
+                        box-shadow: 0 0 5px rgba(116, 235, 213, 0.5);
+                    }
+
+                    .btn-primary, .btn-success {
+                        border-radius: 8px;
+                        font-weight: 600;
+                        transition: all 0.3s ease;
+                    }
+
+                    .btn-primary:hover {
+                        background: #56c7ba;
+                        transform: translateY(-2px);
+                    }
+
+                    .btn-success:hover {
+                        background: #45a049;
+                        transform: translateY(-2px);
+                    }
+
+                    .modal-content {
+                        border-radius: 10px;
+                    }
+
+                    .modal-body button {
+                        border-radius: 6px;
+                        transition: all 0.2s ease-in-out;
+                        width: 100%;
+                        margin-bottom: 10px;
+                        text-align: left;
+                    }
+
+                    .modal-body button:hover {
+                        background: #56c7ba;
+                        color: white;
+                    }
+
+                    @media (max-width: 480px) {
+                        .form-container {
+                            padding: 20px;
+                        }
+                    }
+                </style>
+            </head>
+            <body>
+
+            <div class="form-container">
+                <h3 class="text-center text-primary">User Data Form</h3>
+
+                <div class="mb-3">
+                    <label class="form-label">Current Newspaper</label>
+                    <input type="text" id="newspaper" class="form-control" readonly="1" data-bs-toggle="modal" data-bs-target="#dropdownModal" data-field="newspaper" placeholder="Select Newspaper"/>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Profession</label>
+                    <input type="text" id="profession" class="form-control" readonly="1" data-bs-toggle="modal" data-bs-target="#dropdownModal" data-field="profession" placeholder="Select Profession"/>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Address</label>
+                    <input type="text" id="address" class="form-control" placeholder="Enter your address"/>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Mobile Number</label>
+                    <input type="text" id="mobileNumber" class="form-control" placeholder="Enter your mobile number"/>
+                </div>
+
+                <button class="btn btn-primary w-100 mb-3" onclick="getLocation()">📍 Get Current Location</button>
+                <button class="btn btn-success w-100" onclick="storeData()">✅ Submit</button>
+            </div>
+
+            <div class="modal fade" id="dropdownModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="dropdownTitle"></h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body" id="dropdownBody"></div>
+                    </div>
+                </div>
+            </div>
+
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+            <script>
+                const options = {
+                    newspaper: ["Deccan Chronicle", "Eenadu", "AndhraJyoti", "The Hindu", "Namasthe Telangana", "Metro India", "The Hans India", "Nava Telangana", "The Deccan Times", "Hindi Milap", "Prajasakti"],
+                    profession: ["Farmer", "Doctor", "Teacher", "Lawyer", "Artist", "Musician", "Chef", "Photographer", "Electrician", "Plumber", "Designer", "Writer", "Social Worker", "Marketing Specialist", "Accountant"]
+                };
+
+                let activeField = "";
+                document.querySelectorAll("[data-bs-toggle='modal']").forEach(input => {
+                    input.addEventListener("click", function () {
+                        activeField = this.getAttribute("data-field");
+                        showDropdown(activeField);
+                    });
+                });
+
+                function showDropdown(type) {
+                    const modalTitle = document.getElementById("dropdownTitle");
+                    const modalBody = document.getElementById("dropdownBody");
+                    modalTitle.innerText = `Select ${type.charAt(0).toUpperCase() + type.slice(1)}`;
+                    modalBody.innerHTML = "";
+
+                    options[type].forEach(item => {
+                        const btn = document.createElement("button");
+                        btn.className = "btn btn-light";
+                        btn.innerText = item;
+                        btn.onclick = () => {
+                            document.getElementById(type).value = item;
+                            bootstrap.Modal.getInstance(document.getElementById("dropdownModal")).hide();
+                        };
+                        modalBody.appendChild(btn);
+                    });
+                }
+
+                function getLocation() {
+                    if (navigator.geolocation) {
+                        navigator.geolocation.getCurrentPosition(position => {
+                            const lat = position.coords.latitude;
+                            const lon = position.coords.longitude;
+                            alert(`📍 Latitude: ${lat}, Longitude: ${lon}`);
+                        }, error => {
+                            alert("❌ Error getting location: " + error.message);
+                        });
+                    } else {
+                        alert("❌ Geolocation is not supported by this browser.");
+                    }
+                }
+
+                function storeData() {
+                    alert("✅ Data Submitted Successfully!");
+                }
+            </script>
+
+            </body>
+            </html>
+
+          </template>
+    </data>
+</odoo>

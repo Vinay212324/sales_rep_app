@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Tree View -->
+    <record id="view_sales_rep_tree" model="ir.ui.view">
+        <field name="name">sales.rep.tree</field>
+        <field name="model">res.users</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="role"/>
+                <field name="email"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="view_sales_rep_form" model="ir.ui.view">
+        <field name="name">sales.rep.form</field>
+        <field name="model">res.users</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+
+                            <field name="name"/>
+                            <field name="role"/>
+                            <field name="email"/>
+                            <field name="password" password="True"/>
+
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+
+<!--    &lt;!&ndash; Kanban View &ndash;&gt;-->
+<!--    <record id="view_sales_rep_kanban" model="ir.ui.view">-->
+<!--        <field name="name">sales.rep.kanban</field>-->
+<!--        <field name="model">res.users</field>-->
+<!--        <field name="arch" type="xml">-->
+<!--            <kanban default_group_by="role">-->
+<!--                <field name="role"/>-->
+<!--                <templates>-->
+<!--                    <t t-name="kanban-box">-->
+<!--                        <div class="oe_kanban_card">-->
+<!--                            <div class="oe_kanban_content">-->
+<!--                                <div class="oe_kanban_header">-->
+<!--                                    <strong><field name="name"/></strong>-->
+<!--                                </div>-->
+<!--                                <div>-->
+<!--                                    <div>Role: <field name="role"/></div>-->
+<!--                                    <div>Email: <field name="email"/></div>-->
+<!--                                </div>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                    </t>-->
+<!--                </templates>-->
+<!--            </kanban>-->
+<!--        </field>-->
+<!--    </record>-->
+
+    <!-- Window Action -->
+    <record id="action_sales_rep" model="ir.actions.act_window">
+        <field name="name">Sales Representatives</field>
+        <field name="res_model">res.users</field>
+        <field name="view_mode">tree,form</field>
+
+    </record>
+
+    <!-- Menu Item -->
+    <menuitem id="menu_sales_rep_main" name="Sales Reps"
+              action="action_sales_rep"
+              sequence="10"/>
+</odoo>
