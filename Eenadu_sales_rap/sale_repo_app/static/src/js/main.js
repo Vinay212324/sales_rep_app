@@ -11,7 +11,6 @@ document.addEventListener("DOMContentLoaded", function () {
     let myFormEl = document.getElementById("myForm");
 
     let formData = {
-        db: "sale_rep_db",
         login: "",
         password: "",
         status: "Active"
@@ -67,7 +66,6 @@ document.addEventListener("DOMContentLoaded", function () {
             jsonrpc: "2.0",
             method: "call",
             params: {
-                db: formData.db,
                 login: formData.login,
                 password: formData.password
             },

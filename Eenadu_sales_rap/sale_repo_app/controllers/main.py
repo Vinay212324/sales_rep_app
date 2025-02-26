@@ -92,7 +92,8 @@ class UserPortal(http.Controller):
 
 
     @http.route('/web/session/authenticate', type='json', auth="none", csrf=False, cors="*")
-    def authenticate(self, db, login, password):
+    def authenticate(self, login, password):
+        db = "sales_rep"
         try:
             # Validate database access
             if not http.db_filter([db]):
