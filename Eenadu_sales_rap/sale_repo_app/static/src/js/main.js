@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", function () {
     let myFormEl = document.getElementById("myForm");
 
     let formData = {
-        db: "sales_rep",
+        db: "sale_rep_db",
         login: "",
         password: "",
         status: "Active"
