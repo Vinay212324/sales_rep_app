@@ -67,11 +67,11 @@ SECRET_KEY = 'your_secret_key'
 
 
 
-#
-# class ControllerA(http.Controller):
-#     @http.route('/web/login', type='http', auth='public', website=True)
-#     def controller_a(self, **kw):
-#         return redirect('/lin')
+
+class ControllerA(http.Controller):
+    @http.route('/web/login', type='http', auth='public', website=True)
+    def controller_a(self, **kw):
+        return redirect('/lin')
 
 class UserPortal(http.Controller):
     @http.route('/lin', type='http', auth='public')
