@@ -5,111 +5,226 @@
             <head>
                 <meta charset="UTF-8"/>
                 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-                <title>User Data Form</title>
+                <title>Customer Form</title>
 
                 <!-- Bootstrap CSS -->
+                <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet"/>
                 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
 
                 <!-- Google Font -->
+                <link rel="stylesheet" type="text/css" href="sale_repo_app/static/src/css/customers_form.css"/>
 
 
-                <style>
-                    body {
-                        font-family: 'Poppins', sans-serif;
-                        background: linear-gradient(to right, #74ebd5, #acb6e5);
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                        min-height: 100vh;
-                        padding: 20px;
-                    }
-
-                    .form-container {
-                        background: white;
-                        border-radius: 12px;
-                        padding: 30px;
-                        max-width: 100%;
-                        width: 450px;
-                        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-                    }
-
-                    .form-control {
-                        border-radius: 8px;
-                        padding: 10px;
-                        font-size: 16px;
-                        cursor: pointer;
-                        background-color: #f8f9fa;
-                    }
-
-                    .form-control:focus {
-                        border-color: #74ebd5;
-                        box-shadow: 0 0 5px rgba(116, 235, 213, 0.5);
-                    }
-
-                    .btn-primary, .btn-success {
-                        border-radius: 8px;
-                        font-weight: 600;
-                        transition: all 0.3s ease;
-                    }
-
-                    .btn-primary:hover {
-                        background: #56c7ba;
-                        transform: translateY(-2px);
-                    }
-
-                    .btn-success:hover {
-                        background: #45a049;
-                        transform: translateY(-2px);
-                    }
-
-                    .modal-content {
-                        border-radius: 10px;
-                    }
-
-                    .modal-body button {
-                        border-radius: 6px;
-                        transition: all 0.2s ease-in-out;
-                        width: 100%;
-                        margin-bottom: 10px;
-                        text-align: left;
-                    }
-
-                    .modal-body button:hover {
-                        background: #56c7ba;
-                        color: white;
-                    }
-
-                    @media (max-width: 480px) {
-                        .form-container {
-                            padding: 20px;
-                        }
-                    }
-                </style>
             </head>
             <body>
 
             <div class="form-container">
-                <h3 class="text-center text-primary">User Data Form</h3>
+                <h3 class="text-center text-primary">Customer Form</h3>
+                <div><p id="login"  class="login_info"></p></div>
 
-                <div class="mb-3">
-                    <label class="form-label">Current Newspaper</label>
-                    <input type="text" id="newspaper" class="form-control" readonly="1" data-bs-toggle="modal" data-bs-target="#dropdownModal" data-field="newspaper" placeholder="Select Newspaper"/>
+
+                 <div class="container">
+                      <div class="form-row">
+                        <!-- Date Field -->
+                        <div class="form-group col-md-6">
+                          <label for="currentDate">Today Date:</label>
+                          <input type="date" class="form-control" id="currentDate" readonly="1"/>
+                        </div>
+
+                        <!-- Time Field -->
+                        <div class="form-group col-md-6">
+                          <label for="currentTime">current Time:</label>
+                          <input type="time" class="form-control" id="currentTime" readonly="1"/>
+                        </div>
+                      </div>
+                  </div>
+
+<div>
+    <label>Family Details</label>
+
+    <div class="input-container mb-3">
+        <input type="text" class="input-field" id="family_head_name" placeholder=" " required="1" />
+        <label for="family_head_name" class="input-label">Family Head Name</label>
+    </div>
+
+    <div class="input-container mb-3">
+        <input type="text" class="input-field" id="father_name" placeholder=" " required="1" />
+        <label for="father_name" class="input-label">Father's Name</label>
+    </div>
+
+    <div class="input-container mb-3">
+        <input type="text" class="input-field" id="mother_name" placeholder=" " required="1" />
+        <label for="mother_name" class="input-label">Mother's Name</label>
+    </div>
+
+    <div class="input-container mb-3">
+        <input type="text" class="input-field" id="spouse_name" placeholder=" " required="1" />
+        <label for="spouse_name" class="input-label">Spouse's Name</label>
+    </div>
+</div>
+                <div>
+                    <label>Address Details</label>
+                    <div class="container-flow">
+                          <div class="form-row">
+                            <!-- Date Field -->
+                              <div class="input-container mb-3 form-group col-md-6">
+                                <input type="text" class="input-field " id="House" placeholder="" required="1"/>
+                                <label for="House" class="input-label pl-1">House number</label>
+                              </div>
+                              <div class="input-container mb-3 form-group col-md-6">
+                                <input type="text" class="input-field" id="street" placeholder="" required="1"/>
+                                <label for="street" class="input-label pl-1">street Number</label>
+                              </div>
+                              <div class="input-container mb-3 form-group col-md-6">
+                                <input type="text" class="input-field" id="city" placeholder="" required="1"/>
+                                <label for="city" class="input-label pl-1">City</label>
+                              </div>
+                              <div class="input-container mb-3 form-group col-md-6">
+                                <input type="text" class="input-field" id="pin" placeholder="" required="1"/>
+                                <label for="pin" class="input-label pl-1">Pin Code</label>
+                              </div>
+
+                          </div>
+                    </div>
+                    <div>
+                              <div class="input-container mb-3">
+                                <input type="text" class="input-field" id="address" placeholder=" " required="1"/>
+                                <label for="address" class="input-label">Address</label>
+                              </div>
+                              <div class="input-container mb-3">
+                                  <input type="text" class="input-field" id="Mobile" placeholder=" " required="1"/>
+                                  <label for="Mobile" class="input-label">Mobile number</label>
+                              </div>
+                    </div>
                 </div>
 
-                <div class="mb-3">
+                <div>
+                     <label>Newspaper Details</label>
+                    <div class="toggle-container mb-3">
+                        <span class="toggle-label">Eenadu newspaper : <span class="toggle-text" id="toggleText">Yes</span> </span>
+
+                        <label class="switch">
+                            <input type="checkbox" id="toggleSwitch" onchange="toggleState()"/>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="input-container mb-3" id="feedback_to_improve_eenadu_paper">
+                        <input type="text" class="input-field" id="feedback_improve_eenadu_paper" placeholder=" " required="1"/>
+                        <label for="feedback_improve_eenadu_paper" class="input-label">Feedback to Improve Eenadu Paper</label>
+                    </div>
+
+                </div>
+
+                <div id="toggle_read_newspaper_container">
+                    <div class="toggle-container2">
+                        <span class="toggle-label">Read Newspaper :
+                            <span class="toggle-text2" id="toggle_read_newspaper">No</span>
+                        </span>
+                        <label class="switch">
+                            <input type="checkbox" id="toggle_switch_read" onchange="toggle_read_state()"/>
+                            <span class="slider2" id="slider2"></span>
+                        </label>
+                    </div>
+                    <div id ="Reason_For_NotReadingNewspaper">
+                        <div class="input-container mb-3 mt-3 form-group">
+                            <input type="text" class="input-field " id="Reason_for_notReadingNewspaper" placeholder="" required="1"/>
+                            <label for="Reason_for_notReadingNewspaper" class="input-label pl-1">Reason for not Reading Newspaper</label>
+                        </div>
+                    </div>
+                    <div id="current_paper_not_taking_eenadu_paper">
+                        <div class="input-container mb-3 mt-3 form-group">
+                            <input type="text" id="newspaper" class="input-field " readonly="1" data-bs-toggle="modal" data-bs-target="#dropdownModal" data-field="newspaper" placeholder=""/>
+                            <label for="newspaper" class="form-label input-label pl-1">Current Newspaper</label>
+                        </div>
+                        <div class="input-container mb-3 mt-3 form-group">
+                            <input type="text" class="input-field " id="Reason_for_not_taking_Eenadu_Newspaper" placeholder="" required="1"/>
+                            <label for="Reason_for_not_taking_Eenadu_Newspaper" class="input-label pl-1">Reason for not taking Eenadu Newspaper</label>
+                        </div>
+                    </div>
+
+                </div>
+
+
+                <div id="freeTrile15">
+                    <div class="toggle-container2 mb-3 ">
+                        <span class="toggle-label">15 days free Eenadu offer :
+                            <span class="toggle-text2" id="toggle_switch_15days">No</span>
+                        </span>
+                        <label class="switch">
+                            <input type="checkbox" id="toggle_switch_15days_free" onchange="toggle_read_state4()"/>
+                            <span class="slider2" id="slider2"></span>
+                        </label>
+                    </div>
+                    <div id="free15Of">
+                        <div class="input-container mb-3 form-group">
+                            <input type="text" class="input-field " id="Reason_for_notTakingFreeOffer" placeholder="" required="1"/>
+                            <label for="Reason_for_notTakingFreeOffer" class="input-label pl-1">Reason for not taking free offer</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="toggle-container">
+                    <span class="toggle-label">Employed : <span class="toggle-text" id="employed">Yes</span>
+                    </span>
+
+                    <label class="switch">
+                        <input type="checkbox" id="toggleSwitch3" onchange="toggleState3()"/>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+
+                <div class="mb-3" id="profession1">
                     <label class="form-label">Profession</label>
                     <input type="text" id="profession" class="form-control" readonly="1" data-bs-toggle="modal" data-bs-target="#dropdownModal" data-field="profession" placeholder="Select Profession"/>
                 </div>
 
-                <div class="mb-3">
-                    <label class="form-label">Address</label>
-                    <input type="text" id="address" class="form-control" placeholder="Enter your address"/>
+                <div class="mt-4 mb-4" id="job_type">
+                    <label for="staticDropdown" class="form-label">Job Type</label>
+                    <select id="staticDropdown" class="form-select" >
+                        <option value="" disabled="10" selected="1">Select Job</option>
+                        <option value="1">Government Job</option>
+                        <option value="2">Private Job</option>
+                    </select>
+                </div>
+                <div class="mt-4 mb-4" id="job_type2">
+                    <label for="staticDropdownOne" class="form-label">Job Type</label>
+                    <select id="staticDropdownOne" class="form-select">
+                        <option value="" disabled="10" selected="1">Select Job</option>
+                        <option value="1">Central Job</option>
+                        <option value="2">PSU</option>
+                        <option value="2">State Job</option>
+                    </select>
+
+                    <div class="input-container mb-3 mt-3">
+                        <input type="text" class="input-field" id="Job_Profession" placeholder=" " required="1" />
+                        <label for="Job_Profession" class="input-label">Job Profession</label>
+                    </div>
+                    <div class="input-container mb-3">
+                        <input type="text" class="input-field" id="Job_Designation_Govt" placeholder=" " required="1" />
+                        <label for="Job_Designation_Govt" class="input-label">Job Designation</label>
+                    </div>
+
                 </div>
 
-                <div class="mb-3">
-                    <label class="form-label">Mobile Number</label>
-                    <input type="text" id="mobileNumber" class="form-control" placeholder="Enter your mobile number"/>
+                <div id="for_private_job_details">
+                    <div class="input-container mb-3">
+                        <input type="text" class="input-field" id="Company_Name" placeholder=" " required="1" />
+                        <label for="Company_Name" class="input-label">Company Name</label>
+                    </div>
+
+                    <div class="input-container mb-3">
+                        <input type="text" class="input-field" id="Profession" placeholder=" " required="1" />
+                        <label for="Profession" class="input-label">Profession</label>
+                    </div>
+                    <div class="input-container mb-3">
+                        <input type="text" class="input-field" id="Job_Designation" placeholder=" " required="1" />
+                        <label for="Job_Designation" class="input-label">Job Designation</label>
+                    </div>
                 </div>
+
+
 
                 <button class="btn btn-primary w-100 mb-3" onclick="getLocation()">📍 Get Current Location</button>
                 <button class="btn btn-success w-100" onclick="storeData()">✅ Submit</button>
@@ -129,7 +244,64 @@
 
             <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
+            <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.0.5/dist/umd/popper.min.js"></script>
+            <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
             <script>
+
+                let eenadu_news_paper_feedback = document.getElementById("feedback_to_improve_eenadu_paper");
+                let toggle_read_news_paper_container = document.getElementById("toggle_read_newspaper_container");
+                let toggle_read_newspaper = document.getElementById("toggle_read_newspaper");
+                let toggle_switch_read = document.getElementById("toggle_switch_read");
+                let slider2_change = document.getElementById("slider2");
+                let profession1 = document.getElementById('profession1');
+                let profession = document.getElementById('profession');
+                let job_type = document.getElementById('job_type');
+                let job_type2 = document.getElementById('job_type2');
+                let staticDropdown =document.getElementById('staticDropdown');
+                let for_private_job_details =document.getElementById('for_private_job_details');
+                let staticDropdownOne =document.getElementById('staticDropdownOne');
+                let Reason_For_NotReadingNewspaper =document.getElementById('Reason_For_NotReadingNewspaper');
+                let current_paper_not_taking_eenadu_paper =document.getElementById('current_paper_not_taking_eenadu_paper');
+                let freeTrile15 =document.getElementById('freeTrile15');
+                let toggle_switch_15days =document.getElementById('toggle_switch_15days');
+                let toggle_switch_15days_free =document.getElementById('toggle_switch_15days_free');
+                let free15Of =document.getElementById('free15Of');
+
+
+
+                function resetValue() {
+                    let inputField = document.getElementById("profession");
+                    inputField.value = ""; // Clears the value
+                    inputField.placeholder = "Select Profession"; // Resets placeholder
+                }
+
+
+
+
+
+                // Get the current date and time
+                const today = new Date();
+
+                // Get Date in YYYY-MM-DD format for the date input
+                const dd = String(today.getDate()).padStart(2, '0');
+                const mm = String(today.getMonth() + 1).padStart(2, '0'); // January is 0!
+                const yyyy = today.getFullYear();
+                const currentDate = yyyy + '-' + mm + '-' + dd;
+
+                // Get Time in HH:MM format for the time input
+                const hours = String(today.getHours()).padStart(2, '0');
+                const minutes = String(today.getMinutes()).padStart(2, '0');
+                const currentTime = hours + ':' + minutes;
+
+                // Set the value of the date and time input fields
+                document.getElementById('currentDate').value = currentDate;
+                document.getElementById('currentTime').value = currentTime;
+
+
+                let login = document.getElementById("login");
+                login.textContent = localStorage.getItem('login') + " Agent";
                 const options = {
                     newspaper: ["Deccan Chronicle", "Eenadu", "AndhraJyoti", "The Hindu", "Namasthe Telangana", "Metro India", "The Hans India", "Nava Telangana", "The Deccan Times", "Hindi Milap", "Prajasakti"],
                     profession: ["Farmer", "Doctor", "Teacher", "Lawyer", "Artist", "Musician", "Chef", "Photographer", "Electrician", "Plumber", "Designer", "Writer", "Social Worker", "Marketing Specialist", "Accountant"]
@@ -178,7 +350,118 @@
                 function storeData() {
                     alert("✅ Data Submitted Successfully!");
                 }
-            </script>
+                function toggleState() {
+                    let toggleText = document.getElementById("toggleText");
+                    let toggleSwitch = document.getElementById("toggleSwitch");
+
+                    if (toggleSwitch.checked) {
+                        toggleText.innerText = "No";
+                        toggleText.style.color = "red";
+                        eenadu_news_paper_feedback.style.display = "none";
+                        toggle_read_news_paper_container.style.display = "block";
+                        freeTrile15.style.display = "block";
+
+                        console.log("vinay");
+
+                    } else {
+                        toggleText.innerText = "Yes";
+                        toggleText.style.color = "green";
+                        eenadu_news_paper_feedback.style.display = "block";
+                        toggle_read_news_paper_container.style.display = "none";
+                        freeTrile15.style.display = "none";
+
+                        console.log("vinay11");
+
+<!--                        toggle_read_newspaper.innerText = "No";-->
+<!--                        toggle_read_newspaper.style.color = "red";-->
+
+
+                    }
+                }
+
+
+
+                function toggleState3() {
+                    let employed = document.getElementById("employed");
+                    let toggleSwitch3 = document.getElementById("toggleSwitch3");
+
+                    if (toggleSwitch3.checked) {
+                        employed.innerText = "No";
+                        employed.style.color = "red";
+                        profession1.style.display = "block";
+                        job_type.style.display = "none";
+                        job_type2.style.display = "none";
+                        for_private_job_details.style.display = "none";
+                        staticDropdown.selectedIndex = 0;
+                        staticDropdownOne.selectedIndex = 0;
+
+                        console.log(staticDropdown.value ,"vinay");
+
+
+
+                    } else {
+                        employed.innerText = "Yes";
+                        employed.style.color = "green";
+                        profession1.style.display = "none";
+                        job_type.style.display = "block";
+                        resetValue();
+                    }
+                }
+
+                function toggle_read_state() {
+
+
+                    if (toggle_switch_read.checked) {
+                        toggle_read_newspaper.innerText = "Yes";
+                        toggle_read_newspaper.style.color = "green";
+                        Reason_For_NotReadingNewspaper.style.display="none";
+                        current_paper_not_taking_eenadu_paper.style.display = "block";
+
+                    } else {
+                        toggle_read_newspaper.innerText = "No";
+                        toggle_read_newspaper.style.color = "red";
+                        Reason_For_NotReadingNewspaper.style.display="block";
+                        current_paper_not_taking_eenadu_paper.style.display = "none";
+
+                    }
+                }
+
+
+                const dropdown = document.getElementById("staticDropdown");
+                // Add event listener for change event
+                dropdown.addEventListener("change", function() {
+                    let selectedValue = dropdown.value; // Get selected value
+                    let selectedText = dropdown.options[dropdown.selectedIndex].text; // Get selected text
+
+                    // Log the selected value and text to the console
+                    if (selectedText === "Government Job"){
+                        console.log("vinn2121");
+                        job_type2.style.display = "block";
+                        for_private_job_details.style.display = "none";
+                    }else{
+                        job_type2.style.display = "none";
+                        for_private_job_details.style.display = "block";
+                    };
+                    console.log("Selected Value:", selectedValue);
+                    console.log("Selected Text:", selectedText);
+                });
+
+                function toggle_read_state4(){
+
+                    if (toggle_switch_15days_free.checked) {
+                        toggle_switch_15days.innerText = "Yes";
+                        toggle_switch_15days.style.color = "green";
+                        free15Of.style.display="none";
+
+
+                    } else {
+                        toggle_switch_15days.innerText = "No";
+                        toggle_switch_15days.style.color = "red";
+                        free15Of.style.display="block";
+                    }
+
+                }
+                    </script>
 
             </body>
             </html>

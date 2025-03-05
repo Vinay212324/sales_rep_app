@@ -17,6 +17,7 @@
         "web.assets_frontend": [
             "sale_repo_app/static/src/css/style.css",
             "sale_repo_app/static/src/css/user_dashboard.css",
+            "sale_repo_app/static/src/css/customers_form.css",
             "sale_repo_app/static/src/js/main.js",
             "sale_repo_app/static/src/js/dashboard.js",
             'https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap'
