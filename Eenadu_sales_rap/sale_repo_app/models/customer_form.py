@@ -41,12 +41,12 @@ class CustomerForm(models.Model):
     employed = fields.Boolean(string='Employed')
     job_type = fields.Selection([("government_job","Government Job"),("private_job","Private Job")])
     job_type_one = fields.Selection([("central_job","Central Job"),("psu","PSU"),("state_job","State Job")])
-    job_profession = fields.Char(srting="Profession")
-    job_designation = fields.Char(srting="Job Designation")
+    job_profession = fields.Char(string="Profession")
+    job_designation = fields.Char(string="Job Designation")
 
     company_name = fields.Char(string="Company Name")
-    profession = fields.Char(srting="Profession")
-    job_designation_one = fields.Char(srting="Job Designation")
+    profession = fields.Char(string="Profession")
+    job_designation_one = fields.Char(string="Job Designation")
     latitude = fields.Char(string="Latitude")
     longitude = fields.Char(string="Longitude")
 
