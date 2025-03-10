@@ -23,7 +23,7 @@ class Users(models.Model):
     def generate_token(self):
         """ Generate a unique API token and set an expiration time. """
         self.api_token = secrets.token_hex(32)  # Generates a unique 32-character token
-        self.token_expiry = fields.Datetime.now() + timedelta(hours=1)  # Expires in 1 hour
+        self.token_expiry = fields.Datetime.now() + timedelta(hours=10)  # Expires in 1 hour
         self.sudo().write({'api_token': self.api_token, 'token_expiry': self.token_expiry})  # Save token
 
     def authenticate_by_token(self, token):
