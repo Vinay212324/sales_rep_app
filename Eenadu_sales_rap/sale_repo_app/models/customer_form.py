@@ -40,7 +40,7 @@ class CustomerForm(models.Model):
     # Employment Details
     employed = fields.Boolean(string='Employed')
     job_type = fields.Selection([("government_job","Government Job"),("private_job","Private Job")])
-    job_type_one =fields.Selection([("central_job","Central Job"),("psu","PSU"),("state_job","State Job")])
+    job_type_one = fields.Selection([("central_job","Central Job"),("psu","PSU"),("state_job","State Job")])
     job_profession = fields.Char(srting="Profession")
     job_designation = fields.Char(srting="Job Designation")
 
