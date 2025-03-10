@@ -20,25 +20,25 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="#">Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Dashboard</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Reports</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Sales</a>
-                    </li>
+<!--                    <li class="nav-item">-->
+<!--                        <a class="nav-link active" href="#">Home</a>-->
+<!--                    </li>-->
+<!--                    <li class="nav-item">-->
+<!--                        <a class="nav-link" href="#">Dashboard</a>-->
+<!--                    </li>-->
+<!--                    <li class="nav-item">-->
+<!--                        <a class="nav-link" href="#">Reports</a>-->
+<!--                    </li>-->
+<!--                    <li class="nav-item">-->
+<!--                        <a class="nav-link" href="#">Sales</a>-->
+<!--                    </li>-->
                 </ul>
                 <!-- User Profile Icon -->
                 <div class="dropdown">
                     <a href="#" class="nav-link dropdown-toggle text-light" id="userDropdown" data-bs-toggle="dropdown">
-                        <img src="/your_module_name/static/src/img/user-icon.png" alt="User" class="rounded-circle" width="35"/>
+                        <img src="./sale_repo_app/static/src/css/group7 (2).png" alt="User" class="rounded-circle" width="35"/>
                     </a>
-                    <ul class="dropdown-menu dropdown-menu-end m-5 p-3 pt-4 bg-success-subtle" >
+                    <ul class="dropdown-menu dropdown-menu-end pt-4 bg-success-subtle" >
                         <li><p class="dropdown-item " href="#">upload profile image</p></li>
                         <li><p class="dropdown-item" href="#">name :         vinay</p></li>
                         <li><p class="dropdown-item" href="#">email :        vinay@gmail.com</p></li>
@@ -75,6 +75,15 @@
                         <h3 class="fw-bold">Target Left</h3>
                         <hr class="w-75 mx-auto"/>
                         <h2>Today: 40</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12">
+                <div class="card bg-primary-subtle shadow p-4">
+                    <div class="card-body text-center">
+                        <h3 class="fw-bold">My Route Map</h3>
+                        <hr class="w-75 mx-auto"/>
+                        <h2>NA</h2>
                     </div>
                 </div>
             </div>

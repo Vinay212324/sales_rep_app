@@ -58,6 +58,7 @@ import hmac
 import hashlib
 from odoo import http
 from odoo.http import request
+
 from odoo.exceptions import AccessDenied, AccessError
 from cryptography.fernet import InvalidToken
 
@@ -88,70 +89,68 @@ class UserPortal(http.Controller):
 
     @http.route('/customers_form', type='http', auth='public')
     def customers_form(self, **kwargs):
-        return http.request.render("sale_repo_app.customers_form")
 
+        return http.request.render("sale_repo_app.customers_form")
 
     @http.route('/web/session/authenticate', type='json', auth="none", csrf=False, cors="*")
     def authenticate(self, login, password):
-        db = "sale_rep_db"
-        try:
-            # Validate database access
-            if not http.db_filter([db]):
-                raise AccessError("Database not found")
+        """ Authenticate user and generate API token with expiration time. """
+        db = request.session.db or "sale_rep_db"
 
-            # Authenticate with session validation
+        try:
+            # ✅ Validate database access
+            if db not in http.db_filter([db]):
+                raise AccessDenied("Database not found")
+
+            # ✅ Authenticate user session
             uid = request.session.authenticate(db, login, password)
             if not uid:
                 _logger.error("Authentication failed for %s@%s", login, db)
                 return {'error': 'Invalid credentials', 'code': 401}
 
-            # Initialize secure environment
+            # ✅ Initialize environment
             request.session.db = db
             env = request.env(user=uid)
 
-            # Generate API key
+            # ✅ Fetch user from `res.users`
+            user = env['res.users'].sudo().search([('login', '=', login)], limit=1)
+            if not user:
+                raise AccessDenied("User not found!")
+
+            # ✅ Validate Password using `_check_credentials`
             try:
-                api_key = env['res.users.apikeys']._generate(
-                    name=f"SessionKey_{uuid.uuid4()}",
-                    scope='rpc',
-                    user_id=uid
-                )
-            except Exception as e:
-                _logger.warning("Cryptographic failure, using HMAC fallback: %s", str(e))
-                api_key = hmac.new(
-                    key=b'secret_key',
-                    msg=str(uid).encode(),
-                    digestmod=hashlib.sha256
-                ).hexdigest()  # Corrected hmac usage
+                # Validate user's password
+                user.sudo()._check_credentials(password, {'interactive': True})
+            except exceptions.AccessDenied:
+                raise exceptions.AccessDenied("Invalid password!")
 
-            # Fetch expiration date if available
-            expiration = None
-            apikey_record = env['res.users.apikeys'].search([('user_id', '=', uid)], limit=1)
-            if apikey_record and hasattr(apikey_record, 'expiration_date'):
-                expiration = apikey_record.expiration_date
+            # ✅ Generate API token using `generate_token()`
+            user.sudo().generate_token()
 
-            user = request.env.user
-            role = ""
+            # ✅ Fetch API key expiration date
+            expiration = user.token_expiry if hasattr(user, 'token_expiry') else None
+
+            # ✅ Determine user role
+            role = "No access"
             if user.has_group('sale_repo_app.agent_group'):
                 role = "agent_level1"
             elif user.has_group('sale_repo_app.unit_manager_group'):
                 role = "level2"
             elif user.has_group('sale_repo_app.region_head_group'):
-                role = 'level3'
+                role = "level3"
             elif user.has_group('sale_repo_app.circulation_head_group'):
                 role = "level4"
-            else:
-                role = "No acs"
 
-            # Commit transaction
+            # ✅ Commit transaction
             env.cr.commit()
 
             return {
+                'status': 'success',
                 'user_id': uid,
-                'api_key': api_key,
+                'api_key': user.api_token,
                 'role_Le_gr': role,
-                'role': user.role,
-                'unit': user.unit_name,
+                'role': user.role or "Unknown",  # Prevent NoneType error
+                'unit': user.unit_name or "Unknown",
                 'expiration': expiration  # Set expiration if available
             }
 
@@ -162,9 +161,6 @@ class UserPortal(http.Controller):
         except Exception as e:
             _logger.exception("Critical authentication failure")
             return {'error': str(e), 'code': 500}
-
-
-
 
 
 

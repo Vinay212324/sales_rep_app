@@ -4,6 +4,7 @@ saleacs_ch,salerep_ch,model_res_users,circulation_head_group,1,1,1,1
 saleacs_rh,salerep_rh,model_res_users,region_head_group,1,1,1,1
 saleacs_um,salerep_um,model_res_users,unit_manager_group,1,1,1,1
 saleacs_agent,salerep_agent,model_res_users,agent_group,1,1,1,1
+customer_form,sales_rep_customer_form,model_customer_form,agent_group,1,1,1,1
 
 
 

@@ -1,1 +1,1 @@
-from . import main
+from . import main,customer_form_controller
