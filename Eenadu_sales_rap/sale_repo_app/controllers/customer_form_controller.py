@@ -81,7 +81,6 @@ class CustomerFormAPI(http.Controller):
         user = request.env['res.users'].sudo().search([('api_token', '=', token)], limit=1)
 
         if not user:
-            print(user.id)
             raise AccessDenied("Invalid token!")
 
         return {"success": "True", "user_Id":user.id}  # Return the associated user
@@ -96,7 +95,8 @@ class CustomerFormAPI(http.Controller):
             if not api_key:
                 return {
                     'success': False,
-                    'message': 'Token is missing'
+                    'message': 'Token is missing',
+                    'code': 403
                 }
 
             # Validate Token
@@ -104,7 +104,8 @@ class CustomerFormAPI(http.Controller):
             if not user:
                 return {
                     'success': False,
-                    'message': 'Invalid or expired token'
+                    'message': 'Invalid or expired token',
+                    "code": 403
                 }
 
             # Extract data from request
@@ -150,13 +151,15 @@ class CustomerFormAPI(http.Controller):
             return {
                 'success': True,
                 'message': 'Customer Form created successfully',
-                'customer_id': customer.id
+                'customer_id': customer.id,
+                "code": 200
             }
 
         except Exception as e:
             return {
                 'success': False,
-                'message': 'Error: {}'.format(str(e))
+                'message': 'Error: {}'.format(str(e)),
+                'code': 403
             }
 
     @http.route('/api/login', type='json', auth='public', methods=['POST'])

@@ -252,3 +252,11 @@ body {
 }#freeTrile15{
     display:none;
 }
+
+
+
+
+.danger_style{
+    color:red;
+    border-color:red;
+}

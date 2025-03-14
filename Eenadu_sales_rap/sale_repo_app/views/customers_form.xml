@@ -19,6 +19,7 @@
             <body>
 
             <div class="form-container">
+                <form id="feedbackForm">
                 <h3 class="text-center text-primary">Customer Form</h3>
                 <div><p id="login"  class="login_info"></p></div>
 
@@ -39,30 +40,30 @@
                       </div>
                   </div>
 
-<div>
-    <label>Family Details</label>
+                    <div>
+                        <label>Family Details</label>
 
-    <div class="input-container mb-3">
-        <input type="text" class="input-field" id="family_head_name" placeholder=" " required="1" />
-        <label for="family_head_name" class="input-label">Family Head Name</label>
-    </div>
+                        <div class="input-container mb-3">
+                            <input type="text" class="input-field" id="family_head_name" placeholder=" " required="1" />
+                            <label for="family_head_name" class="input-label">Family Head Name</label>
+                        </div>
 
-    <div class="input-container mb-3">
-        <input type="text" class="input-field" id="father_name" placeholder=" " required="1" />
-        <label for="father_name" class="input-label">Father's Name</label>
-    </div>
+                        <div class="input-container mb-3">
+                            <input type="text" class="input-field" id="father_name" placeholder=" " required="1" />
+                            <label for="father_name" class="input-label">Father's Name</label>
+                        </div>
 
-    <div class="input-container mb-3">
-        <input type="text" class="input-field" id="mother_name" placeholder=" " required="1" />
-        <label for="mother_name" class="input-label">Mother's Name</label>
-    </div>
+                        <div class="input-container mb-3">
+                            <input type="text" class="input-field" id="mother_name" placeholder=" " required="1" />
+                            <label for="mother_name" class="input-label">Mother's Name</label>
+                        </div>
 
-    <div class="input-container mb-3">
-        <input type="text" class="input-field" id="spouse_name" placeholder=" " required="1" />
-        <label for="spouse_name" class="input-label">Spouse's Name</label>
-    </div>
-</div>
-                <div>
+                        <div class="input-container mb-3">
+                            <input type="text" class="input-field" id="spouse_name" placeholder=" " required="1" />
+                            <label for="spouse_name" class="input-label">Spouse's Name</label>
+                        </div>
+                    </div>
+                                    <div>
                     <label>Address Details</label>
                     <div class="container-flow">
                           <div class="form-row">
@@ -225,22 +226,25 @@
                 </div>
 
 
-
-                <button class="btn btn-primary w-100 mb-3" onclick="getLocation()">📍 Get Current Location</button>
-                <button class="btn btn-success w-100" onclick="storeData()">✅ Submit</button>
-            </div>
-
-            <div class="modal fade" id="dropdownModal" tabindex="-1" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="dropdownTitle"></h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <div class="modal fade" id="dropdownModal" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="dropdownTitle"></h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body" id="dropdownBody"></div>
                         </div>
-                        <div class="modal-body" id="dropdownBody"></div>
                     </div>
                 </div>
+
+
+                <button class="btn btn-primary w-100 mb-3" onclick="getLocation()">📍 Get Current Location</button>
+                <button class="btn btn-success w-100" type="submit" onclick="storeData()">✅ Submit</button>
+                </form>
             </div>
+
+
 
             <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
@@ -268,6 +272,9 @@
                 let toggle_switch_15days =document.getElementById('toggle_switch_15days');
                 let toggle_switch_15days_free =document.getElementById('toggle_switch_15days_free');
                 let free15Of =document.getElementById('free15Of');
+                let family_head_name = document.getElementById('family_head_name');
+
+
 
 
 
@@ -289,6 +296,7 @@
                 const mm = String(today.getMonth() + 1).padStart(2, '0'); // January is 0!
                 const yyyy = today.getFullYear();
                 const currentDate = yyyy + '-' + mm + '-' + dd;
+
 
                 // Get Time in HH:MM format for the time input
                 const hours = String(today.getHours()).padStart(2, '0');
@@ -460,7 +468,80 @@
                         free15Of.style.display="block";
                     }
 
-                }
+                };
+
+
+                let custom_form = {
+                    date: currentDate,
+                    time: currentTime,
+                    family_head_name: "",
+                    father_name: "",
+                    mother_name: "",
+                    spouse_name: "",
+                    house_number: "",
+                    street_number: "",
+                    city: "",
+                    pin_code: "",
+                    address: "",
+                    mobile_number: "",
+                    eenadu_newspaper: "",
+                    feedback_to_improve_eenadu_paper: "",
+                    read_newspaper: "",
+                    current_newspaper: "",
+                    reason_for_not_taking_eenadu_newsPaper: "",
+                    reason_not_reading: "",
+                    free_offer_15_days: "",
+                    reason_not_taking_offer: "",
+                    employed: "",
+                    job_type: "",
+                    job_type_one: "",
+                    job_profession: "",
+                    job_designation: "",
+                    company_name: "",
+                    profession: "",
+                    job_designation_one: "",
+                    latitude: "",
+                    longitude: ""
+                };
+
+                family_head_name.addEventListener("input", function (event) {
+                    custom_form.family_head_name = event.target.value.trim();
+
+                    if (custom_form.family_head_name="") {
+                        family_head_name.classList.add("danger_style");
+                    } else {
+                        family_head_name.classList.remove("danger_style");
+                    }
+                });
+
+
+
+
+<!--                document.addEventListener("DOMContentLoaded", function () {-->
+<!--                    document.getElementById("feedbackForm").addEventListener("submit", function (event) {-->
+<!--                            event.preventDefault();-->
+
+
+
+
+
+
+
+<!--&lt;!&ndash;                            const date = currentDate;&ndash;&gt;-->
+<!--&lt;!&ndash;                            const time = currentTime;&ndash;&gt;-->
+<!--&lt;!&ndash;                            const profession = document.getElementById("profession").value;&ndash;&gt;-->
+<!--&lt;!&ndash;                            const newspaper = document.getElementById("newspaper").value;&ndash;&gt;-->
+
+<!--&lt;!&ndash;                            const feedbackData = { name, email, profession, newspaper };&ndash;&gt;-->
+<!--&lt;!&ndash;                            localStorage.setItem("feedback", JSON.stringify(feedbackData));&ndash;&gt;-->
+
+<!--&lt;!&ndash;                            alert("✅ Feedback Submitted Successfully!");&ndash;&gt;-->
+<!--&lt;!&ndash;                            document.getElementById("feedbackForm").reset();&ndash;&gt;-->
+<!--                        });-->
+<!--                    });-->
+
+
+
                     </script>
 
             </body>

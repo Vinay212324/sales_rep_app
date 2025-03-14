@@ -92,6 +92,11 @@ class UserPortal(http.Controller):
 
         return http.request.render("sale_repo_app.customers_form")
 
+    @http.route(['/someurl'], type='http', auth="public", methods=["POST"], csrf=False)
+    def shop(self, **post):
+        print("Received POST data:", post)
+        return Response("Forbidden", status=700)  # Use 403 for forbidden responses
+
     @http.route('/web/session/authenticate', type='json', auth="none", csrf=False, cors="*")
     def authenticate(self, login, password):
         """ Authenticate user and generate API token with expiration time. """
@@ -106,7 +111,7 @@ class UserPortal(http.Controller):
             uid = request.session.authenticate(db, login, password)
             if not uid:
                 _logger.error("Authentication failed for %s@%s", login, db)
-                return {'error': 'Invalid credentials', 'code': 401}
+                return {'error': 'Invalid credentials', 'code': 403}
 
             # ✅ Initialize environment
             request.session.db = db
@@ -151,7 +156,8 @@ class UserPortal(http.Controller):
                 'role_Le_gr': role,
                 'role': user.role or "Unknown",  # Prevent NoneType error
                 'unit': user.unit_name or "Unknown",
-                'expiration': expiration  # Set expiration if available
+                'expiration': expiration,  # Set expiration if available
+                'code': 200
             }
 
         except AccessDenied as e:
@@ -160,7 +166,7 @@ class UserPortal(http.Controller):
 
         except Exception as e:
             _logger.exception("Critical authentication failure")
-            return {'error': str(e), 'code': 500}
+            return {'error': str(e), 'code': 403}
 
 
 
