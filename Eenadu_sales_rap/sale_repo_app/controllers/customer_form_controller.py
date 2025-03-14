@@ -96,7 +96,7 @@ class CustomerFormAPI(http.Controller):
                 return {
                     'success': False,
                     'message': 'Token is missing',
-                    'code': 403
+                    'code': "403"
                 }
 
             # Validate Token
@@ -105,7 +105,7 @@ class CustomerFormAPI(http.Controller):
                 return {
                     'success': False,
                     'message': 'Invalid or expired token',
-                    "code": 403
+                    "code": "403"
                 }
 
             # Extract data from request
@@ -152,14 +152,14 @@ class CustomerFormAPI(http.Controller):
                 'success': True,
                 'message': 'Customer Form created successfully',
                 'customer_id': customer.id,
-                "code": 200
+                "code": "200"
             }
 
         except Exception as e:
             return {
                 'success': False,
                 'message': 'Error: {}'.format(str(e)),
-                'code': 403
+                'code': "403"
             }
 
     @http.route('/api/login', type='json', auth='public', methods=['POST'])
@@ -200,4 +200,4 @@ class CustomerFormAPI(http.Controller):
         user.clear_token()
         print(user.id)
 
-        return {'status': 'success', 'message': "User logged out successfully"}
+        return {'status': 'success', 'message': "User logged out successfully", "code": "200"}

@@ -95,7 +95,7 @@ class UserPortal(http.Controller):
     @http.route(['/someurl'], type='http', auth="public", methods=["POST"], csrf=False)
     def shop(self, **post):
         print("Received POST data:", post)
-        return Response("Forbidden", status=700)  # Use 403 for forbidden responses
+        return Response("Forbidden", status="700")  # Use 403 for forbidden responses
 
     @http.route('/web/session/authenticate', type='json', auth="none", csrf=False, cors="*")
     def authenticate(self, login, password):
@@ -111,7 +111,7 @@ class UserPortal(http.Controller):
             uid = request.session.authenticate(db, login, password)
             if not uid:
                 _logger.error("Authentication failed for %s@%s", login, db)
-                return {'error': 'Invalid credentials', 'code': 403}
+                return {'error': 'Invalid credentials', 'code': "403"}
 
             # ✅ Initialize environment
             request.session.db = db
@@ -157,16 +157,17 @@ class UserPortal(http.Controller):
                 'role': user.role or "Unknown",  # Prevent NoneType error
                 'unit': user.unit_name or "Unknown",
                 'expiration': expiration,  # Set expiration if available
-                'code': 200
+                'code': "200"
             }
 
         except AccessDenied as e:
             _logger.warning("Access denied for %s: %s", login, str(e))
-            return {'error': 'Authentication failed', 'code': 403}
+            return {'error': 'Authentication failed', 'code': "403"}
 
         except Exception as e:
             _logger.exception("Critical authentication failure")
-            return {'error': str(e), 'code': 403}
+            return {'error': str(e), 'code': "403"}
+
 
 
 
@@ -179,17 +180,17 @@ class UserPortal(http.Controller):
             # Authentication check
             token = kw.get('token')
             if not token:
-                return {'error': 'Authentication token required', 'code': 401}  # Fixed indexing error
+                return {'error': 'Authentication token required', 'code': "403"}  # Fixed indexing error
 
             # API key validation
             user_id = request.env['res.users.apikeys'].sudo()._check_credentials(scope='rpc', key=token)
             if not user_id:
-                return {'error': 'Invalid authentication token', 'code': 403}  # Removed invalid indexing
+                return {'error': 'Invalid authentication token', 'code': "403"}  # Removed invalid indexing
 
             # Permission check
             env = request.env(user=user_id)
             if not env.user.has_group('sale_repo_app.circulation_head_group'):
-                return {'error': 'Insufficient permissions', 'code': 403}
+                return {'error': 'Insufficient permissions', 'code': "403"}
 
             # Field validation
             required_fields = ['name', 'email', 'password']
