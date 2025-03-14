@@ -157,7 +157,7 @@ class UserPortal(http.Controller):
                 'role': user.role or "Unknown",  # Prevent NoneType error
                 'unit': user.unit_name or "Unknown",
                 'expiration': expiration,  # Set expiration if available
-                'cd': "200"
+                'code': "200"
             }
 
         except AccessDenied as e:
