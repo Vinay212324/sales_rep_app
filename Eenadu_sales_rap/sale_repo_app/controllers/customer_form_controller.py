@@ -191,11 +191,16 @@ class CustomerFormAPI(http.Controller):
     @http.route('/api/logout', type='json', auth='public', methods=['POST'], csrf=False, cors="*")
     def api_logout(self, token):
         """ Logout the user and clear their API token """
-        user = request.env['res.users'].sudo().search([('api_token', '=', token)], limit=1)
+
+        try:
+            user = request.env['res.users'].sudo().search([('api_token', '=', token)], limit=1)
+        except exceptions.AccessDenied:
+            raise exceptions.AccessDenied("Invalid token!")
 
         if not user:
             print(user.id)
             raise AccessDenied("Invalid token!")
+            return {"code" : "403", "error" : "code is not define"}
 
         user.clear_token()
         print(user.id)

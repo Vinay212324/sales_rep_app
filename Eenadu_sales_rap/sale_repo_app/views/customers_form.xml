@@ -49,17 +49,17 @@
                         </div>
 
                         <div class="input-container mb-3">
-                            <input type="text" class="input-field" id="father_name" placeholder=" " required="1" />
+                            <input type="text" class="input-field" id="father_name" placeholder=" " />
                             <label for="father_name" class="input-label">Father's Name</label>
                         </div>
 
                         <div class="input-container mb-3">
-                            <input type="text" class="input-field" id="mother_name" placeholder=" " required="1" />
+                            <input type="text" class="input-field" id="mother_name" placeholder=" "/>
                             <label for="mother_name" class="input-label">Mother's Name</label>
                         </div>
 
                         <div class="input-container mb-3">
-                            <input type="text" class="input-field" id="spouse_name" placeholder=" " required="1" />
+                            <input type="text" class="input-field" id="spouse_name" placeholder=" " />
                             <label for="spouse_name" class="input-label">Spouse's Name</label>
                         </div>
                     </div>
@@ -111,7 +111,7 @@
                     </div>
 
                     <div class="input-container mb-3" id="feedback_to_improve_eenadu_paper">
-                        <input type="text" class="input-field" id="feedback_improve_eenadu_paper" placeholder=" " required="1"/>
+                        <input type="text" class="input-field" id="feedback_improve_eenadu_paper" placeholder=" "/>
                         <label for="feedback_improve_eenadu_paper" class="input-label">Feedback to Improve Eenadu Paper</label>
                     </div>
 
@@ -139,7 +139,7 @@
                             <label for="newspaper" class="form-label input-label pl-1">Current Newspaper</label>
                         </div>
                         <div class="input-container mb-3 mt-3 form-group">
-                            <input type="text" class="input-field " id="Reason_for_not_taking_Eenadu_Newspaper" placeholder="" required="1"/>
+                            <input type="text" class="input-field " id="Reason_for_not_taking_Eenadu_Newspaper" placeholder=""/>
                             <label for="Reason_for_not_taking_Eenadu_Newspaper" class="input-label pl-1">Reason for not taking Eenadu Newspaper</label>
                         </div>
                     </div>
@@ -159,7 +159,7 @@
                     </div>
                     <div id="free15Of">
                         <div class="input-container mb-3 form-group">
-                            <input type="text" class="input-field " id="Reason_for_notTakingFreeOffer" placeholder="" required="1"/>
+                            <input type="text" class="input-field " id="Reason_for_notTakingFreeOffer" placeholder=""/>
                             <label for="Reason_for_notTakingFreeOffer" class="input-label pl-1">Reason for not taking free offer</label>
                         </div>
                     </div>
@@ -216,8 +216,8 @@
                     </div>
 
                     <div class="input-container mb-3">
-                        <input type="text" class="input-field" id="Profession" placeholder=" " required="1" />
-                        <label for="Profession" class="input-label">Profession</label>
+                        <input type="text" class="input-field" id="Profession_g" placeholder=" " required="1" />
+                        <label for="Profession_g" class="input-label">Profession</label>
                     </div>
                     <div class="input-container mb-3">
                         <input type="text" class="input-field" id="Job_Designation" placeholder=" " required="1" />
@@ -240,7 +240,7 @@
 
 
                 <button class="btn btn-primary w-100 mb-3" onclick="getLocation()">📍 Get Current Location</button>
-                <button class="btn btn-success w-100" type="submit" onclick="storeData()">✅ Submit</button>
+                <button class="btn btn-success w-100" type="submit">✅ Submit</button>
                 </form>
             </div>
 
@@ -273,12 +273,23 @@
                 let toggle_switch_15days_free =document.getElementById('toggle_switch_15days_free');
                 let free15Of =document.getElementById('free15Of');
                 let family_head_name = document.getElementById('family_head_name');
+                let feedback_improve_eenadu_paper = document.getElementById("feedback_improve_eenadu_paper");
+                let Reason_for_notReadingNewspaper = document.getElementById("Reason_for_notReadingNewspaper");
+                let Reason_for_notTakingFreeOffer = document.getElementById("Reason_for_notTakingFreeOffer"); // Added missing element reference
+                let newspaper = document.getElementById("newspaper");
+                let Job_Profession = document.getElementById("Job_Profession");
+                let Job_Designation_Govt = document.getElementById("Job_Designation_Govt");
+                let Company_Name = document.getElementById("Company_Name");
+                let Profession_g = document.getElementById("Profession_g");
+                let Job_Designation = document.getElementById("Job_Designation");
+                let Reason_for_not_taking_Eenadu_Newspaper = document.getElementById("Reason_for_not_taking_Eenadu_Newspaper");
 
 
 
+                feedback_improve_eenadu_paper.setAttribute("required", "1");
+                staticDropdown.setAttribute("required", "1");
 
-
-                function resetValue() {
+                function resetValue() {373
                     let inputField = document.getElementById("profession");
                     inputField.value = ""; // Clears the value
                     inputField.placeholder = "Select Profession"; // Resets placeholder
@@ -355,9 +366,9 @@
                     }
                 }
 
-                function storeData() {
-                    alert("✅ Data Submitted Successfully!");
-                }
+<!--                function storeData() {-->
+<!--                    alert("✅ Data Submitted Successfully!");-->
+<!--                }-->
                 function toggleState() {
                     let toggleText = document.getElementById("toggleText");
                     let toggleSwitch = document.getElementById("toggleSwitch");
@@ -369,6 +380,11 @@
                         toggle_read_news_paper_container.style.display = "block";
                         freeTrile15.style.display = "block";
 
+                        feedback_improve_eenadu_paper.removeAttribute("required");
+                        Reason_for_notReadingNewspaper.setAttribute("required", "1");
+                        Reason_for_notTakingFreeOffer.setAttribute("required", "1");
+
+
                         console.log("vinay");
 
                     } else {
@@ -377,6 +393,10 @@
                         eenadu_news_paper_feedback.style.display = "block";
                         toggle_read_news_paper_container.style.display = "none";
                         freeTrile15.style.display = "none";
+
+                        feedback_improve_eenadu_paper.setAttribute("required", "1");
+                        Reason_for_notReadingNewspaper.removeAttribute("required");
+                        Reason_for_notTakingFreeOffer.removeAttribute("required");
 
                         console.log("vinay11");
 
@@ -404,6 +424,12 @@
                         staticDropdownOne.selectedIndex = 0;
 
                         console.log(staticDropdown.value ,"vinay");
+                        profession.removeAttribute("required");
+
+                        staticDropdownOne.removeAttribute("required");
+                        Job_Profession.removeAttribute("required");
+                        Job_Designation_Govt.removeAttribute("required");
+                        staticDropdown.removeAttribute("required");
 
 
 
@@ -413,6 +439,10 @@
                         profession1.style.display = "none";
                         job_type.style.display = "block";
                         resetValue();
+
+                        profession.setAttribute("required", "1");
+                        staticDropdown.setAttribute("required", "1");
+
                     }
                 }
 
@@ -425,11 +455,21 @@
                         Reason_For_NotReadingNewspaper.style.display="none";
                         current_paper_not_taking_eenadu_paper.style.display = "block";
 
+                        Reason_for_notReadingNewspaper.removeAttribute("required");
+                        newspaper.setAttribute("required", "1");
+                        Reason_for_not_taking_Eenadu_Newspaper.setAttribute("required", "1");
+
+
                     } else {
                         toggle_read_newspaper.innerText = "No";
                         toggle_read_newspaper.style.color = "red";
                         Reason_For_NotReadingNewspaper.style.display="block";
                         current_paper_not_taking_eenadu_paper.style.display = "none";
+
+                        Reason_for_notReadingNewspaper.setAttribute("required", "1");
+                        newspaper.removeAttribute("required");
+                        Reason_for_not_taking_Eenadu_Newspaper.removeAttribute("required");
+
 
                     }
                 }
@@ -446,9 +486,28 @@
                         console.log("vinn2121");
                         job_type2.style.display = "block";
                         for_private_job_details.style.display = "none";
+
+                        staticDropdownOne.setAttribute("required", "1");
+                        Job_Profession.setAttribute("required", "1");
+                        Job_Designation_Govt.setAttribute("required", "1");
+
+                        Company_Name.removeAttribute("required");
+                        Profession_g.removeAttribute("required");
+                        Company_Name.removeAttribute("required");
+
+
+
                     }else{
                         job_type2.style.display = "none";
                         for_private_job_details.style.display = "block";
+                        staticDropdownOne.removeAttribute("required");
+                        Job_Profession.removeAttribute("required");
+                        Job_Designation.removeAttribute("required");
+
+                        Company_Name.setAttribute("required", "1");
+                        Profession_g.setAttribute("required", "1");
+                        Company_Name.setAttribute("required", "1");
+
                     };
                     console.log("Selected Value:", selectedValue);
                     console.log("Selected Text:", selectedText);
@@ -461,11 +520,15 @@
                         toggle_switch_15days.style.color = "green";
                         free15Of.style.display="none";
 
+                        Reason_for_notTakingFreeOffer.removeAttribute("required");
+
 
                     } else {
                         toggle_switch_15days.innerText = "No";
                         toggle_switch_15days.style.color = "red";
                         free15Of.style.display="block";
+
+                        eason_for_notTakingFreeOffer.setAttribute("required", "1");
                     }
 
                 };
