@@ -83,7 +83,7 @@ class CustomerFormAPI(http.Controller):
         if not user:
             raise AccessDenied("Invalid token!")
 
-        return {"success": "True", "user_Id":user.id}  # Return the associated user
+        return {"success": "True", "user_Id":user.id, "user_login": user.login}  # Return the associated user
 
 
     @http.route('/api/customer_form', type='json', auth='public', methods=['POST'], csrf=False, cors="*")
@@ -108,8 +108,19 @@ class CustomerFormAPI(http.Controller):
                     "code": "403"
                 }
 
+
+
             # Extract data from request
             data = kwargs
+            if data.get('job_type_one') == "Central Job":
+                job_one = "central_job"
+            elif data.get('job_type_one') == "PSU":
+                job_one = "psu"
+            elif data.get('job_type_one') == "State Job":
+                job_one = "state_job"
+            else:
+                job_one = ""
+
 
             # Create a new customer form record
             customer = request.env['customer.form'].sudo().create({
@@ -138,7 +149,7 @@ class CustomerFormAPI(http.Controller):
                 'reason_not_taking_offer': data.get('reason_not_taking_offer'),
                 'employed': data.get('employed', False),
                 'job_type': data.get('job_type'),
-                'job_type_one': data.get('job_type_one'),
+                'job_type_one': job_one,
                 'job_profession': data.get('job_profession'),
                 'job_designation': data.get('job_designation'),
                 'company_name': data.get('company_name'),
@@ -206,3 +217,49 @@ class CustomerFormAPI(http.Controller):
         print(user.id)
 
         return {'status': 'success', 'message': "User logged out successfully", "code": "200"}
+
+
+    @http.route('/token_validation', type='json', auth='public', methods=['POST'], csrf=False, cors="*")
+    def tokenvalidation(self, **params):
+        try:
+            # Extract headers
+            api_key = params.get('token')
+            print(api_key,"vinayyyyughiuhihnin")
+
+            if not api_key:
+                return {
+                    'success': False,
+                    'message': 'Token is missing',
+                    'code': "403"
+                }
+
+            # Validate Token
+            user = self._verify_api_key(api_key)
+            if not user:
+                return {
+                    'success': False,
+                    'message': 'Invalid or expired token',
+                    "code": "403"
+            }
+            else:
+                return {
+                    'success': True,
+                    'message': 'valid token',
+                    'user_login': user,
+                    "code": "200"
+                }
+
+
+
+
+        except Exception as e:
+            return {
+                'success': False,
+                'message': 'Error: {}'.format(str(e)),
+                'code': "403"
+            }
+
+
+
+
+

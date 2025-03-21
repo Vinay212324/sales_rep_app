@@ -49,17 +49,17 @@
                         </div>
 
                         <div class="input-container mb-3">
-                            <input type="text" class="input-field" id="father_name" placeholder=" " />
+                            <input type="text" class="input-field" id="father_name" placeholder=" " required="1" />
                             <label for="father_name" class="input-label">Father's Name</label>
                         </div>
 
                         <div class="input-container mb-3">
-                            <input type="text" class="input-field" id="mother_name" placeholder=" "/>
+                            <input type="text" class="input-field" id="mother_name" placeholder=" " required="1"/>
                             <label for="mother_name" class="input-label">Mother's Name</label>
                         </div>
 
                         <div class="input-container mb-3">
-                            <input type="text" class="input-field" id="spouse_name" placeholder=" " />
+                            <input type="text" class="input-field" id="spouse_name" placeholder=" " required="1" />
                             <label for="spouse_name" class="input-label">Spouse's Name</label>
                         </div>
                     </div>
@@ -129,7 +129,7 @@
                     </div>
                     <div id ="Reason_For_NotReadingNewspaper">
                         <div class="input-container mb-3 mt-3 form-group">
-                            <input type="text" class="input-field " id="Reason_for_notReadingNewspaper" placeholder="" required="1"/>
+                            <input type="text" class="input-field " id="Reason_for_notReadingNewspaper" placeholder=""/>
                             <label for="Reason_for_notReadingNewspaper" class="input-label pl-1">Reason for not Reading Newspaper</label>
                         </div>
                     </div>
@@ -199,11 +199,11 @@
                     </select>
 
                     <div class="input-container mb-3 mt-3">
-                        <input type="text" class="input-field" id="Job_Profession" placeholder=" " required="1" />
+                        <input type="text" class="input-field" id="Job_Profession" placeholder=" "  />
                         <label for="Job_Profession" class="input-label">Job Profession</label>
                     </div>
                     <div class="input-container mb-3">
-                        <input type="text" class="input-field" id="Job_Designation_Govt" placeholder=" " required="1" />
+                        <input type="text" class="input-field" id="Job_Designation_Govt" placeholder=" "  />
                         <label for="Job_Designation_Govt" class="input-label">Job Designation</label>
                     </div>
 
@@ -211,16 +211,16 @@
 
                 <div id="for_private_job_details">
                     <div class="input-container mb-3">
-                        <input type="text" class="input-field" id="Company_Name" placeholder=" " required="1" />
+                        <input type="text" class="input-field" id="Company_Name" placeholder=" "  />
                         <label for="Company_Name" class="input-label">Company Name</label>
                     </div>
 
                     <div class="input-container mb-3">
-                        <input type="text" class="input-field" id="Profession_g" placeholder=" " required="1" />
+                        <input type="text" class="input-field" id="Profession_g" placeholder=" "  />
                         <label for="Profession_g" class="input-label">Profession</label>
                     </div>
                     <div class="input-container mb-3">
-                        <input type="text" class="input-field" id="Job_Designation" placeholder=" " required="1" />
+                        <input type="text" class="input-field" id="Job_Designation" placeholder=" " />
                         <label for="Job_Designation" class="input-label">Job Designation</label>
                     </div>
                 </div>
@@ -253,6 +253,96 @@
             <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
             <script>
+                document.addEventListener("DOMContentLoaded", function () {
+                    async function tokenValid() {
+                        let base_url = localStorage.getItem("base_url");
+                        if (!base_url) {
+                            console.error("⚠️ Base URL not found in localStorage.");
+                            redirectToLogin();
+                            return;
+                        }
+
+                        let url = base_url + "/token_validation";
+                        let token = localStorage.getItem("api_key");
+
+                        console.log("📌 Retrieved token:", token);
+
+                        if (!token) {
+                            console.error("⚠️ API key not found in localStorage.");
+                            redirectToLogin();
+                            return;
+                        }
+
+                        let payload = {
+                            jsonrpc: "2.0",
+                            method: "call",
+                            params: { token: token },
+                            id: 1 // Change to 1 for debugging
+                        };
+
+                        try {
+                            let response = await fetch(url, {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify(payload)
+                            });
+
+                            console.log("📡 Fetch response:", response);
+
+                            if (!response.ok) {
+                                console.error("❌ Server error:", response.status, response.statusText);
+                                alert("Server error: " + response.statusText);
+                                redirectToLogin();
+                                return;
+                            }
+
+                            let jsonData = await response.json();
+                            console.log("📥 API Response:", jsonData);
+
+                            // ✅ Corrected Token Validation Check
+                            if (!jsonData.result) {
+                                console.warn("❌ Token validation failed.");
+                                alert("Invalid token. Please log in again.");
+                                redirectToLogin();
+                                return;
+                            }
+
+                            if (jsonData.result.success === true) {
+                                console.log("✅ Valid token:", jsonData.result.message);
+                            } else {
+                                console.warn("❌ Token validation failed.");
+                                alert("Invalid token. Please log in again.");
+                                redirectToLogin();
+                                return;
+                            }
+
+                            // ✅ Corrected User Login Validation with Optional Chaining
+                            let storedLogin = localStorage.getItem("login");
+                            let responseLogin = jsonData.result.user_login?.user_login; // Safe access
+
+                            if (storedLogin === responseLogin) {
+                                console.log("✅ User login matches. Staying on the page.");
+                            } else {
+                                console.warn("⚠️ User login does not match. Redirecting...");
+                                redirectToLogin();
+                            }
+
+                        } catch (error) {
+                            console.error("⚠️ Network Error:", error.message);
+                            alert("Network error: " + error.message);
+                            redirectToLogin();
+                        }
+                    }
+
+                    function redirectToLogin() {
+                        window.location.href = "/lin"; 
+                    }
+
+                    tokenValid();
+                });
+
+
+
 
                 let eenadu_news_paper_feedback = document.getElementById("feedback_to_improve_eenadu_paper");
                 let toggle_read_news_paper_container = document.getElementById("toggle_read_newspaper_container");
@@ -433,6 +523,7 @@
 
 
 
+
                     } else {
                         employed.innerText = "Yes";
                         employed.style.color = "green";
@@ -491,9 +582,11 @@
                         Job_Profession.setAttribute("required", "1");
                         Job_Designation_Govt.setAttribute("required", "1");
 
+
                         Company_Name.removeAttribute("required");
                         Profession_g.removeAttribute("required");
                         Company_Name.removeAttribute("required");
+                        Job_Designation.removeAttribute("required");
 
 
 
@@ -502,7 +595,9 @@
                         for_private_job_details.style.display = "block";
                         staticDropdownOne.removeAttribute("required");
                         Job_Profession.removeAttribute("required");
-                        Job_Designation.removeAttribute("required");
+                        Job_Designation_Govt.removeAttribute("required");
+                        Job_Designation.setAttribute("required", "1");
+
 
                         Company_Name.setAttribute("required", "1");
                         Profession_g.setAttribute("required", "1");
@@ -534,75 +629,114 @@
                 };
 
 
-                let custom_form = {
-                    date: currentDate,
-                    time: currentTime,
-                    family_head_name: "",
-                    father_name: "",
-                    mother_name: "",
-                    spouse_name: "",
-                    house_number: "",
-                    street_number: "",
-                    city: "",
-                    pin_code: "",
-                    address: "",
-                    mobile_number: "",
-                    eenadu_newspaper: "",
-                    feedback_to_improve_eenadu_paper: "",
-                    read_newspaper: "",
-                    current_newspaper: "",
-                    reason_for_not_taking_eenadu_newsPaper: "",
-                    reason_not_reading: "",
-                    free_offer_15_days: "",
-                    reason_not_taking_offer: "",
-                    employed: "",
-                    job_type: "",
-                    job_type_one: "",
-                    job_profession: "",
-                    job_designation: "",
-                    company_name: "",
-                    profession: "",
-                    job_designation_one: "",
-                    latitude: "",
-                    longitude: ""
-                };
 
-                family_head_name.addEventListener("input", function (event) {
-                    custom_form.family_head_name = event.target.value.trim();
 
-                    if (custom_form.family_head_name="") {
-                        family_head_name.classList.add("danger_style");
-                    } else {
-                        family_head_name.classList.remove("danger_style");
+
+
+
+
+
+
+                document.addEventListener("DOMContentLoaded", function () {
+                    console.log("vinnn12333");
+
+
+
+                    let feedbackForm = document.getElementById("feedbackForm");
+
+                    if (!feedbackForm) {
+                        console.error("❌ Form element not found.");
+                        return;
                     }
+
+                    feedbackForm.addEventListener("submit", async function (event) {
+                        event.preventDefault();
+
+
+                        let currentTime = new Date().toLocaleTimeString();
+
+                        let formData = {
+                            token: localStorage.getItem("api_key"),
+                            date: currentDate,
+                            time: currentTime,
+                            family_head_name: document.getElementById("family_head_name")?.value.trim() || "",
+                            father_name: document.getElementById("father_name")?.value.trim() || "",
+                            mother_name: document.getElementById("mother_name")?.value.trim() || "",
+                            spouse_name: document.getElementById("spouse_name")?.value.trim() || "",
+                            house_number: document.getElementById("House")?.value.trim() || "",
+                            street_number: document.getElementById("street")?.value.trim() || "",
+                            city: document.getElementById("city")?.value.trim() || "",
+                            pin_code: document.getElementById("pin")?.value.trim() || "",
+                            address: document.getElementById("address")?.value.trim() || "",
+                            mobile_number: document.getElementById("Mobile")?.value.trim() || "",
+                            eenadu_newspaper: document.getElementById("toggleSwitch")?.checked ? "false" : "true",
+                            feedback_to_improve_eenadu_paper: document.getElementById("feedback_improve_eenadu_paper")?.value.trim() || "",
+                            read_newspaper: document.getElementById("toggle_switch_read")?.checked ? "true" : "false",
+                            current_newspaper: document.getElementById("newspaper")?.value.trim() || "",
+                            reason_for_not_taking_eenadu_newsPaper: document.getElementById("Reason_for_not_taking_Eenadu_Newspaper")?.value.trim() || "",
+                            reason_not_reading: document.getElementById("Reason_for_notReadingNewspaper")?.value.trim() || "",
+                            free_offer_15_days: document.getElementById("toggle_switch_15days_free")?.checked ? "true" : "false",
+                            reason_not_taking_offer: document.getElementById("Reason_for_notTakingFreeOffer")?.value.trim() || "",
+                            employed: document.getElementById("toggleSwitch3")?.checked ? "false" : "true",
+                            job_type_one: document.getElementById("staticDropdownOne")?.options[ document.getElementById("staticDropdownOne").selectedIndex ]?.text || "",
+                            job_profession: document.getElementById("Job_Profession")?.value.trim() || "",
+                            job_designation: document.getElementById("Job_Designation_Govt")?.value.trim() || "",
+                            company_name: document.getElementById("Company_Name")?.value.trim() || "",
+                            profession: document.getElementById("Profession_g")?.value.trim() || "",
+                            job_designation_one: document.getElementById("Job_Designation")?.value.trim() || "",
+                            select_profession: document.getElementById("profession")?.value.trim() || "",
+                            latitude: "",
+                            longitude: ""
+                        };
+
+                        console.log("Submitting Form Data:", formData);
+                        alert("✅ Data Submitted Successfully!");
+
+                        // Submit form data to API
+                        await submitCustomFormData(formData);
+                    });
+
+                    async function submitCustomFormData(formData) {
+                        let base_url = localStorage.getItem("base_url");
+                        let url = base_url + "/api/customer_form";
+
+                        let payload = {
+                            jsonrpc: "2.0",
+                            method: "call",
+                            params: formData,
+                            id: new Date().getTime()
+                        };
+
+                        try {
+                            let response = await fetch(url, {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify(payload)
+                            });
+
+                            let jsonData = await response.json();
+                            console.log("API Response:", jsonData);
+
+                            if (jsonData.result) {
+                                console.log("✅ Submission Successful:", jsonData.result);
+                                alert("Form submitted successfully!");
+                            } else if (jsonData.error) {
+                                console.warn("❌ Submission Failed:", jsonData.error);
+                                alert("Error: " + jsonData.error.message);
+                            } else {
+                                alert("Unexpected server response. Please try again.");
+                            }
+                        } catch (error) {
+                            console.error("⚠️ Network Error:", error);
+                            alert("Network error. Please check your connection and try again.");
+                        }
+                    }
+
+                    // Event listener for input validation
+                    document.getElementById("family_head_name")?.addEventListener("input", function (event) {
+                        event.target.classList.toggle("danger_style", event.target.value.trim() === "");
+                    });
                 });
-
-
-
-
-<!--                document.addEventListener("DOMContentLoaded", function () {-->
-<!--                    document.getElementById("feedbackForm").addEventListener("submit", function (event) {-->
-<!--                            event.preventDefault();-->
-
-
-
-
-
-
-
-<!--&lt;!&ndash;                            const date = currentDate;&ndash;&gt;-->
-<!--&lt;!&ndash;                            const time = currentTime;&ndash;&gt;-->
-<!--&lt;!&ndash;                            const profession = document.getElementById("profession").value;&ndash;&gt;-->
-<!--&lt;!&ndash;                            const newspaper = document.getElementById("newspaper").value;&ndash;&gt;-->
-
-<!--&lt;!&ndash;                            const feedbackData = { name, email, profession, newspaper };&ndash;&gt;-->
-<!--&lt;!&ndash;                            localStorage.setItem("feedback", JSON.stringify(feedbackData));&ndash;&gt;-->
-
-<!--&lt;!&ndash;                            alert("✅ Feedback Submitted Successfully!");&ndash;&gt;-->
-<!--&lt;!&ndash;                            document.getElementById("feedbackForm").reset();&ndash;&gt;-->
-<!--                        });-->
-<!--                    });-->
-
 
 
                     </script>
