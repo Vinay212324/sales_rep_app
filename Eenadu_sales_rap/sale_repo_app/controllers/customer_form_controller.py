@@ -102,7 +102,6 @@ class CustomerFormAPI(http.Controller):
     def token_validation(self, **params):
         try:
             api_key = params.get('token')
-            print(api_key)
             if not api_key:
                 return {'success': False, 'message': 'Token is missing', 'code': "403"}
             user = self._verify_api_key(api_key)
