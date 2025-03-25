@@ -260,7 +260,7 @@ class CustomerFormAPI(http.Controller):
             }
 
 
-    @http.route('/api/customer_forms', type='json', auth='user', methods=['GET'])
+    @http.route('/api/customer_forms', type='json', auth="public", methods=['GET'])
     def get_customer_forms(self, **params):
         """
         Fetch customer form records based on the user login.
