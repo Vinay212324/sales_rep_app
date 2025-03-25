@@ -20,7 +20,7 @@ class CustomerFormAPI(http.Controller):
             raise AccessDenied("Invalid token!")
         return {"success": "True", "user_Id": user.id, "user_login": user.login}
 
-    @http.route('/api/customer_form', type='json', auth='public', methods=['POST'], csrf=False, cors="*")
+    @http.route('/api/customer_form_info', type='json', auth='public', methods=['POST'], csrf=False, cors="*")
     def create_customer(self, **kwargs):
         try:
             api_key = kwargs.get('token')
