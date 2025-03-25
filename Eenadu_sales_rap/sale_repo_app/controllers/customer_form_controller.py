@@ -259,90 +259,100 @@ class CustomerFormAPI(http.Controller):
                 'code': "403"
             }
 
-    import logging
-    from odoo import http
-    from odoo.http import request
 
-    _logger = logging.getLogger(__name__)
+    @http.route('/api/customer_forms', type='json', auth='user', methods=['GET'])
+    def get_customer_forms(self, **params):
+        """
+        Fetch customer form records based on the user login.
+        """
+        api_key = params.get('token')
 
-    class CustomerFormController(http.Controller):
+        if not api_key:
+            return {
+                'success': False,
+                'message': 'Token is missing',
+                'code': "403"
+            }
 
-        @http.route('/api/customer_forms', type='json', auth='user', methods=['GET'])
-        def get_customer_forms(self, **params):
-            """
-            Fetch customer form records based on the user login.
-            """
-            user_id = params.get("user_id")
-            if not user_id:
-                return {'error': 'User ID is required'}
 
-            try:
-                user_id = int(user_id)
-                print(user_id)
-            except ValueError:
-                return {'error': 'Invalid User ID'}
+        # Validate Token
+        user = self._verify_api_key(api_key)
+        if not user:
+            return {
+                'success': False,
+                'message': 'Invalid or expired token',
+                "code": "403"
+            }
 
-            # Fetch user details
-            user = request.env['res.users'].sudo().browse(user_id)
-            if not user.exists():
-                return {'error': 'User not found'}
+        user_id = params.get("user_id")
+        if not user_id:
+            return {'error': 'User ID is required', "code": "403"}
 
-            agent_login = user.login  # Get the login of the user
+        try:
+            user_id = int(user_id)
+        except ValueError:
+            return {'error': 'Invalid User ID', "code": "403"}
 
-            _logger.info(f"Fetching records for agent login: {agent_login}")
+        # Fetch user details
+        user = request.env['res.users'].sudo().browse(user_id)
+        if not user.exists():
+            return {'error': 'User not found', "code": "403"}
 
-            # Debugging: Check if any records exist at all
-            all_records = request.env['customer.form'].sudo().search([])
-            _logger.info(f"Total Customer Forms: {len(all_records)}")
+        agent_login = user.login  # Get the login of the user
+        _logger.info(f"Fetching records for agent login: {agent_login}")
 
-            # Print all records to check agent_login values
-            for record in all_records:
-                _logger.info(f"Record ID: {record.id}, Agent Login: {record.agent_login}")
+        # Debugging: Check if any records exist at all
+        all_records = request.env['customer.form'].sudo().search([])
+        _logger.info(f"Total Customer Forms: {len(all_records)}")
 
-            # Check if `agent_login` is a Many2one relation instead of a Char field
-            customer_forms = request.env['customer.form'].sudo().search([('agent_login', '=', agent_login)])
-            if not customer_forms:
-                _logger.warning(f"No records found for agent_login: {agent_login}")
+        # Print all records to check agent_login values
+        for record in all_records:
+            _logger.info(f"Record ID: {record.id}, Agent Login: {record.agent_login}")
 
-            # Prepare the result
-            result = [{
-                'id': record.id,
-                'agent_name': record.agent_name,
-                'agent_login': record.agent_login,
-                'unit_name': record.unit_name,
-                'date': record.date,
-                'time': record.time,
-                'family_head_name': record.family_head_name,
-                'father_name': record.father_name,
-                'mother_name': record.mother_name,
-                'spouse_name': record.spouse_name,
-                'house_number': record.house_number,
-                'street_number': record.street_number,
-                'city': record.city,
-                'pin_code': record.pin_code,
-                'address': record.address,
-                'mobile_number': record.mobile_number,
-                'eenadu_newspaper': record.eenadu_newspaper,
-                'feedback_to_improve_eenadu_paper': record.feedback_to_improve_eenadu_paper,
-                'read_newspaper': record.read_newspaper,
-                'current_newspaper': record.current_newspaper,
-                'reason_for_not_taking_eenadu_newsPaper': record.reason_for_not_taking_eenadu_newsPaper,
-                'reason_not_reading': record.reason_not_reading,
-                'free_offer_15_days': record.free_offer_15_days,
-                'reason_not_taking_offer': record.reason_not_taking_offer,
-                'employed': record.employed,
-                'job_type': record.job_type,
-                'job_type_one': record.job_type_one,
-                'job_profession': record.job_profession,
-                'job_designation': record.job_designation,
-                'company_name': record.company_name,
-                'profession': record.profession,
-                'job_designation_one': record.job_designation_one,
-                'latitude': record.latitude,
-                'longitude': record.longitude,
-            } for record in customer_forms]
+        # Check if `agent_login` is a Many2one relation instead of a Char field
+        customer_forms = request.env['customer.form'].sudo().search([('agent_login', '=', agent_login)])
+        if not customer_forms:
+            _logger.warning(f"No records found for agent_login: {agent_login}")
 
-            return {'records': result}
+        # Prepare the result
+        result = [{
+            'id': record.id,
+            'agent_name': record.agent_name,
+            'agent_login': record.agent_login,
+            'unit_name': record.unit_name,
+            'date': record.date,
+            'time': record.time,
+            'family_head_name': record.family_head_name,
+            'father_name': record.father_name,
+            'mother_name': record.mother_name,
+            'spouse_name': record.spouse_name,
+            'house_number': record.house_number,
+            'street_number': record.street_number,
+            'city': record.city,
+            'pin_code': record.pin_code,
+            'address': record.address,
+            'mobile_number': record.mobile_number,
+            'eenadu_newspaper': record.eenadu_newspaper,
+            'feedback_to_improve_eenadu_paper': record.feedback_to_improve_eenadu_paper,
+            'read_newspaper': record.read_newspaper,
+            'current_newspaper': record.current_newspaper,
+            'reason_for_not_taking_eenadu_newsPaper': record.reason_for_not_taking_eenadu_newsPaper,
+            'reason_not_reading': record.reason_not_reading,
+            'free_offer_15_days': record.free_offer_15_days,
+            'reason_not_taking_offer': record.reason_not_taking_offer,
+            'employed': record.employed,
+            'job_type': record.job_type,
+            'job_type_one': record.job_type_one,
+            'job_profession': record.job_profession,
+            'job_designation': record.job_designation,
+            'company_name': record.company_name,
+            'profession': record.profession,
+            'job_designation_one': record.job_designation_one,
+            'latitude': record.latitude,
+            'longitude': record.longitude,
+        } for record in customer_forms]
+
+        return {'records': result, "code": "403"}
 
 
 
