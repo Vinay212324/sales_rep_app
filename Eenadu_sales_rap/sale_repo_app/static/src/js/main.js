@@ -4,6 +4,7 @@ document.addEventListener("DOMContentLoaded", function () {
         localStorage.setItem("base_url", "http://10.100.13.138:8099");
     }
 
+    let login = document.getElementById("login");
     let identity = document.getElementById("identity");
     let password = document.getElementById("password");
     let identityer = document.getElementById("identityer");
@@ -18,22 +19,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Event listener for identity field
     identity.addEventListener("input", function (event) {
-        if (event.target.value.trim() === "") {
-            identityer.textContent = "User ID is Required*";
-        } else {
-            identityer.textContent = "";
-        }
         formData.login = event.target.value.trim();
+        identityer.textContent = formData.login === "" ? "User ID is Required*" : "";
     });
 
     // Event listener for password field
     password.addEventListener("input", function (event) {
-        if (event.target.value.trim() === "") {
-            passwordER.textContent = "Password is Required*";
-        } else {
-            passwordER.textContent = "";
-        }
         formData.password = event.target.value.trim();
+        passwordER.textContent = formData.password === "" ? "Password is Required*" : "";
     });
 
     // Form validation function
@@ -61,6 +54,9 @@ document.addEventListener("DOMContentLoaded", function () {
     async function submitFormData(formData) {
         let base_url = localStorage.getItem('base_url');
         let url = base_url + "/web/session/authenticate";
+
+        // Clear previous login from localStorage
+        localStorage.setItem("login", formData.login);
 
         let payload = {
             jsonrpc: "2.0",
@@ -121,10 +117,14 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
+
+
+
     // Handle form submission
     myFormEl.addEventListener("submit", function (event) {
         event.preventDefault();
 
+        // Validate before submitting
         if (validateFormData(formData)) {
             submitFormData(formData);
         }
