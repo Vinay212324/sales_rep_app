@@ -20,6 +20,7 @@ function customer_form(){
 document.addEventListener("DOMContentLoaded", function () {
     async function tokenValid() {
         let base_url = localStorage.getItem("base_url");
+        console.log(base_url)
         if (!base_url) {
             console.error("⚠️ Base URL not found in localStorage.");
             redirectToLogin();
