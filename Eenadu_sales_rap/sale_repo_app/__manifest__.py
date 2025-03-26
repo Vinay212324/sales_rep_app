@@ -1,5 +1,5 @@
 {
-    "name": "Sales_Rep",
+    "name": "Sales REPO",
     "version": "1.0",
     "depends": ["base", "web"],  # Base module + OWL support
     "author": "Your Name",
