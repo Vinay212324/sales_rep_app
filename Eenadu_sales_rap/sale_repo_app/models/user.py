@@ -17,6 +17,7 @@ class Users(models.Model):
 
     user_id = fields.Integer(string="User ID")
     unit_name = fields.Char(string="Unit Name")
+    create_uid = fields.Integer(string="create_uid ID")
     api_token = fields.Char(string="API Token", readonly=True)
     token_expiry = fields.Datetime(string="Token Expiry")
 
