@@ -259,12 +259,10 @@ class UserPortal(http.Controller):
             _logger.info(f"Creating new user with values: {values}")
 
             # Attempt to create the user and catch any errors
-            try:
-                new_user = env['res.users'].create(values)
-                _logger.info(f"User created successfully with ID: {new_user.id}")
-            except Exception as e:
-                _logger.error(f"Error creating user with values: {values}, error: {str(e)}")
-                return {'error': 'Internal server error', 'code': "500"}  # Return status code as string
+
+            new_user = env['res.users'].create(values)
+
+
 
             # Return success response
             return {
