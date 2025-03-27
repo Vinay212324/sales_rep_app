@@ -43,8 +43,6 @@ import secrets
 from odoo.tools.translate import _
 
 
-
-
 import logging
 import uuid
 from odoo import http, SUPERUSER_ID
@@ -168,64 +166,107 @@ class UserPortal(http.Controller):
             _logger.exception("Critical authentication failure")
             return {'error': str(e), 'code': "403"}
 
-
-
-
-
-
-    @http.route('/web/session/user_creation_for_sales_rep', type='json', auth='none', csrf=False, cors="*")
+    @http.route('/sales_rep_user_creation', type='json', auth='none', methods=["POST"], csrf=False, cors="*")
     def user_creation(self, **kw):
         _logger = logging.getLogger(__name__)  # Ensure proper logging
         try:
             # Authentication check
             token = kw.get('token')
             if not token:
-                return {'error': 'Authentication token required', 'code': "403"}  # Fixed indexing error
+                return {'error': 'Authentication token required', 'code': "403"}  # Return status code as string
 
             # API key validation
-            user_id = request.env['res.users.apikeys'].sudo()._check_credentials(scope='rpc', key=token)
-            if not user_id:
-                return {'error': 'Invalid authentication token', 'code': "403"}  # Removed invalid indexing
+            user = request.env['res.users'].sudo().search([('api_token', '=', token)], limit=1)
+            if not user:
+                return {'error': 'Invalid authentication token', 'code': "403"}  # Return status code as string
 
             # Permission check
-            env = request.env(user=user_id)
-            if not env.user.has_group('sale_repo_app.circulation_head_group'):
+            env = request.env(user=user)
+            if (env.user.has_group('sale_repo_app.circulation_head_group')) or \
+                    (env.user.has_group('sale_repo_app.region_head_group')) or \
+                    (env.user.has_group('sale_repo_app.unit_manager_group')):
+
+                if env.user.has_group('sale_repo_app.circulation_head_group'):
+                    valid_roles = ["circulation_head", "region_head", "unit_manager", "agent"]
+                elif env.user.has_group('sale_repo_app.region_head_group'):
+                    valid_roles = ["region_head", "unit_manager", "agent"]
+                elif env.user.has_group('sale_repo_app.unit_manager_group'):
+                    valid_roles = ["unit_manager", "agent"]
+
+                # Role validation
+                if kw.get("role") not in valid_roles:
+                    return {'error': 'Role is not valid for this user', 'code': "403"}
+
+            else:
                 return {'error': 'Insufficient permissions', 'code': "403"}
 
             # Field validation
-            required_fields = ['name', 'email', 'password']
+            required_fields = ['name', 'email', 'password', 'role']
             missing = [field for field in required_fields if not kw.get(field)]
             if missing:
-                return {'error': f'Missing required fields: {", ".join(missing)}', 'code': 400}
+                return {'error': f'Missing required fields: {", ".join(missing)}',
+                        'code': "400"}  # Use code 400 for missing fields
 
             # Existing user check
             existing_user = env['res.users'].search([('login', '=', kw['email'])], limit=1)
             if existing_user:
-                return {'error': 'Email already registered', 'code': 409}
+                return {'error': 'Email already registered', 'code': "409"}  # Conflict: email already registered
 
-            # User creation
+            # Assign groups based on role
+            if kw.get("role") == "circulation_head":
+                groups = [
+                    env.ref('base.group_user').id,
+                    env.ref('base.group_erp_manager').id,
+                    env.ref('sale_repo_app.circulation_head_group').id
+                ]
+            elif kw.get("role") == "region_head":
+                groups = [
+                    env.ref('base.group_user').id,
+                    env.ref('base.group_erp_manager').id,
+                    env.ref('sale_repo_app.region_head_group').id
+                ]
+            elif kw.get("role") == "unit_manager":
+                groups = [
+                    env.ref('base.group_user').id,
+                    env.ref('base.group_erp_manager').id,
+                    env.ref('sale_repo_app.unit_manager_group').id
+                ]
+            elif kw.get("role") == "agent":
+                groups = [
+                    env.ref('base.group_user').id,
+                    env.ref('base.group_erp_manager').id,
+                    env.ref('sale_repo_app.agent_group').id
+                ]
+            else:
+                return {'error': 'Role is not valid', 'code': "403"}  # Return 403 if role is invalid
+
+            # Create the user
             company = env['res.company'].search([], limit=1)
-            groups = [
-                env.ref('base.group_user').id,
-                env.ref('base.group_erp_manager').id,
-                env.ref('sale_repo_app.circulation_head_group').id
-            ]
 
+            # Construct the values to create the new user
             values = {
                 'name': kw['name'],
                 'login': kw['email'],
                 'email': kw['email'],
                 'password': kw['password'],
-                'role': kw['role'],
-                'who_is_created_id': user_id,
+                'role': kw.get('role', ''),  # Ensure 'role' is handled properly (might not always be required)
                 'company_id': company.id,
                 'company_ids': [(4, company.id)],
-                'groups_id': [(6, 0, groups)]  # Fixed group assignment syntax
+                'groups_id': [(6, 0, groups)]  # Group assignment based on role
             }
 
-            new_user = env['res.users'].create(values)
-            env.cr.commit()  # Consider if this is truly necessary
+            # Log the values to ensure they're correct before creating the user
+            _logger.info(f"Creating new user with values: {values}")
 
+            # Attempt to create the user and catch any errors
+            try:
+                new_user = env['res.users'].create(values)
+                _logger.info(f"User created successfully with ID: {new_user.id}")
+            except Exception as e:
+                _logger.error(f"Error creating user with values: {values}, error: {str(e)}")
+                return {'error': 'Internal server error', 'code': "500"}  # Return status code as string
+
+            # Return success response
             return {
                 'success': True,
                 'user_id': new_user.id,
@@ -234,231 +275,13 @@ class UserPortal(http.Controller):
 
         except exceptions.AccessDenied as e:
             _logger.error("Access denied: %s", str(e))
-            return {'error': 'Authentication failed', 'code': 403}
+            return {'error': 'Authentication failed', 'code': "403"}  # Return status code as string
         except exceptions.ValidationError as e:
             _logger.error("Validation error: %s", str(e))
-            return {'error': str(e), 'code': 400}
+            return {'error': str(e), 'code': "400"}  # Return status code as string for validation errors
         except Exception as e:
-            _logger.exception("Server error during user creation:")  # Better error logging
-            return {'error': 'Internal server error', 'code': 500}
-
-
-
-
-
-
-
-    @http.route('/web/session/creating_region_head', type='json', auth='none', csrf=False, cors="*")
-    def user_creation(self, **kw):
-        _logger = logging.getLogger(__name__)  # Ensure proper logging
-        try:
-            # Authentication check
-            token = kw.get('token')
-            if not token:
-                return {'error': 'Authentication token required', 'code': 401}  # Fixed indexing error
-
-            # API key validation
-            user_id = request.env['res.users.apikeys'].sudo()._check_credentials(scope='rpc', key=token)
-            if not user_id:
-                return {'error': 'Invalid authentication token', 'code': 403}  # Removed invalid indexing
-
-            # Permission check
-            env = request.env(user=user_id)
-            if not env.user.has_group('sale_repo_app.circulation_head_group'):
-                return {'error': 'Insufficient permissions', 'code': 403}
-
-            # Field validation
-            required_fields = ['name', 'email', 'password']
-            missing = [field for field in required_fields if not kw.get(field)]
-            if missing:
-                return {'error': f'Missing required fields: {", ".join(missing)}', 'code': 400}
-
-            # Existing user check
-            existing_user = env['res.users'].search([('login', '=', kw['email'])], limit=1)
-            if existing_user:
-                return {'error': 'Email already registered', 'code': 409}
-
-            # User creation
-            company = env['res.company'].search([], limit=1)
-            groups = [
-                env.ref('base.group_user').id,
-                env.ref('base.group_erp_manager').id,
-                env.ref('sale_repo_app.region_head_group').id
-            ]
-
-            values = {
-                'name': kw['name'],
-                'login': kw['email'],
-                'email': kw['email'],
-                'password': kw['password'],
-                'role': kw['role'],
-                'who_is_created_id': user_id,
-                'company_id': company.id,
-                'company_ids': [(4, company.id)],
-                'groups_id': [(6, 0, groups)]  # Fixed group assignment syntax
-            }
-
-            new_user = env['res.users'].create(values)
-            env.cr.commit()  # Consider if this is truly necessary
-
-            return {
-                'success': True,
-                'user_id': new_user.id,
-                'message': 'User created successfully'
-            }
-
-        except exceptions.AccessDenied as e:
-            _logger.error("Access denied: %s", str(e))
-            return {'error': 'Authentication failed', 'code': 403}
-        except exceptions.ValidationError as e:
-            _logger.error("Validation error: %s", str(e))
-            return {'error': str(e), 'code': 400}
-        except Exception as e:
-            _logger.exception("Server error during user creation:")  # Better error logging
-            return {'error': 'Internal server error', 'code': 500}  
-
-    @http.route('/web/session/creating_unit_manager', type='json', auth='none', csrf=False, cors="*")
-    def user_creation(self, **kw):
-        _logger = logging.getLogger(__name__)  # Ensure proper logging
-        try:
-            # Authentication check
-            token = kw.get('token')
-            if not token:
-                return {'error': 'Authentication token required', 'code': 401}  # Fixed indexing error
-
-            # API key validation
-            user_id = request.env['res.users.apikeys'].sudo()._check_credentials(scope='rpc', key=token)
-            if not user_id:
-                return {'error': 'Invalid authentication token', 'code': 403}  # Removed invalid indexing
-
-            # Permission check
-            env = request.env(user=user_id)
-            if not env.user.has_group('sale_repo_app.region_head_group'):
-                return {'error': 'Insufficient permissions', 'code': 403}
-
-            # Field validation
-            required_fields = ['name', 'email', 'password']
-            missing = [field for field in required_fields if not kw.get(field)]
-            if missing:
-                return {'error': f'Missing required fields: {", ".join(missing)}', 'code': 400}
-
-            # Existing user check
-            existing_user = env['res.users'].search([('login', '=', kw['email'])], limit=1)
-            if existing_user:
-                return {'error': 'Email already registered', 'code': 409}
-
-            # User creation
-            company = env['res.company'].search([], limit=1)
-            groups = [
-                env.ref('base.group_user').id,
-                env.ref('base.group_erp_manager').id,
-                env.ref('sale_repo_app.unit_manager_group').id
-            ]
-
-            values = {
-                'name': kw['name'],
-                'login': kw['email'],
-                'email': kw['email'],
-                'password': kw['password'],
-                'role': kw['role'],
-                'who_is_created_id': user_id,
-                'company_id': company.id,
-                'company_ids': [(4, company.id)],
-                'groups_id': [(6, 0, groups)]  # Fixed group assignment syntax
-            }
-
-            new_user = env['res.users'].create(values)
-            env.cr.commit()  # Consider if this is truly necessary
-
-            return {
-                'success': True,
-                'user_id': new_user.id,
-                'message': 'User created successfully'
-            }
-
-        except exceptions.AccessDenied as e:
-            _logger.error("Access denied: %s", str(e))
-            return {'error': 'Authentication failed', 'code': 403}
-        except exceptions.ValidationError as e:
-            _logger.error("Validation error: %s", str(e))
-            return {'error': str(e), 'code': 400}
-        except Exception as e:
-            _logger.exception("Server error during user creation:")  # Better error logging
-            return {'error': 'Internal server error', 'code': 500}
-
-    @http.route('/web/session/creating_agent', type='json', auth='none', csrf=False, cors="*")
-    def user_creation(self, **kw):
-        _logger = logging.getLogger(__name__)  # Ensure proper logging
-        try:
-            # Authentication check
-            token = kw.get('token')
-            if not token:
-                return {'error': 'Authentication token required', 'code': 401}  # Fixed indexing error
-
-            # API key validation
-            user_id = request.env['res.users.apikeys'].sudo()._check_credentials(scope='rpc', key=token)
-            if not user_id:
-                return {'error': 'Invalid authentication token', 'code': 403}  # Removed invalid indexing
-
-            # Permission check
-            env = request.env(user=user_id)
-            if not env.user.has_group('sale_repo_app.unit_manager_group'):
-                return {'error': 'Insufficient permissions', 'code': 403}
-
-            # Field validation
-            required_fields = ['name', 'email', 'password']
-            missing = [field for field in required_fields if not kw.get(field)]
-            if missing:
-                return {'error': f'Missing required fields: {", ".join(missing)}', 'code': 400}
-
-            # Existing user check
-            existing_user = env['res.users'].search([('login', '=', kw['email'])], limit=1)
-            if existing_user:
-                return {'error': 'Email already registered', 'code': 409}
-
-            # User creation
-            company = env['res.company'].search([], limit=1)
-            groups = [
-                env.ref('base.group_user').id,
-                env.ref('base.group_erp_manager').id,
-                env.ref('sale_repo_app.agent_group').id
-            ]
-
-            values = {
-                'name': kw['name'],
-                'login': kw['email'],
-                'email': kw['email'],
-                'password': kw['password'],
-                'role': kw['role'],
-                'who_is_created_id': user_id,
-                'company_id': company.id,
-                'company_ids': [(4, company.id)],
-                'groups_id': [(6, 0, groups)]  # Fixed group assignment syntax
-            }
-
-            new_user = env['res.users'].create(values)
-            env.cr.commit()  # Consider if this is truly necessary
-
-            return {
-                'success': True,
-                'user_id': new_user.id,
-                'message': 'User created successfully'
-            }
-
-        except exceptions.AccessDenied as e:
-            _logger.error("Access denied: %s", str(e))
-            return {'error': 'Authentication failed', 'code': 403}
-        except exceptions.ValidationError as e:
-            _logger.error("Validation error: %s", str(e))
-            return {'error': str(e), 'code': 400}
-        except Exception as e:
-            _logger.exception("Server error during user creation:")  # Better error logging
-            return {'error': 'Internal server error', 'code': 500}
-
-
-
-
-
+            _logger.exception("Server error during user creation: %s", str(e))  # Better error logging
+            return {'error': 'Internal server error', 'code': "500"}  # Return status code as string for server errors
 
 
 

@@ -8,15 +8,15 @@ class Users(models.Model):
     _inherit = 'res.users'
 
     role = fields.Selection(
-        [('level1', 'Level1'),
-         ('level2', 'Level2'),
-         ('level3', 'Level3'),
-         ('level4', 'Level4')],
-        string="Role", required=True, default="level1"
+        [('agent', 'Level1'),
+         ('unit_manager', 'Level2'),
+         ('region_head', 'Level3'),
+         ('circulation_head', 'Level4')],
+        string="Role", required=True, default="agent"
     )
 
     user_id = fields.Integer(string="User ID")
-    unit_name = fields.Char(string="Unit Name", default="terupati")
+    unit_name = fields.Char(string="Unit Name")
     api_token = fields.Char(string="API Token", readonly=True)
     token_expiry = fields.Datetime(string="Token Expiry")
 
