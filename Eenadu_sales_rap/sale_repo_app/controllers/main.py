@@ -201,7 +201,7 @@ class UserPortal(http.Controller):
                 return {'error': 'Insufficient permissions', 'code': "403"}
 
             # Field validation
-            required_fields = ['name', 'email', 'password', 'role']
+            required_fields = ['name', 'email', 'password', 'role', 'unit_name']
             missing = [field for field in required_fields if not kw.get(field)]
             if missing:
                 return {'error': f'Missing required fields: {", ".join(missing)}', 'code': "400"}
@@ -249,6 +249,7 @@ class UserPortal(http.Controller):
                 'name': kw['name'],
                 'login': kw['email'],
                 'email': kw['email'],
+                'unit_name' : kw['unit_name'],
                 'password': kw['password'],
                 'create_uid': user.id,  # Use 'create_uid' to store the creator's user ID
                 'company_id': company.id,
