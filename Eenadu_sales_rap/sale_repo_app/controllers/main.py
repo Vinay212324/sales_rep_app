@@ -150,6 +150,7 @@ class UserPortal(http.Controller):
             return {
                 'status': 'success',
                 'user_id': uid,
+                'name':user.name,
                 'api_key': user.api_token,
                 'role_Le_gr': role,
                 'role': user.role or "Unknown",  # Prevent NoneType error
@@ -254,6 +255,7 @@ class UserPortal(http.Controller):
                 'create_uid': user.id,  # Use 'create_uid' to store the creator's user ID
                 'company_id': company.id,
                 'company_ids': [(4, company.id)],
+                'role': kw['role'],
                 'groups_id': [(6, 0, groups)]  # Group assignment based on role
             }
 
