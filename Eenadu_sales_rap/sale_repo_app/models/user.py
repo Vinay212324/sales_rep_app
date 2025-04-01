@@ -11,10 +11,19 @@ class Users(models.Model):
         [('agent', 'Level1'),
          ('unit_manager', 'Level2'),
          ('region_head', 'Level3'),
-         ('circulation_head', 'Level4')],
+         ('circulation_head', 'Level4'),('admin','level5')],
         string="Role", required=True, default="agent"
     )
-
+    status = fields.Selection(
+        [('un_activ', 'un active'),
+         ('active', 'Active'),
+      ],
+        string="Role", required=True, default="un_activ"
+    )
+    aadhar_number = fields.Char(string="Aadhar")
+    pan_number = fields.Char(string="PAN")
+    state = fields.Char(string="state")
+    phone = fields.Char(string="phone")
     user_id = fields.Integer(string="User ID")
     unit_name = fields.Char(string="Unit Name")
     create_uid = fields.Integer(string="create_uid ID")

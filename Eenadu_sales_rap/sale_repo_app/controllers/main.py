@@ -95,6 +95,12 @@ class UserPortal(http.Controller):
         print("Received POST data:", post)
         return Response("Forbidden", status="700")  # Use 403 for forbidden responses
 
+    @http.route('/customer_form_list', type='http', auth='public')
+    def customer_form_list(self):
+        return http.request.render("sale_repo_app.list_customer_form")
+
+
+
     @http.route('/web/session/authenticate', type='json', auth="none", csrf=False, cors="*")
     def authenticate(self, login, password):
         """ Authenticate user and generate API token with expiration time. """
@@ -117,6 +123,7 @@ class UserPortal(http.Controller):
 
             # ✅ Fetch user from `res.users`
             user = env['res.users'].sudo().search([('login', '=', login)], limit=1)
+            print(user)
             if not user:
                 raise AccessDenied("User not found!")
 
@@ -132,6 +139,7 @@ class UserPortal(http.Controller):
 
             # ✅ Fetch API key expiration date
             expiration = user.token_expiry if hasattr(user, 'token_expiry') else None
+
 
             # ✅ Determine user role
             role = "No access"
@@ -155,6 +163,11 @@ class UserPortal(http.Controller):
                 'role_Le_gr': role,
                 'role': user.role or "Unknown",  # Prevent NoneType error
                 'unit': user.unit_name or "Unknown",
+                'aadhar_number': user.aadhar_number,
+                'pan_number': user.pan_number,
+                'state': user.state,
+                'phone': user.phone,
+
                 'expiration': expiration,  # Set expiration if available
                 'code': "200"
             }
@@ -185,9 +198,11 @@ class UserPortal(http.Controller):
             env = request.env(user=user)
             if (env.user.has_group('sale_repo_app.circulation_head_group')) or \
                     (env.user.has_group('sale_repo_app.region_head_group')) or \
-                    (env.user.has_group('sale_repo_app.unit_manager_group')):
-
-                if env.user.has_group('sale_repo_app.circulation_head_group'):
+                    (env.user.has_group('sale_repo_app.unit_manager_group')) or\
+                    (env.user.has_group('sale_repo_app.admin_group')) :
+                if env.user.has_group('sale_repo_app.admin_group'):
+                    valid_roles = ["admin","circulation_head", "region_head", "unit_manager", "agent"]
+                elif env.user.has_group('sale_repo_app.circulation_head_group'):
                     valid_roles = ["circulation_head", "region_head", "unit_manager", "agent"]
                 elif env.user.has_group('sale_repo_app.region_head_group'):
                     valid_roles = ["region_head", "unit_manager", "agent"]
@@ -202,7 +217,7 @@ class UserPortal(http.Controller):
                 return {'error': 'Insufficient permissions', 'code': "403"}
 
             # Field validation
-            required_fields = ['name', 'email', 'password', 'role', 'unit_name']
+            required_fields = ['name', 'status', 'email', 'phone', 'password', 'role', 'unit_name','pan_number','aadhar_number','state']
             missing = [field for field in required_fields if not kw.get(field)]
             if missing:
                 return {'error': f'Missing required fields: {", ".join(missing)}', 'code': "400"}
@@ -238,6 +253,13 @@ class UserPortal(http.Controller):
                         env.ref('base.group_erp_manager').id,
                         env.ref('sale_repo_app.agent_group').id
                     ]
+                elif kw.get("role") == "admin":
+                    groups = [
+                        env.ref('base.group_user').id,
+                        env.ref('base.group_erp_manager').id,
+                        env.ref('sale_repo_app.agent_group').id,
+                        env.ref('sale_repo_app.admin_group').id
+                    ]
                 else:
                     return {'error': 'Role is not valid', 'code': "403"}
             except Exception as e:
@@ -256,6 +278,12 @@ class UserPortal(http.Controller):
                 'company_id': company.id,
                 'company_ids': [(4, company.id)],
                 'role': kw['role'],
+                'aadhar_number': kw['aadhar_number'],
+                'pan_number': kw['pan_number'],
+                'state': kw['state'],
+                'phone': kw['phone'],
+
+
                 'groups_id': [(6, 0, groups)]  # Group assignment based on role
             }
 
@@ -291,3 +319,8 @@ class UserPortal(http.Controller):
         except Exception as e:
             _logger.exception("Server error during user creation: %s", str(e))
             return {'error': 'Internal server error', 'code': "500"}
+
+    #
+    # @http.route('/sales_rep_user_list', type='json', auth='none', methods=["POST"], csrf=False, cors="*")
+    # def user_list(self, **kw):
+    #     pass
