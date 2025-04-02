@@ -1,0 +1,55 @@
+<odoo>
+    <data>
+        <!-- Define the custom template with id and name -->
+        <template id="list_customer_form" name="List customer forms">
+
+            <!-- This section contains your HTML content -->
+            <!-- HTML - Filter Form using Bootstrap -->
+            <div class="container">
+                <h3 class="d-flex justify-content-center align-items-center">Filter Customer Forms</h3>
+                <form id="filter-form">
+                    <div class="form-group">
+                        <label for="user_id">login:</label>
+                        <input type="number" class="form-control" id="login" placeholder="login"/>
+                    </div>
+                    <div class="form-group">
+                        <label for="unit">Unit:</label>
+                        <input type="text" class="form-control" id="unit" placeholder="Enter Unit"/>
+                    </div>
+                    <div class="form-group">
+                        <label for="start_date">Start Date:</label>
+                        <input type="date" class="form-control" id="start_date"/>
+                    </div>
+                    <div class="form-group">
+                        <label for="end_date">End Date:</label>
+                        <input type="date" class="form-control" id="end_date"/>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Filter</button>
+                </form>
+
+                <hr/>
+
+                <!-- Container to display filtered customer data -->
+                <div id="customer-list-container"></div>
+            </div>
+
+
+            <!-- Static CSS inclusion -->
+            <link rel="stylesheet" type="text/css" href="/sale_repo_app/static/src/css/customer_form_list.css"/>
+
+            <!-- Static JS inclusion -->
+            <script type="text/javascript" src="sale_repo_app/static/src/js/customer_form_list.js"></script>
+
+            <!-- Bootstrap CSS (external CDN) -->
+            <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" crossorigin="anonymous"/>
+
+            <!-- jQuery (external CDN) -->
+            <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+
+            <!-- Bootstrap JS (external CDN, Optional for additional features) -->
+            <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+
+        </template>
+
+    </data>
+</odoo>

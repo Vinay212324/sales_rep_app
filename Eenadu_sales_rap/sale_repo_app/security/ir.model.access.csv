@@ -1,5 +1,6 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 saleacs,salerep,model_res_users,base.group_user,1,1,1,1
+saleaad,salerep_ad,model_res_users,admin_group,1,1,1,1
 saleacs_ch,salerep_ch,model_res_users,circulation_head_group,1,1,1,1
 saleacs_rh,salerep_rh,model_res_users,region_head_group,1,1,1,1
 saleacs_um,salerep_um,model_res_users,unit_manager_group,1,1,1,1
