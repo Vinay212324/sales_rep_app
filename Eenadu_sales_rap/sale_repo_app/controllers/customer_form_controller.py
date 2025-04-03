@@ -244,6 +244,8 @@ class CustomerFormAPI(http.Controller):
                     'state': user.state,
                     'pan_number': user.pan_number,
                     'aadhar_number': user.aadhar_number,
+                    'role': user.role,
+                    'status': user.status,
                 })
 
             return {'status': 200, 'users': user_list}
