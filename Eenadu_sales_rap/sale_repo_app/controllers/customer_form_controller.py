@@ -17,7 +17,8 @@ class CustomerFormAPI(http.Controller):
     def _verify_api_key(self, token):
         user = request.env['res.users'].sudo().search([('api_token', '=', token)], limit=1)
         if not user:
-            raise AccessDenied("Invalid token!")
+            user = False
+            return user
         return {"success": "True", "user_Id": user.id, "user_login": user.login}
 
     @http.route('/api/customer_form', type='json', auth='public', methods=['POST'], csrf=False, cors="*")
