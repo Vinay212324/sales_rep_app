@@ -29,6 +29,8 @@ class Users(models.Model):
     create_uid = fields.Integer(string="create_uid ID")
     api_token = fields.Char(string="API Token", readonly=True)
     token_expiry = fields.Datetime(string="Token Expiry")
+    aadhar_base64 = fields.Binary(string="Aadhar image")
+    Pan_base64 = fields.Binary(string="Pan image")
 
     def generate_token(self):
         """ Generate a unique API token and set an expiration time. """

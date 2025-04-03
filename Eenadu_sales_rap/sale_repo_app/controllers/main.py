@@ -49,6 +49,7 @@ from odoo import http, SUPERUSER_ID
 from odoo.http import request
 from odoo.exceptions import AccessError, AccessDenied
 from odoo.tools import hmac
+import base64
 
 import logging
 import uuid
@@ -282,6 +283,8 @@ class UserPortal(http.Controller):
                 'pan_number': kw['pan_number'] if (kw['pan_number']) else "",
                 'state': kw['state'],
                 'phone': kw['phone'],
+                'aadhar_base64': kw['aadhar_base64'] if (kw['aadhar_base64']) else "",
+                'Pan_base64': kw['Pan_base64'] if (kw['Pan_base64']) else "",
 
 
                 'groups_id': [(6, 0, groups)]  # Group assignment based on role
