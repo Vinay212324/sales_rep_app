@@ -113,7 +113,7 @@ class CustomerFormAPI(http.Controller):
             return {'success': False, 'message': 'Error: {}'.format(str(e)), 'code': "403"}
 
 
-    @http.route('/api/customer_forms_info', type='json', auth="public", methods=['GET'], csrf=False, cors="*")
+    @http.route('/api/customer_forms_info', type='json', auth="public", methods=['POST'], csrf=False, cors="*")
     def get_customer_forms(self, **params):
         """
         Fetch customer form records based on the user login.
