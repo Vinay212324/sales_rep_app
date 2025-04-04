@@ -207,7 +207,7 @@ class CustomerFormAPI(http.Controller):
 
         return {'records': result, "code": "200"}
 
-    @http.route('/api/users', type='json', auth='public', methods=['GET'], csrf=False, cors="*")
+    @http.route('/api/users', type='json', auth='public', methods=['POST'], csrf=False, cors="*")
     def get_users(self, **kw):
         try:
 
