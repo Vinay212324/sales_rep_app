@@ -10,6 +10,8 @@ class Users(models.Model):
     role = fields.Selection(
         [('agent', 'Level1'),
          ('unit_manager', 'Level2'),
+         ('segment_incharge', 'Level2'),
+         ('circulation_incharge', 'Level2'),
          ('region_head', 'Level3'),
          ('circulation_head', 'Level4'),('admin','level5')],
         string="Role", required=True, default="agent"
