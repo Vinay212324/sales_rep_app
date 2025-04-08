@@ -61,4 +61,5 @@ class CustomerForm(models.Model):
     job_designation_one = fields.Char(string="Job Designation")
     latitude = fields.Char(string="Latitude")
     longitude = fields.Char(string="Longitude")
+    location_address = fields.Char(string="Address")
 
