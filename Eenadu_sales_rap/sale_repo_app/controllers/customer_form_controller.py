@@ -8,6 +8,19 @@ import uuid
 import hmac
 import hashlib
 
+
+
+from datetime import date
+import time
+import logging
+
+
+# Cache storage (module-level)
+_cached_data = {}
+CACHE_DURATION = 60  # 2 minutes
+
+
+
 _logger = logging.getLogger(__name__)
 SECRET_KEY = 'your_secret_key'
 
@@ -310,7 +323,6 @@ class CustomerFormAPI(http.Controller):
         except Exception as e:
             return {'error': 'Internal Server Error', 'message': str(e), 'code': 500}
 
-
     @http.route('/api/customer_forms_info_one_day', type='json', auth="public", methods=['POST'], csrf=False, cors="*")
     def get_customer_forms(self, **params):
         """
@@ -325,8 +337,6 @@ class CustomerFormAPI(http.Controller):
                 'code': "403"
             }
 
-
-        # Validate Token
         user = self._verify_api_key(api_key)
         if not user:
             return {
@@ -344,33 +354,29 @@ class CustomerFormAPI(http.Controller):
         except ValueError:
             return {'error': 'Invalid User ID', "code": "403"}
 
-        # Fetch user details
         user = request.env['res.users'].sudo().browse(user_id)
         if not user.exists():
             return {'error': 'User not found', "code": "403"}
 
-        agent_login = user.login  # Get the login of the user
-        _logger.info(f"Fetching records for agent login: {agent_login}")
+        agent_login = user.login
         today_date = date.today()
 
-        agent_login_input = user.login
-        # Debugging: Check if any records exist at all
-        all_records = request.env['customer.form'].sudo().search([
-            ('agent_login', '=', agent_login_input),
+        cache_key = f"{agent_login}_{today_date}"
+        now = time.time()
+
+        # Check cache
+        if cache_key in _cached_data:
+            cached_result, timestamp = _cached_data[cache_key]
+            if now - timestamp < CACHE_DURATION:
+                _logger.info("Returning cached response")
+                return cached_result
+
+        # Fetch data from DB
+        records = request.env['customer.form'].sudo().search([
+            ('agent_login', '=', agent_login),
             ('date', '=', today_date)
         ])
-        _logger.info(f"Total Customer Forms: {len(all_records)}")
 
-        # Print all records to check agent_login values
-        for record in all_records:
-            _logger.info(f"Record ID: {record.id}, Agent Login: {record.agent_login}")
-
-        # Check if `agent_login` is a Many2one relation instead of a Char field
-        customer_forms = request.env['customer.form'].sudo().search([('agent_login', '=', agent_login)])
-        if not customer_forms:
-            _logger.warning(f"No records found for agent_login: {agent_login}")
-
-        # Prepare the result
         result = [{
             'id': record.id,
             'agent_name': record.agent_name,
@@ -409,9 +415,11 @@ class CustomerFormAPI(http.Controller):
             'latitude': record.latitude,
             'longitude': record.longitude,
             'location_address': record.location_address,
-        } for record in all_records]
+        } for record in records]
 
-        return {'records': result, 'count': len(result), "code": "200"}
+        response = {'records': result, 'count': len(result), "code": "200"}
 
+        # Save to cache
+        _cached_data[cache_key] = (response, now)
 
-
+        return response
