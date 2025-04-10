@@ -326,24 +326,16 @@ class CustomerFormAPI(http.Controller):
     @http.route('/api/customer_forms_info_one_day', type='json', auth="public", methods=['POST'], csrf=False, cors="*")
     def get_customer_forms(self, **params):
         """
-        Fetch customer form records based on the user login.
+        API to fetch today's customer forms entered by a specific agent.
+        Uses caching to reduce database load.
         """
         api_key = params.get('token')
-
         if not api_key:
-            return {
-                'success': False,
-                'message': 'Token is missing',
-                'code': "403"
-            }
+            return {'success': False, 'message': 'Token is missing', 'code': "403"}
 
         user = self._verify_api_key(api_key)
         if not user:
-            return {
-                'success': False,
-                'message': 'Invalid or expired token',
-                "code": "403"
-            }
+            return {'success': False, 'message': 'Invalid or expired token', 'code': "403"}
 
         user_id = params.get("user_id")
         if not user_id:
@@ -361,18 +353,19 @@ class CustomerFormAPI(http.Controller):
         agent_login = user.login
         today_date = date.today()
 
-        cache_key = f"{agent_login}_{today_date}"
+        # Define cache key
+        cache_key = f"customer_forms_{agent_login}_{today_date}"
         now = time.time()
 
-        # Check cache
+        # ✅ Use cache if available and valid
         if cache_key in _cached_data:
-            cached_result, timestamp = _cached_data[cache_key]
-            if now - timestamp < CACHE_DURATION:
-                _logger.info("Returning cached response")
-                return cached_result
+            cached_response, cached_time = _cached_data[cache_key]
+            if now - cached_time < CACHE_DURATION:
+                _logger.info(f"[CACHE] Returning cached data for {agent_login}")
+                return cached_response
 
-        # Fetch data from DB
-        records = request.env['customer.form'].sudo().search([
+        # ❌ Cache expired or not found – fetch from DB
+        customer_forms = request.env['customer.form'].sudo().search([
             ('agent_login', '=', agent_login),
             ('date', '=', today_date)
         ])
@@ -382,7 +375,7 @@ class CustomerFormAPI(http.Controller):
             'agent_name': record.agent_name,
             'agent_login': record.agent_login,
             'unit_name': record.unit_name,
-            'date': record.date,
+            'date': str(record.date),
             'time': record.time,
             'family_head_name': record.family_head_name,
             'father_name': record.father_name,
@@ -415,11 +408,16 @@ class CustomerFormAPI(http.Controller):
             'latitude': record.latitude,
             'longitude': record.longitude,
             'location_address': record.location_address,
-        } for record in records]
+        } for record in customer_forms]
 
-        response = {'records': result, 'count': len(result), "code": "200"}
+        response = {
+            'records': result,
+            'count': len(result),
+            'code': "200"
+        }
 
-        # Save to cache
+        # ✅ Store result in cache
         _cached_data[cache_key] = (response, now)
+        _logger.info(f"[CACHE] Data cached for {agent_login} with {len(result)} records.")
 
         return response
