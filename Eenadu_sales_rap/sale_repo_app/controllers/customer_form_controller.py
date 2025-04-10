@@ -324,7 +324,7 @@ class CustomerFormAPI(http.Controller):
             return {'error': 'Internal Server Error', 'message': str(e), 'code': 500}
 
     @http.route('/api/customer_forms_info_one_day', type='json', auth="public", methods=['POST'], csrf=False, cors="*")
-    def get_customer_forms(self, **params):
+    def get_customer_forms_one_day(self, **params):
         """
         API to fetch today's customer forms entered by a specific agent.
         Uses caching to reduce database load.
