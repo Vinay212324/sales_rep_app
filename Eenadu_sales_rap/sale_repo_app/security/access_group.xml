@@ -33,6 +33,12 @@
         <field name="category_id" ref="module_sales_rep_access_group"/>
     </record>
 
+    <!-- Unit Manager Group -->
+    <record id="office_staff_group" model="res.groups">
+        <field name="name">Office staff</field>
+        <field name="category_id" ref="module_sales_rep_access_group"/>
+    </record>
+
     <!-- Agent Group -->
     <record id="agent_group" model="res.groups">
         <field name="name">Agent</field>

@@ -146,6 +146,8 @@ class UserPortal(http.Controller):
             role = "No access"
             if user.has_group('sale_repo_app.agent_group'):
                 role = "agent"
+            elif user.has_group('sale_repo_app.office_staff_group'):
+                role = "Office_staff"
             elif user.has_group('sale_repo_app.unit_manager_group'):
                 role = "unit_manager"
             elif user.has_group('sale_repo_app.region_head_group'):
@@ -200,15 +202,18 @@ class UserPortal(http.Controller):
             if (env.user.has_group('sale_repo_app.circulation_head_group')) or \
                     (env.user.has_group('sale_repo_app.region_head_group')) or \
                     (env.user.has_group('sale_repo_app.unit_manager_group')) or\
+                    (env.user.has_group('sale_repo_app.office_staff_group')) or\
                     (env.user.has_group('sale_repo_app.admin_group')) :
                 if env.user.has_group('sale_repo_app.admin_group'):
-                    valid_roles = ["admin","circulation_head", "region_head", "unit_manager", "agent"]
+                    valid_roles = ["admin","circulation_head", "region_head", "unit_manager","Office_staff", "agent"]
                 elif env.user.has_group('sale_repo_app.circulation_head_group'):
-                    valid_roles = ["circulation_head", "region_head", "unit_manager", "agent"]
+                    valid_roles = ["circulation_head", "region_head", "unit_manager","Office_staff", "agent"]
                 elif env.user.has_group('sale_repo_app.region_head_group'):
-                    valid_roles = ["region_head", "unit_manager", "agent"]
+                    valid_roles = ["region_head", "unit_manager","Office_staff", "agent"]
                 elif env.user.has_group('sale_repo_app.unit_manager_group'):
-                    valid_roles = ["unit_manager", "agent"]
+                    valid_roles = ["unit_manager","Office_staff", "agent"]
+                elif env.user.has_group('sale_repo_app.office_staff_group'):
+                    valid_roles = ["Office_staff", "agent"]
 
                 # Role validation
                 if kw.get("role") not in valid_roles:
@@ -260,6 +265,12 @@ class UserPortal(http.Controller):
                         env.ref('base.group_erp_manager').id,
                         env.ref('sale_repo_app.agent_group').id,
                         env.ref('sale_repo_app.admin_group').id
+                    ]
+                elif kw.get("role") == "Office_staff":
+                    groups = [
+                        env.ref('base.group_user').id,
+                        env.ref('base.group_erp_manager').id,
+                        env.ref('sale_repo_app.office_staff_group').id
                     ]
                 else:
                     return {'error': 'Role is not valid', 'code': "403"}

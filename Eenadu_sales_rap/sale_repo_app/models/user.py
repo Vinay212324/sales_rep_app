@@ -8,7 +8,8 @@ class Users(models.Model):
     _inherit = 'res.users'
 
     role = fields.Selection(
-        [('agent', 'Level1'),
+        [('agent', 'Level0'),
+         ('Office_staff', 'level1'),
          ('unit_manager', 'Level2'),
          ('segment_incharge', 'Level2'),
          ('circulation_incharge', 'Level2'),
