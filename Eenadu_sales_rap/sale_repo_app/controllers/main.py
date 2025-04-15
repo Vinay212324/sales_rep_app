@@ -205,13 +205,13 @@ class UserPortal(http.Controller):
                     (env.user.has_group('sale_repo_app.office_staff_group')) or\
                     (env.user.has_group('sale_repo_app.admin_group')) :
                 if env.user.has_group('sale_repo_app.admin_group'):
-                    valid_roles = ["admin","circulation_head", "region_head", "unit_manager","Office_staff", "agent"]
+                    valid_roles = ["admin","circulation_head", "region_head", "unit_manager","Office_staff","circulation_incharge", "agent"]
                 elif env.user.has_group('sale_repo_app.circulation_head_group'):
-                    valid_roles = ["circulation_head", "region_head", "unit_manager","Office_staff", "agent"]
+                    valid_roles = ["circulation_head", "region_head","segment_incharge", "unit_manager","Office_staff","circulation_incharge", "agent"]
                 elif env.user.has_group('sale_repo_app.region_head_group'):
-                    valid_roles = ["region_head", "unit_manager","Office_staff", "agent"]
+                    valid_roles = ["region_head", "unit_manager","segment_incharge","Office_staff","circulation_incharge", "agent"]
                 elif env.user.has_group('sale_repo_app.unit_manager_group'):
-                    valid_roles = ["unit_manager","Office_staff", "agent"]
+                    valid_roles = ["unit_manager","Office_staff","segment_incharge","circulation_incharge", "agent"]
                 elif env.user.has_group('sale_repo_app.office_staff_group'):
                     valid_roles = ["Office_staff", "agent"]
 
@@ -247,7 +247,7 @@ class UserPortal(http.Controller):
                         env.ref('base.group_erp_manager').id,
                         env.ref('sale_repo_app.region_head_group').id
                     ]
-                elif kw.get("role") == "unit_manager":
+                elif kw.get("role") in ["unit_manager","segment_incharge","circulation_incharge"]:
                     groups = [
                         env.ref('base.group_user').id,
                         env.ref('base.group_erp_manager').id,
