@@ -7,7 +7,9 @@ import json
 import uuid
 import hmac
 import hashlib
-
+import time
+from datetime import date
+import logging
 
 
 from datetime import date
@@ -16,14 +18,15 @@ import logging
 
 
 # Cache storage (module-level)
-_cached_data = {}
-CACHE_DURATION = 60  # 2 minutes
+_cached__data = {}
+
 
 
 
 _logger = logging.getLogger(__name__)
 SECRET_KEY = 'your_secret_key'
-
+_cached_data = {}  # Simple dictionary for cache
+CACHE_DURATION = 60 * 2  # 5 minutes cache
 from datetime import date
 
 
@@ -457,8 +460,8 @@ class CustomerFormAPI(http.Controller):
         now = time.time()
 
         # ✅ Use cache if available and valid
-        if cache_key in _cached_data:
-            cached_response, cached_time = _cached_data[cache_key]
+        if cache_key in _cached__data:
+            cached_response, cached_time = _cached__data[cache_key]
             if now - cached_time < CACHE_DURATION:
                 _logger.info(f"[CACHE] Returning cached data for {agent_login}")
                 return cached_response
@@ -515,7 +518,7 @@ class CustomerFormAPI(http.Controller):
         }
 
         # ✅ Store result in cache
-        _cached_data[cache_key] = (response, now)
+        _cached__data[cache_key] = (response, now)
         _logger.info(f"[CACHE] Data cached for {agent_login} with {len(result)} records.")
 
         return response
