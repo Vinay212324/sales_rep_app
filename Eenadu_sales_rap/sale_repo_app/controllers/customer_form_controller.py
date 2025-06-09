@@ -10,7 +10,7 @@ import hashlib
 import time
 from datetime import date
 import logging
-
+import base64
 
 from datetime import date
 import time
@@ -26,7 +26,7 @@ _cached__data = {}
 _logger = logging.getLogger(__name__)
 SECRET_KEY = 'your_secret_key'
 _cached_data = {}  # Simple dictionary for cache
-CACHE_DURATION = 60 * 2  # 5 minutes cache
+CACHE_DURATION = 6
 from datetime import date
 
 
@@ -258,12 +258,19 @@ class CustomerFormAPI(http.Controller):
             user_list = []
 
             for user in users:
+                aadhar_image_data = None
+                if user.aadhar_base64:
+                    aadhar_image_data = f"data:image/png;base64,{user.aadhar_base64.decode('utf-8')}"
+                pan_image_data = None
+                if user.Pan_base64:
+                    pan_image_data = f"data:image/png;base64,{user.Pan_base64.decode('utf-8')}"
+
                 user_list.append({
                     'id': user.id,
                     'name': user.name,
                     'email': user.email,
                     'login': user.login,
-                    'create_uid': user.create_uid,
+                    'create_uid': user.create_uid.id if user.create_uid else None,
                     'unit_name': user.unit_name,
                     'phone': user.phone,
                     'state': user.state,
@@ -271,6 +278,8 @@ class CustomerFormAPI(http.Controller):
                     'aadhar_number': user.aadhar_number,
                     'role': user.role,
                     'status': user.status,
+                    'aadhar_image': aadhar_image_data,
+                    'pan_image' : pan_image_data,
                 })
 
             return {'status': 200, 'users': user_list}
