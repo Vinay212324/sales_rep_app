@@ -35,6 +35,8 @@ class Users(models.Model):
     aadhar_base64 = fields.Binary(string="Aadhar image")
     Pan_base64 = fields.Binary(string="Pan image")
 
+
+
     def generate_token(self):
         """ Generate a unique API token and set an expiration time. """
         self.api_token = secrets.token_hex(32)  # Generates a unique 32-character token

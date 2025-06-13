@@ -88,6 +88,7 @@ class CustomerFormAPI(http.Controller):
                 'company_name': kwargs.get('company_name'),
                 'job_working_state': kwargs.get('job_working_state'),
                 'job_working_location': kwargs.get('job_working_location'),
+                'job_location_landmark': kwargs.get('job_location_landmark'),
                 'profession': kwargs.get('profession'),
                 'job_designation_one': kwargs.get('job_designation_one'),
                 'latitude': kwargs.get('latitude'),

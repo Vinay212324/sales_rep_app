@@ -293,6 +293,7 @@ class UserPortal(http.Controller):
                 'aadhar_number': kw['aadhar_number'] if (kw['aadhar_number']) else "" ,
                 'pan_number': kw['pan_number'] if (kw['pan_number']) else "",
                 'state': kw['state'],
+                'states': kw['states'],
                 'phone': kw['phone'],
                 'aadhar_base64': kw['aadhar_base64'] if (kw['aadhar_base64']) else "",
                 'Pan_base64': kw['Pan_base64'] if (kw['Pan_base64']) else "",

@@ -55,6 +55,7 @@ class CustomerForm(models.Model):
 
     job_working_state = fields.Char(string="working state")
     job_working_location = fields.Char(string="working location")
+    job_location_landmark = fields.Char(string="job_location_landMark")
 
     company_name = fields.Char(string="Company Name")
     profession = fields.Char(string="Profession")
