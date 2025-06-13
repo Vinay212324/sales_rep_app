@@ -570,4 +570,57 @@ class CustomerFormAPI(http.Controller):
         else:
             return {"success":"False", "code":"403"}
 
+    @http.route('/api/agents_info_based_on_the_unit', type='json', auth='public', methods=['POST'], csrf=False, cors="*")
+    def users_you_created(self, **kw):
+        try:
+
+            api_key = kw.get('token')
+            unit_name = kw.get('unit_name')
+
+            if not api_key:
+                return {
+                    'success': False,
+                    'message': 'Token is missing',
+                    'code': "403"
+                }
+
+            # Validate Token
+            user = self._verify_api_key(api_key)
+            if not user:
+                return {
+                    'success': False,
+                    'message': 'Invalid or expired token',
+                    "code": "403"
+                }
+            # user = request.env['res.users'].sudo().search([('api_token', '=', api_key)], limit=1)
+            # user_id = user.id
+            # # Fetch users
+            users = request.env['res.users'].sudo().search([
+                '&',
+                ('unit_name', '=', unit_name),
+                ('role', '=', 'agent')
+            ])
+            user_list = []
+
+            for user in users:
+                user_list.append({
+                    'id': user.id,
+                    'name': user.name,
+                    'email': user.email,
+                    'login': user.login,
+                    'create_uid': user.create_uid,
+                    'unit_name': user.unit_name,
+                    'phone': user.phone,
+                    'state': user.state,
+                    'pan_number': user.pan_number,
+                    'aadhar_number': user.aadhar_number,
+                    'role': user.role,
+                    'status': user.status,
+                })
+
+            return {'status': 200, 'users': user_list}
+
+        except Exception as e:
+            return {'error': 'Internal Server Error', 'message': str(e), 'code': 500}
+
 
