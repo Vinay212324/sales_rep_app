@@ -571,7 +571,7 @@ class CustomerFormAPI(http.Controller):
             return {"success":"False", "code":"403"}
 
     @http.route('/api/agents_info_based_on_the_unit', type='json', auth='public', methods=['POST'], csrf=False, cors="*")
-    def users_you_created(self, **kw):
+    def agents_info_based_on_the_unit(self, **kw):
         try:
 
             api_key = kw.get('token')
@@ -622,5 +622,115 @@ class CustomerFormAPI(http.Controller):
 
         except Exception as e:
             return {'error': 'Internal Server Error', 'message': str(e), 'code': 500}
+
+    @http.route('/api/For_root_map_asin', type='json', auth='public', methods=['POST'], csrf=False,
+                cors="*")
+    def For_root_map_asin(self, **kw):
+        try:
+            agent_id = kw.get('agent_id')
+            api_key = kw.get('token')
+            root_map = kw.get('root_map')
+
+            if not api_key:
+                return {
+                    'success': False,
+                    'message': 'Token is missing',
+                    'code': "403"
+                }
+
+            # Validate Token
+            user = self._verify_api_key(api_key)
+            if not user:
+                return {
+                    'success': False,
+                    'message': 'Invalid or expired token',
+                    "code": "403"
+                }
+            users = request.env['res.users'].sudo().search([('id', '=', agent_id)], limit=1)
+            users.root_name_id = root_map
+
+            # users = request.env['res.users'].sudo().search([
+            #     '&',
+            #     ('unit_name', '=', unit_name),
+            #     ('role', '=', 'agent')
+            # ])
+            # user_list = []
+            #
+            # for user in users:
+            #     user_list.append({
+            #         'id': user.id,
+            #         'name': user.name,
+            #         'email': user.email,
+            #         'login': user.login,
+            #         'create_uid': user.create_uid,
+            #         'unit_name': user.unit_name,
+            #         'phone': user.phone,
+            #         'state': user.state,
+            #         'pan_number': user.pan_number,
+            #         'aadhar_number': user.aadhar_number,
+            #         'role': user.role,
+            #         'status': user.status,
+            #         ''
+            #     })
+
+            return {'status': 200, 'users': users}
+
+        except Exception as e:
+            return {'error': 'Internal Server Error', 'message': str(e), 'code': 500}
+
+    @http.route('/api/for_agent_root_map_name', type='json', auth='public', methods=['POST'], csrf=False,
+                cors="*")
+    def For_agent_root_map_name(self, **kw):
+        try:
+            agent_id = kw.get('id')
+            api_key = kw.get('token')
+
+            if not api_key:
+                return {
+                    'success': False,
+                    'message': 'Token is missing',
+                    'code': "403"
+                }
+
+            # Validate Token
+            user = self._verify_api_key(api_key)
+            if not user:
+                return {
+                    'success': False,
+                    'message': 'Invalid or expired token',
+                    "code": "403"
+                }
+            users = request.env['res.users'].sudo().search([('id', '=', agent_id)], limit=1)
+
+            # users = request.env['res.users'].sudo().search([
+            #     '&',
+            #     ('unit_name', '=', unit_name),
+            #     ('role', '=', 'agent')
+            # ])
+            # user_list = []
+            #
+            # for user in users:
+            #     user_list.append({
+            #         'id': user.id,
+            #         'name': user.name,
+            #         'email': user.email,
+            #         'login': user.login,
+            #         'create_uid': user.create_uid,
+            #         'unit_name': user.unit_name,
+            #         'phone': user.phone,
+            #         'state': user.state,
+            #         'pan_number': user.pan_number,
+            #         'aadhar_number': user.aadhar_number,
+            #         'role': user.role,
+            #         'status': user.status,
+            #         ''
+            #     })
+
+            return {'status': 200, 'root_map': users.root_name_id }
+
+        except Exception as e:
+            return {'error': 'Internal Server Error', 'message': str(e), 'code': 500}
+
+
 
 

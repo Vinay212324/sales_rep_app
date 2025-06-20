@@ -8,6 +8,7 @@ class CustomerForm(models.Model):
     _description = 'Customer Form'
 
     agent_name = fields.Char(string='Agent Name')
+    root_name = fields.Char(string="Root Map")
     agent_login = fields.Char(string="Agent login")
     unit_name = fields.Char(string="Unit name")
     date = fields.Date(string='Today Date', default=fields.Date.context_today)

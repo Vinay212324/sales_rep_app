@@ -24,6 +24,7 @@ class Users(models.Model):
         string="Role", required=True, default="un_activ"
     )
     aadhar_number = fields.Char(string="Aadhar")
+    root_name_id = fields.Many2one('root.map', string="Root Map")
     pan_number = fields.Char(string="PAN")
     state = fields.Char(string="state")
     phone = fields.Char(string="phone")
