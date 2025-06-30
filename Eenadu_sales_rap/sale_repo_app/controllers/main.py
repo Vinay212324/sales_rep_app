@@ -185,157 +185,122 @@ class UserPortal(http.Controller):
 
     @http.route('/sales_rep_user_creation', type='json', auth='none', methods=["POST"], csrf=False, cors="*")
     def user_creation(self, **kw):
-        _logger = logging.getLogger(__name__)  # Ensure proper logging
         try:
             # Authentication check
             token = kw.get('token')
             if not token:
                 return {'error': 'Authentication token required', 'code': "403"}
 
-            # API key validation
             user = request.env['res.users'].sudo().search([('api_token', '=', token)], limit=1)
             if not user:
                 return {'error': 'Invalid authentication token', 'code': "403"}
 
-            # Permission check
             env = request.env(user=user)
-            if (env.user.has_group('sale_repo_app.circulation_head_group')) or \
-                    (env.user.has_group('sale_repo_app.region_head_group')) or \
-                    (env.user.has_group('sale_repo_app.unit_manager_group')) or\
-                    (env.user.has_group('sale_repo_app.office_staff_group')) or\
-                    (env.user.has_group('sale_repo_app.admin_group')) :
-                if env.user.has_group('sale_repo_app.admin_group'):
-                    valid_roles = ["admin","circulation_head", "region_head", "unit_manager","Office_staff","circulation_incharge", "agent"]
-                elif env.user.has_group('sale_repo_app.circulation_head_group'):
-                    valid_roles = ["circulation_head", "region_head","segment_incharge", "unit_manager","Office_staff","circulation_incharge", "agent"]
-                elif env.user.has_group('sale_repo_app.region_head_group'):
-                    valid_roles = ["region_head", "unit_manager","segment_incharge","Office_staff","circulation_incharge", "agent"]
-                elif env.user.has_group('sale_repo_app.unit_manager_group'):
-                    valid_roles = ["unit_manager","Office_staff","segment_incharge","circulation_incharge", "agent"]
-                elif env.user.has_group('sale_repo_app.office_staff_group'):
-                    valid_roles = ["Office_staff", "agent"]
 
-                # Role validation
-                if kw.get("role") not in valid_roles:
-                    return {'error': 'Role is not valid for this user', 'code': "403"}
-
+            # Permission check and valid roles
+            valid_roles = []
+            if env.user.has_group('sale_repo_app.admin_group'):
+                valid_roles = ["admin", "circulation_head", "region_head", "unit_manager", "Office_staff",
+                               "circulation_incharge", "agent"]
+            elif env.user.has_group('sale_repo_app.circulation_head_group'):
+                valid_roles = ["circulation_head", "region_head", "segment_incharge", "unit_manager", "Office_staff",
+                               "circulation_incharge", "agent"]
+            elif env.user.has_group('sale_repo_app.region_head_group'):
+                valid_roles = ["region_head", "unit_manager", "segment_incharge", "Office_staff",
+                               "circulation_incharge", "agent"]
+            elif env.user.has_group('sale_repo_app.unit_manager_group'):
+                valid_roles = ["unit_manager", "Office_staff", "segment_incharge", "circulation_incharge", "agent"]
+            elif env.user.has_group('sale_repo_app.office_staff_group'):
+                valid_roles = ["Office_staff", "agent"]
             else:
                 return {'error': 'Insufficient permissions', 'code': "403"}
 
+            if kw.get("role") not in valid_roles:
+                return {'error': 'Role is not valid for this user', 'code': "403"}
+
             # Field validation
-            required_fields = ['name', 'status', 'email', 'phone', 'password', 'role', 'unit_name','state']
+            required_fields = ['name', 'status', 'email', 'phone', 'password', 'role', 'unit_name', 'state']
             missing = [field for field in required_fields if not kw.get(field)]
             if missing:
                 return {'error': f'Missing required fields: {", ".join(missing)}', 'code': "400"}
 
-            # Existing user check
-            existing_user = env['res.users'].search([('login', '=', kw['email'])], limit=1)
-            if existing_user:
+            # Check for existing user
+            if env['res.users'].search([('login', '=', kw['email'])], limit=1):
                 return {'error': 'Email already registered', 'code': "409"}
 
             # Assign groups based on role
             try:
-                if kw.get("role") == "circulation_head":
-                    groups = [
-                        env.ref('base.group_user').id,
-                        env.ref('base.group_erp_manager').id,
-                        env.ref('sale_repo_app.circulation_head_group').id
-                    ]
-                elif kw.get("role") == "region_head":
-                    groups = [
-                        env.ref('base.group_user').id,
-                        env.ref('base.group_erp_manager').id,
-                        env.ref('sale_repo_app.region_head_group').id
-                    ]
-                elif kw.get("role") in ["unit_manager","segment_incharge","circulation_incharge"]:
-                    groups = [
-                        env.ref('base.group_user').id,
-                        env.ref('base.group_erp_manager').id,
-                        env.ref('sale_repo_app.unit_manager_group').id
-                    ]
-                elif kw.get("role") == "agent":
-                    groups = [
-                        env.ref('base.group_user').id,
-                        env.ref('base.group_erp_manager').id,
-                        env.ref('sale_repo_app.agent_group').id
-                    ]
-                elif kw.get("role") == "admin":
-                    groups = [
-                        env.ref('base.group_user').id,
-                        env.ref('base.group_erp_manager').id,
-                        env.ref('sale_repo_app.agent_group').id,
-                        env.ref('sale_repo_app.admin_group').id
-                    ]
-                elif kw.get("role") == "Office_staff":
-                    groups = [
-                        env.ref('base.group_user').id,
-                        env.ref('base.group_erp_manager').id,
-                        env.ref('sale_repo_app.office_staff_group').id
-                    ]
-                else:
+                role = kw.get("role")
+                group_mapping = {
+                    "circulation_head": ['base.group_user', 'base.group_erp_manager',
+                                         'sale_repo_app.circulation_head_group'],
+                    "region_head": ['base.group_user', 'base.group_erp_manager', 'sale_repo_app.region_head_group'],
+                    "unit_manager": ['base.group_user', 'base.group_erp_manager', 'sale_repo_app.unit_manager_group'],
+                    "segment_incharge": ['base.group_user', 'base.group_erp_manager',
+                                         'sale_repo_app.unit_manager_group'],
+                    "circulation_incharge": ['base.group_user', 'base.group_erp_manager',
+                                             'sale_repo_app.unit_manager_group'],
+                    "agent": ['base.group_user', 'base.group_erp_manager', 'sale_repo_app.agent_group'],
+                    "admin": ['base.group_user', 'base.group_erp_manager', 'sale_repo_app.agent_group',
+                              'sale_repo_app.admin_group'],
+                    "Office_staff": ['base.group_user', 'base.group_erp_manager', 'sale_repo_app.office_staff_group'],
+                }
+
+                group_xml_ids = group_mapping.get(role)
+                if not group_xml_ids:
                     return {'error': 'Role is not valid', 'code': "403"}
+
+                groups = [env.ref(xml_id).id for xml_id in group_xml_ids]
+
             except Exception as e:
                 _logger.error(f"Error resolving group references: {e}")
                 return {'error': 'Group reference not found', 'code': "500"}
 
-            # Create the user
-            company = env['res.company'].search([], limit=1)
-            values = {
-                'name': kw['name'],
-                'login': kw['email'],
-                'email': kw['email'],
-                'unit_name' : kw['unit_name'],
-                'password': kw['password'],
-                'create_uid': user.id,  # Use 'create_uid' to store the creator's user ID
-                'company_id': company.id,
-                'company_ids': [(4, company.id)],
-                'role': kw['role'],
-                'aadhar_number': kw['aadhar_number'] if (kw['aadhar_number']) else "" ,
-                'pan_number': kw['pan_number'] if (kw['pan_number']) else "",
-                'state': kw['state'],
-                'states': kw['states'],
-                'phone': kw['phone'],
-                'aadhar_base64': kw['aadhar_base64'] if (kw['aadhar_base64']) else "",
-                'Pan_base64': kw['Pan_base64'] if (kw['Pan_base64']) else "",
-
-
-                'groups_id': [(6, 0, groups)]  # Group assignment based on role
-            }
-
-            _logger.info(f"Creating new user with values: {values}")
+            # Create user
+            print("vinayyyy1111")
 
             try:
-                new_user = env['res.users'].sudo().create(values)
-                _logger.info(f"New user created with ID: {new_user.id}")
-            except Exception as e:
-                _logger.error(f"Error during user creation: {e}")
-                raise  # Re-raise the exception to propagate it
+                company = env['res.company'].search([], limit=1)
+                new_user = env['res.users'].sudo().create({
+                    'name': kw['name'],
+                    'login': kw['email'],
+                    'email': kw['email'],
+                    'unit_name': kw['unit_name'],
+                    'password': kw['password'],
+                    'create_uid': user.id,
+                    'company_id': company.id,
+                    'company_ids': [(4, company.id)],
+                    'role': kw['role'],
+                    'aadhar_number': kw.get('aadhar_number', ""),
+                    'pan_number': kw.get('pan_number', ""),
+                    'state': kw['state'],
+                    'status': kw.get('status', "un_activ"),
+                    'phone': kw['phone'],
+                    'aadhar_base64': kw.get('aadhar_base64', ""),
+                    'Pan_base64': kw.get('Pan_base64', ""),
+                    'groups_id': [(6, 0, groups)]
+                })
 
-            return {
-                'success': True,
-                'user_id': new_user.id,
-                'message': 'User created successfully'
-            }
+                _logger.info(f"New user created with ID: {new_user.id}")
+
+                return {
+                    'success': True,
+                    'user_id': new_user.id,
+                    'message': 'User created successfully'
+                }
+
+            except Exception as e:
+                _logger.exception(f"Error during user creation: {e}")
+                return {'error': 'Internal server error', 'code': "500"}
 
         except exceptions.AccessDenied as e:
             _logger.error("Access denied: %s", str(e))
             return {'error': 'Authentication failed', 'code': "403"}
-        except exceptions.ValidationError as e:
-            _logger.error("Validation error: %s", str(e))
-            return {'error': str(e), 'code': "400"}
-        except Exception as e:
-            _logger.exception("Server error during user creation: %s", str(e))  # Better error logging
-            return {'success': 'user created successfully', 'code': "200"}
-
 
         except exceptions.ValidationError as e:
             _logger.error("Validation error: %s", str(e))
             return {'error': str(e), 'code': "400"}
+
         except Exception as e:
-            _logger.exception("Server error during user creation: %s", str(e))
+            _logger.exception("Unexpected server error: %s", str(e))
             return {'error': 'Internal server error', 'code': "500"}
-
-    #
-    # @http.route('/sales_rep_user_list', type='json', auth='none', methods=["POST"], csrf=False, cors="*")
-    # def user_list(self, **kw):
-    #     pass
