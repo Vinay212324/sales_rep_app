@@ -304,3 +304,4 @@ class UserPortal(http.Controller):
         except Exception as e:
             _logger.exception("Unexpected server error: %s", str(e))
             return {'error': 'Internal server error', 'code': "500"}
+

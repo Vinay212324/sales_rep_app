@@ -12,7 +12,8 @@
         "views/users_view.xml",
         "views/user_dashboard.xml",
         "views/customers_form.xml",
-        "views/list_customer_form.xml"
+        "views/list_customer_form.xml",
+        'views/unit_name_views.xml'
     ],
     "assets": {
         "web.assets_frontend": [

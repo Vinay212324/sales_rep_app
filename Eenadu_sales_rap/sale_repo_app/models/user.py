@@ -17,6 +17,7 @@ class Users(models.Model):
          ('circulation_head', 'Level4'),('admin','level5')],
         string="Role", required=True, default="agent"
     )
+    unit_name_ids = fields.One2many('unit.name','unit_name_id')
     status = fields.Selection(
         [('un_activ', 'un active'),
          ('active', 'Active'),
@@ -30,7 +31,7 @@ class Users(models.Model):
     phone = fields.Char(string="phone")
     user_id = fields.Integer(string="User ID")
     unit_name = fields.Char(string="Unit Name")
-    create_uid = fields.Integer(string="create_uid ID")
+    # create_uid = fields.Integer(string="create_uid ID")
     api_token = fields.Char(string="API Token", readonly=True)
     token_expiry = fields.Datetime(string="Token Expiry")
     aadhar_base64 = fields.Binary(string="Aadhar image")
@@ -58,3 +59,9 @@ class Users(models.Model):
     def clear_token(self):
         """ Clear the token when the user logs out. """
         self.sudo().write({'api_token': False, 'token_expiry': False})
+
+class unit_names(models.Model):
+    _name = 'unit.name'
+
+    name = fields.Char(string="Name")
+    unit_name_id = fields.Many2one('res.users')

@@ -731,6 +731,31 @@ class CustomerFormAPI(http.Controller):
         except Exception as e:
             return {'error': 'Internal Server Error', 'message': str(e), 'code': 500}
 
+    @http.route('/unit_name_of_user', type='json', auth='none', methods=["POST"], csrf=False, cors="*")
+    def get_unit_names(self, **kwargs):
+        try:
+            api_key = kwargs.get('token')
+            if not api_key:
+                return {'success': False, 'message': 'Token is missing', 'code': "403"}
 
+            user = request.env['res.users'].sudo().search([('api_token', '=', api_key)], limit=1)
+            if not user:
+                return {'success': False, 'message': 'Invalid or expired token', 'code': "403"}
 
+            # Return list of unit names
+            unit_names = [{'id': unit.id, 'name': unit.name} for unit in user.unit_name_ids]
+
+            return {
+                'success': True,
+                'unit_names': unit_names,
+                'code': 200
+            }
+
+        except Exception as e:
+            return {
+                'success': False,
+                'error': 'Internal Server Error',
+                'message': str(e),
+                'code': 500
+            }
 
