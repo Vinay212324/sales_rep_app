@@ -19,6 +19,7 @@ import logging
 
 # Cache storage (module-level)
 _cached__data = {}
+_cached_customer_form_filter_data = {}
 
 
 
@@ -758,4 +759,112 @@ class CustomerFormAPI(http.Controller):
                 'message': str(e),
                 'code': 500
             }
+
+    @http.route('/api/customer_forms_filtered', type='json', auth="public", methods=['POST'], csrf=False, cors="*")
+    def get_filtered_customer_forms(self, **params):
+        api_key = params.get('token')
+        if not api_key:
+            return {'success': False, 'message': 'Token is missing', 'code': "403"}
+
+        user = self._verify_api_key(api_key)
+        if not user:
+            return {'success': False, 'message': 'Invalid or expired token', 'code': "403"}
+
+        # Filters
+        from_date = params.get('from_date')  # format: "YYYY-MM-DD"
+        to_date = params.get('to_date')  # format: "YYYY-MM-DD"
+        unit_name = params.get('unit_name')  # string
+        agent_name = params.get('agent_name')  # string
+        limit = int(params.get('limit', 100))  # default 100
+        order = params.get('order', 'desc')  # 'asc' or 'desc'
+
+        # Compose domain (search filters)
+        domain = []
+
+        try:
+            if from_date and to_date:
+                domain.append(('date', '>=', from_date))
+                domain.append(('date', '<=', to_date))
+            elif from_date:
+                domain.append(('date', '>=', from_date))
+            elif to_date:
+                domain.append(('date', '<=', to_date))
+
+            if unit_name:
+                domain.append(('unit_name', '=', unit_name))
+
+            if agent_name:
+                domain.append(('agent_name', '=', agent_name))
+        except Exception as e:
+            return {'success': False, 'message': f'Invalid filter values: {e}', 'code': "400"}
+
+        # Caching logic
+        cache_key = f"filter_forms_{from_date}_{to_date}_{unit_name}_{agent_name}_{limit}_{order}"
+        now = time.time()
+
+        if cache_key in _cached_customer_form_filter_data:
+            cached_response, cached_time = _cached_customer_form_filter_data[cache_key]
+            if now - cached_time < CACHE_DURATION:
+                _logger.info(f"[CACHE] Returning cached data for key: {cache_key}")
+                return cached_response
+
+        # Sorting order
+        order_by = 'date asc' if order == 'asc' else 'date desc'
+
+        forms = request.env['customer.form'].sudo().search(domain, limit=limit, order=order_by)
+
+        result = [{
+            'id': form.id,
+            'agent_name': form.agent_name,
+            'agent_login': form.agent_login,
+            'unit_name': form.unit_name,
+            'date': str(form.date),
+            'time': form.time,
+            'family_head_name': form.family_head_name,
+            'father_name': form.father_name,
+            'mother_name': form.mother_name,
+            'spouse_name': form.spouse_name,
+            'house_number': form.house_number,
+            'street_number': form.street_number,
+            'city': form.city,
+            'pin_code': form.pin_code,
+            'address': form.address,
+            'mobile_number': form.mobile_number,
+            'eenadu_newspaper': form.eenadu_newspaper,
+            'feedback_to_improve_eenadu_paper': form.feedback_to_improve_eenadu_paper,
+            'read_newspaper': form.read_newspaper,
+            'current_newspaper': form.current_newspaper,
+            'reason_for_not_taking_eenadu_newsPaper': form.reason_for_not_taking_eenadu_newsPaper,
+            'reason_not_reading': form.reason_not_reading,
+            'free_offer_15_days': form.free_offer_15_days,
+            'reason_not_taking_offer': form.reason_not_taking_offer,
+            'employed': form.employed,
+            'job_type': form.job_type,
+            'job_type_one': form.job_type_one,
+            'job_profession': form.job_profession,
+            'job_designation': form.job_designation,
+            'company_name': form.company_name,
+            'profession': form.profession,
+            'job_working_state': form.job_working_state,
+            'job_working_location': form.job_working_location,
+            'job_designation_one': form.job_designation_one,
+            'latitude': form.latitude,
+            'longitude': form.longitude,
+            'location_address': form.location_address,
+        } for form in forms]
+
+        response = {
+            'success': True,
+            'records': result,
+            'count': len(result),
+            'code': "200"
+        }
+
+        # Save to cache
+        _cached_customer_form_filter_data[cache_key] = (response, now)
+        _logger.info(f"[CACHE] Data cached for filtered query key: {cache_key}")
+
+        return response
+
+
 
