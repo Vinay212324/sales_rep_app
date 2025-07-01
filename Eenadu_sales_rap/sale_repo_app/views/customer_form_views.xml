@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_customer_form_tree" model="ir.ui.view">
+        <field name="name">customer.form.tree</field>
+        <field name="model">customer.form</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="agent_name"/>
+                <field name="unit_name"/>
+                <field name="date"/>
+                <field name="time"/>
+                <field name="mobile_number"/>
+                <field name="city"/>
+                <field name="profession"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_customer_form_form" model="ir.ui.view">
+        <field name="name">customer.form.form</field>
+        <field name="model">customer.form</field>
+        <field name="arch" type="xml">
+            <form string="Customer Form">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="agent_name"/>
+                            <field name="agent_login"/>
+                            <field name="unit_name"/>
+                            <field name="date"/>
+                            <field name="time"/>
+                        </group>
+
+                        <group string="Family Details">
+                            <field name="family_head_name"/>
+                            <field name="father_name"/>
+                            <field name="mother_name"/>
+                            <field name="spouse_name"/>
+                        </group>
+
+                        <group string="Address">
+                            <field name="house_number"/>
+                            <field name="street_number"/>
+                            <field name="city"/>
+                            <field name="pin_code"/>
+                            <field name="address"/>
+                            <field name="mobile_number"/>
+                        </group>
+
+                        <group string="Newspaper">
+                            <field name="eenadu_newspaper"/>
+                            <field name="feedback_to_improve_eenadu_paper"/>
+                            <field name="read_newspaper"/>
+                            <field name="current_newspaper"/>
+                            <field name="reason_for_not_taking_eenadu_newsPaper"/>
+                            <field name="reason_not_reading"/>
+                            <field name="free_offer_15_days"/>
+                            <field name="reason_not_taking_offer"/>
+                        </group>
+
+                        <group string="Employment">
+                            <field name="employed"/>
+                            <field name="job_type"/>
+                            <field name="job_type_one"/>
+                            <field name="job_profession"/>
+                            <field name="job_designation"/>
+                            <field name="job_working_state"/>
+                            <field name="job_working_location"/>
+                            <field name="job_location_landmark"/>
+                            <field name="company_name"/>
+                            <field name="profession"/>
+                            <field name="job_designation_one"/>
+                        </group>
+
+                        <group string="Geo Location">
+                            <field name="latitude"/>
+                            <field name="longitude"/>
+                            <field name="location_address"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_customer_form" model="ir.actions.act_window">
+        <field name="name">Customer Forms</field>
+        <field name="res_model">customer.form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first customer form record
+            </p>
+        </field>
+    </record>
+
+    <!-- Menu -->
+    <menuitem id="menu_customer_form_root" name="Customer Forms"/>
+
+    <menuitem id="menu_customer_form_main" name="Forms" parent="menu_sales_rep_main" action="action_customer_form"/>
+</odoo>
