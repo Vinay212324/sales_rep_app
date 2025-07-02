@@ -30,12 +30,20 @@
                         <div class="oe_kanban_card">
                             <div class="oe_kanban_content">
                                 <div class="oe_kanban_header">
-                                    <strong><field name="name"/></strong>
+                                    <strong>
+                                        <field name="name"/>
+                                    </strong>
                                 </div>
                                 <div>
-                                    <div>Role: <field name="role"/></div>
-                                    <div>Email: <field name="email"/></div>
-                                    <div>Status: <field name="status"/></div>
+                                    <div>Role:
+                                        <field name="role"/>
+                                    </div>
+                                    <div>Email:
+                                        <field name="email"/>
+                                    </div>
+                                    <div>Status:
+                                        <field name="status"/>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -45,11 +53,39 @@
         </field>
     </record>
 
-    <!-- Inherited Form View -->
+
+
+
+    <record id="view_users_form_inherit" model="ir.ui.view">
+        <field name="name">res.users.form</field>
+        <field name="model">res.users</field>
+        <field name="arch" type="xml">
+            <form string="Users">
+                <header>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1>
+                            <field name="name" placeholder="e.g. John Doe" required="1"/>
+                        </h1>
+                        <field name="email" invisible="1"/>
+                        <label for="login" string="Email Address"/>
+                        <h2>
+                            <field name="login" placeholder="e.g. email@yourcompany.com"/>
+                        </h2>
+                    </div>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+
+     <!-- Inherited Form View -->
     <record id="view_users_form_inherit_custom" model="ir.ui.view">
         <field name="name">res.users.form.inherit.custom</field>
         <field name="model">res.users</field>
-        <field name="inherit_id" ref="base.view_users_form"/>
+        <field name="inherit_id" ref="view_users_form_inherit"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='login']" position="after">
                 <group string="Custom Information">
@@ -64,23 +100,67 @@
                     <field name="state"/>
                     <field name="phone"/>
                     <field name="user_id"/>
-                    <field name="api_token" readonly="1"/>
-                    <field name="token_expiry" readonly="1"/>
+                    <!--                    <field name="api_token" readonly="1"/>-->
+                    <!--                    <field name="token_expiry" readonly="1"/>-->
                 </group>
             </xpath>
         </field>
     </record>
 
+     <record id="view_users_search_inh" model="ir.ui.view">
+            <field name="name">res.users.search</field>
+            <field name="model">res.users</field>
+            <field name="arch" type="xml">
+                <search string="Users">
+                    <field name="name" filter_domain="['|', '|', ('name','ilike',self), ('login','ilike',self), ('email','ilike',self)]" string="User"/>
+                    <field name="company_ids" string="Company" groups="base.group_multi_company"/>
+                    <field name="share"/>
+                    <filter name="filter_no_share" string="Internal Users" domain="[('share', '=', False)]"/>
+                    <filter name="filter_share" string="Portal Users" domain="[('share', '=', True)]"/>
+                    <separator/>
+                    <filter name="Inactive" string="Inactive Users" domain="[('active','=',False)]"/>
+                </search>
+            </field>
+        </record>
     <!-- Window Action -->
-    <record id="action_sales_rep" model="ir.actions.act_window">
-        <field name="name">Sales Representatives</field>
-        <field name="res_model">res.users</field>
-        <field name="view_mode">kanban,tree,form</field>
-        <field name="domain">[('role', '!=', False)]</field>
-    </record>
+
+    <record id="action_res_users_heirt" model="ir.actions.act_window">
+            <field name="name">Users</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">res.users</field>
+            <field name="view_mode">tree,kanban,form</field>
+            <field name="view_id" ref="view_sales_rep_tree"/>
+            <field name="search_view_id" ref="view_users_search_inh"/>
+            <field name="context">{'search_default_filter_no_share': 1, 'show_user_group_warning': True}</field>
+            <field name="help">Create and manage users that will connect to the system. Users can be deactivated should there be a period of time during which they will/should not connect to the system. You can assign them groups in order to give them specific access to the applications they need to use in the system.</field>
+        </record>
+        <record id="action_res_users_view1" model="ir.actions.act_window.view">
+            <field eval="10" name="sequence"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="view_sales_rep_tree"/>
+            <field name="act_window_id" ref="action_res_users_heirt"/>
+        </record>
+        <record id="action_res_users_view2" model="ir.actions.act_window.view">
+            <field eval="20" name="sequence"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="view_users_form_inherit"/>
+            <field name="act_window_id" ref="action_res_users_heirt"/>
+        </record>
+<!--    <record id="action_sales_rep" model="ir.actions.act_window">-->
+<!--        <field name="name">Sales Representatives</field>-->
+<!--        <field name="res_model">res.users</field>-->
+<!--        <field name="view_mode">kanban,tree,form</field>-->
+<!--        <field name="domain">[('role', '!=', False)]</field>-->
+<!--    </record>-->
+<!--        <menuitem action="action_res_users" id="menu_action_res_users" parent="base.menu_users" sequence="0"/>-->
 
     <!-- Menu Item -->
     <menuitem id="menu_sales_rep_main" name="Sales Reps"
-              action="action_sales_rep"
               sequence="10"/>
+
+    <menuitem id="for_users"
+              name="User info"
+              parent="menu_sales_rep_main"
+              action="action_res_users_heirt"
+              sequence="20"/>
 </odoo>
