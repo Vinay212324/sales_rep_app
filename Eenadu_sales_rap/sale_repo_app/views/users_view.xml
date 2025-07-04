@@ -156,6 +156,7 @@
 
     <!-- Menu Item -->
     <menuitem id="menu_sales_rep_main" name="Sales Reps"
+              action="action_res_users_heirt"
               sequence="10"/>
 
     <menuitem id="for_users"
