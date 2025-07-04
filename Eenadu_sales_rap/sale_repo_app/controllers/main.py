@@ -159,7 +159,6 @@ class UserPortal(http.Controller):
             env.cr.commit()
 
             return {
-                'status': 'success',
                 'user_id': uid,
                 'name':user.name,
                 'api_key': user.api_token,
@@ -170,7 +169,7 @@ class UserPortal(http.Controller):
                 'pan_number': user.pan_number,
                 'state': user.state,
                 'phone': user.phone,
-
+                'status': user.status,
                 'expiration': expiration,  # Set expiration if available
                 'code': "200"
             }
