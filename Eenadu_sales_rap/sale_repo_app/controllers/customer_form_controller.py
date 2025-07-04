@@ -15,6 +15,7 @@ import base64
 from datetime import date
 import time
 import logging
+from datetime import date
 
 
 # Cache storage (module-level)
@@ -624,113 +625,85 @@ class CustomerFormAPI(http.Controller):
         except Exception as e:
             return {'error': 'Internal Server Error', 'message': str(e), 'code': 500}
 
-    @http.route('/api/For_root_map_asin', type='json', auth='public', methods=['POST'], csrf=False,
-                cors="*")
+    @http.route('/api/For_root_map_asin', type='json', auth='public', methods=['POST'], csrf=False, cors="*")
     def For_root_map_asin(self, **kw):
         try:
             agent_id = kw.get('agent_id')
             api_key = kw.get('token')
-            root_map = kw.get('root_map')
-
+            root_map_name = kw.get('root_map')  # Sent as string
+            print(agent_id,api_key,root_map_name)
             if not api_key:
-                return {
-                    'success': False,
-                    'message': 'Token is missing',
-                    'code': "403"
-                }
+                return {'success': False, 'message': 'Token is missing', 'code': 403}
 
-            # Validate Token
             user = self._verify_api_key(api_key)
             if not user:
-                return {
-                    'success': False,
-                    'message': 'Invalid or expired token',
-                    "code": "403"
+                return {'success': False, 'message': 'Invalid or expired token', 'code': 403}
+
+            agent = request.env['res.users'].sudo().search([('id', '=', int(agent_id))], limit=1)
+            if not agent:
+                return {'success': False, 'message': 'Agent not found', 'code': 404}
+            print("vinay21321")
+            # Search or create root.map
+            root_map_rec = request.env['root.map'].sudo().search([('root_name', '=', root_map_name)], limit=1)
+            print(root_map_rec)
+            if not root_map_rec:
+                print("madhavarao")
+                root_map_rec = request.env['root.map'].sudo().create({
+                    'root_name': root_map_name,
+                    'date': date.today()
+                })
+
+            # Assign to agent
+            print(root_map_rec.id)
+            agent.root_name_id = root_map_rec.id
+
+            return {
+                'success': True,
+                'message': 'Root map assigned successfully',
+                'status': 200,
+                'agent_id': agent.id,
+                'root_map': {
+                    'id': root_map_rec.id,
+                    'name': root_map_rec.root_name
                 }
-            users = request.env['res.users'].sudo().search([('id', '=', agent_id)], limit=1)
-            users.root_name_id = root_map
-
-            # users = request.env['res.users'].sudo().search([
-            #     '&',
-            #     ('unit_name', '=', unit_name),
-            #     ('role', '=', 'agent')
-            # ])
-            # user_list = []
-            #
-            # for user in users:
-            #     user_list.append({
-            #         'id': user.id,
-            #         'name': user.name,
-            #         'email': user.email,
-            #         'login': user.login,
-            #         'create_uid': user.create_uid,
-            #         'unit_name': user.unit_name,
-            #         'phone': user.phone,
-            #         'state': user.state,
-            #         'pan_number': user.pan_number,
-            #         'aadhar_number': user.aadhar_number,
-            #         'role': user.role,
-            #         'status': user.status,
-            #         ''
-            #     })
-
-            return {'status': 200, 'users': users}
+            }
 
         except Exception as e:
-            return {'error': 'Internal Server Error', 'message': str(e), 'code': 500}
+            return {
+                'success': False,
+                'error': 'Internal Server Error',
+                'message': str(e),
+                'code': 500
+            }
 
-    @http.route('/api/for_agent_root_map_name', type='json', auth='public', methods=['POST'], csrf=False,
-                cors="*")
+    @http.route('/api/for_agent_root_map_name', type='json', auth='public', methods=['POST'], csrf=False, cors="*")
     def For_agent_root_map_name(self, **kw):
         try:
-            agent_id = kw.get('id')
+            agent_id = int(kw.get('agent_id'))
             api_key = kw.get('token')
 
             if not api_key:
-                return {
-                    'success': False,
-                    'message': 'Token is missing',
-                    'code': "403"
-                }
+                return {'success': False, 'message': 'Token is missing', 'code': 403}
 
-            # Validate Token
             user = self._verify_api_key(api_key)
             if not user:
-                return {
-                    'success': False,
-                    'message': 'Invalid or expired token',
-                    "code": "403"
+                return {'success': False, 'message': 'Invalid or expired token', 'code': 403}
+
+            agent = request.env['res.users'].sudo().search([('id', '=', int(agent_id))], limit=1)
+            if not agent:
+                return {'success': False, 'message': 'Agent not found', 'code': 404}
+
+            return {
+                'status': 200,
+                'success': True,
+                'root_map': {
+                    'id': agent.root_name_id.id if agent.root_name_id else None,
+                    'name': agent.root_name_id.root_name if agent.root_name_id else ""
                 }
-            users = request.env['res.users'].sudo().search([('id', '=', agent_id)], limit=1)
-
-            # users = request.env['res.users'].sudo().search([
-            #     '&',
-            #     ('unit_name', '=', unit_name),
-            #     ('role', '=', 'agent')
-            # ])
-            # user_list = []
-            #
-            # for user in users:
-            #     user_list.append({
-            #         'id': user.id,
-            #         'name': user.name,
-            #         'email': user.email,
-            #         'login': user.login,
-            #         'create_uid': user.create_uid,
-            #         'unit_name': user.unit_name,
-            #         'phone': user.phone,
-            #         'state': user.state,
-            #         'pan_number': user.pan_number,
-            #         'aadhar_number': user.aadhar_number,
-            #         'role': user.role,
-            #         'status': user.status,
-            #         ''
-            #     })
-
-            return {'status': 200, 'root_map': users.root_name_id }
+            }
 
         except Exception as e:
-            return {'error': 'Internal Server Error', 'message': str(e), 'code': 500}
+            return {'success': False, 'error': 'Internal Server Error', 'message': str(e), 'code': 500}
 
     @http.route('/unit_name_of_user', type='json', auth='none', methods=["POST"], csrf=False, cors="*")
     def get_unit_names(self, **kwargs):

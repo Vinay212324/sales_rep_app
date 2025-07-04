@@ -8,5 +8,4 @@ saleacs_agent,salerep_agent,model_res_users,agent_group,1,1,1,1
 customer_form,sales_rep_customer_form,model_customer_form,agent_group,1,1,1,1
 access_unit_name_user,access.unit.name.user,model_unit_name,base.group_user,1,1,1,1
 access_customer_form,access.customer.form,model_customer_form,base.group_user,1,1,1,1
-
-
+for_root_map,for_root,model_root_map,base.group_user,1,1,1,1

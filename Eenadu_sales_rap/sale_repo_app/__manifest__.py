@@ -14,6 +14,7 @@
         "views/customers_form.xml",
         "views/list_customer_form.xml",
         'views/unit_name_views.xml',
+        'views/root_map_views.xml',
         'views/customer_form_views.xml'
     ],
     "assets": {

@@ -5,5 +5,5 @@ class root_map(models.Model):
     _name = "root.map"
 
     user_ids = fields.One2many('res.users','root_name_id', string="user_id")
-    root_name = fields.Char(sring="Root Map")
+    root_name = fields.Char(string="Root Map")
     date = fields.Date(string="Date")

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_tree_root_map" model="ir.ui.view">
+        <field name="name">root.map.tree</field>
+        <field name="model">root.map</field>
+        <field name="arch" type="xml">
+            <tree string="Root Map List">
+                <field name="root_name"/>
+                <field name="date"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_form_root_map" model="ir.ui.view">
+        <field name="name">root.map.form</field>
+        <field name="model">root.map</field>
+        <field name="arch" type="xml">
+            <form string="Root Map">
+                <sheet>
+                    <group>
+                        <field name="root_name"/>
+                        <field name="date"/>
+                    </group>
+                    <notebook>
+                        <page string="Assigned Users">
+                            <field name="user_ids">
+                                <tree string="Users">
+                                    <field name="name"/>
+                                    <field name="login"/>
+                                    <field name="phone"/>
+                                    <field name="role"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_root_map" model="ir.actions.act_window">
+        <field name="name">Root Maps</field>
+        <field name="res_model">root.map</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Create the first root map</p>
+        </field>
+    </record>
+
+    <menuitem id="menu_root_map" name="Root Maps" parent="menu_sales_rep_main" action="action_root_map"/>
+</odoo>
