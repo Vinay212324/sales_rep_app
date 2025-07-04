@@ -775,7 +775,6 @@ class CustomerFormAPI(http.Controller):
         to_date = params.get('to_date')  # format: "YYYY-MM-DD"
         unit_name = params.get('unit_name')  # string
         agent_name = params.get('agent_name')  # string
-        limit = int(params.get('limit', 100))  # default 100
         order = params.get('order', 'desc')  # 'asc' or 'desc'
 
         # Compose domain (search filters)
@@ -799,7 +798,7 @@ class CustomerFormAPI(http.Controller):
             return {'success': False, 'message': f'Invalid filter values: {e}', 'code': "400"}
 
         # Caching logic
-        cache_key = f"filter_forms_{from_date}_{to_date}_{unit_name}_{agent_name}_{limit}_{order}"
+        cache_key = f"filter_forms_{from_date}_{to_date}_{unit_name}_{agent_name}_{order}"
         now = time.time()
 
         if cache_key in _cached_customer_form_filter_data:
@@ -811,7 +810,7 @@ class CustomerFormAPI(http.Controller):
         # Sorting order
         order_by = 'date asc' if order == 'asc' else 'date desc'
 
-        forms = request.env['customer.form'].sudo().search(domain, limit=limit, order=order_by)
+        forms = request.env['customer.form'].sudo().search(domain, order=order_by)
 
         result = [{
             'id': form.id,
