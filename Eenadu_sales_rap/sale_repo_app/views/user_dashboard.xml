@@ -39,15 +39,19 @@
                     <a href="#" class="nav-link dropdown-toggle text-light" id="userDropdown" data-bs-toggle="dropdown">
                         <img src="./sale_repo_app/static/src/css/group7 (2).png" alt="User" class="rounded-circle" width="35"/>
                     </a>
-                    <ul class="dropdown-menu dropdown-menu-end pt-4 bg-success-subtle" >
-                        <li><p class="dropdown-item " href="#">upload profile image</p></li>
-                        <li><p class="dropdown-item" href="#">name :         vinay</p></li>
-                        <li><p class="dropdown-item" href="#">email :        vinay@gmail.com</p></li>
-                        <li><p class="dropdown-item" href="#">job role :     Eenadu Agent</p></li>
-                        <li><p class="dropdown-item" href="#">Mobile :       9642425585858</p ></li>
-                        <li><hr class="dropdown-divider"/></li>
-                        <li><a class="" href="#"><btn class="btn btn-primary">Logout</btn></a></li>
-                    </ul>
+<!--                    <ul class="dropdown-menu dropdown-menu-end pt-4 bg-success-subtle" >-->
+<!--                        <li><p class="dropdown-item " href="#">upload profile image</p></li>-->
+<!--                        <li><p class="dropdown-item" href="#">name :         vinay</p></li>-->
+<!--                        <li><p class="dropdown-item" href="#">email :        vinay@gmail.com</p></li>-->
+<!--                        <li><p class="dropdown-item" href="#">job role :     Eenadu Agent</p></li>-->
+<!--                        <li><p class="dropdown-item" href="#">Mobile :       9642425585858</p ></li>-->
+<!--                        <li><hr class="dropdown-divider"/></li>-->
+<!--                        <li><a class="" href="#"><btn class="btn btn-primary">Logout</btn></a></li>-->
+<!--                    </ul>-->
+                    <div id="user-profile-container" class="container mt-5">
+                        <!-- User profile info will be inserted here dynamically -->
+                    </div>
+
                 </div>
             </div>
         </div>
