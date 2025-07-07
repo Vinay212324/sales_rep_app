@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", function () {
     // Set base URL in localStorage if not already set
     if (!localStorage.getItem("base_url")) {
-        localStorage.setItem("base_url", "http://10.100.13.138:8099");
+        localStorage.setItem("base_url", "https://salesrep.esanchaya.com");
     }
 
     let login = document.getElementById("login");
