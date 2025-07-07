@@ -36,6 +36,7 @@ class Users(models.Model):
     token_expiry = fields.Datetime(string="Token Expiry")
     aadhar_base64 = fields.Binary(string="Aadhar image")
     Pan_base64 = fields.Binary(string="Pan image")
+    target = fields.Char(string="Target")
 
 
 

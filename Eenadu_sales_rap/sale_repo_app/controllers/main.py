@@ -170,6 +170,7 @@ class UserPortal(http.Controller):
                 'state': user.state,
                 'phone': user.phone,
                 'status': user.status,
+                'target': user.target,
                 'expiration': expiration,  # Set expiration if available
                 'code': "200"
             }

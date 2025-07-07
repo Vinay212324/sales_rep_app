@@ -838,5 +838,38 @@ class CustomerFormAPI(http.Controller):
 
         return response
 
+    @http.route("/update/target", type="json", methods=['POST'], csrf=False, cors="*")
+    def _update_status(self, **params):
 
+        api_key = params.get('token')
+        if not api_key:
+            return {'success': False, 'message': 'Token is missing', 'code': "403"}
 
+        user = self._verify_api_key(api_key)
+        if not user:
+            return {'success': False, 'message': 'Invalid or expired token', 'code': "403"}
+
+        user_id = params.get("user_id")
+        if not user_id:
+            return {'error': 'User ID is required', "code": "403"}
+
+        try:
+            user_id = int(user_id)
+        except ValueError:
+            return {'error': 'Invalid User ID', "code": "403"}
+
+        user = request.env['res.users'].sudo().browse(user_id)
+        if not user.exists():
+            return {'error': 'User not found', "code": "403"}
+        if params.get("target") ==  "":
+            return {'error': 'target is missing'}
+        if type(int(params.get("target"))) == type(66):
+            return {'error': 'target type is not int, pleas send the number'}
+
+        user.write({
+            'target': params.get("target"),
+        })
+        if user.target == params.get("target"):
+            return {"success": "True", "user_id": user.id, "code": "200"}
+        else:
+            return {"success": "False", "code": "403"}
