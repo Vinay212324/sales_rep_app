@@ -1,104 +1,142 @@
 <odoo>
     <data>
-          <template id="user_dashboard_template" name="User dashboard template">
+        <template id="user_dashboard_template" name="User Dashboard Template">
             <html lang="en">
-<head>
-    <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Sales Rep Navbar</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"/>
-    <link rel="stylesheet" href="sale_repo_app/static/src/css/user_dashboard.css"/> <!-- Your custom CSS -->
-</head>
-<body>
-    <btn class="forcustonbtn btn btn-primary" onclick="customer_form()">+ Customer Form</btn>
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container">
-            <a class="navbar-brand" href="#">Sales Rep</a>
-            <a class="customer_form pl-3" href="customer_form_list">List of customer forms</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-<!--                    <li class="nav-item">-->
-<!--                        <a class="nav-link active" href="#">Home</a>-->
-<!--                    </li>-->
-<!--                    <li class="nav-item">-->
-<!--                        <a class="nav-link" href="#">Dashboard</a>-->
-<!--                    </li>-->
-<!--                    <li class="nav-item">-->
-<!--                        <a class="nav-link" href="#">Reports</a>-->
-<!--                    </li>-->
-<!--                    <li class="nav-item">-->
-<!--                        <a class="nav-link" href="#">Sales</a>-->
-<!--                    </li>-->
-                </ul>
-                <!-- User Profile Icon -->
-                <div class="dropdown">
-                    <a href="#" class="nav-link dropdown-toggle text-light" id="userDropdown" data-bs-toggle="dropdown">
-                        <img src="./sale_repo_app/static/src/css/group7 (2).png" alt="User" class="rounded-circle" width="35"/>
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-end pt-4 bg-success-subtle" >
-                        <li><p class="dropdown-item " href="#">upload profile image</p></li>
-                        <li><p class="dropdown-item" href="#">name :         vinay</p></li>
-                        <li><p class="dropdown-item" href="#">email :        vinay@gmail.com</p></li>
-                        <li><p class="dropdown-item" href="#">job role :     Eenadu Agent</p></li>
-                        <li><p class="dropdown-item" href="#">Mobile :       9642425585858</p ></li>
-                        <li><hr class="dropdown-divider"/></li>
-                        <li><a class="" href="#"><btn class="btn btn-primary">Logout</btn></a></li>
-                    </ul>
+            <head>
+                <meta charset="UTF-8"/>
+                <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+                <title>Sales Rep Navbar</title>
+                <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"/>
+                <link rel="stylesheet" href="/sale_repo_app/static/src/css/user_dashboard.css"/>
+            </head>
+            <body>
+                <button class="forcustonbtn btn btn-primary" onclick="customer_form()">+ Customer Form</button>
 
-                </div>
-            </div>
-        </div>
-    </nav>
-    <div class="date pt-3 pb-3">
-        <div class="date-container" id="currentDate">
-        <!-- Date will be displayed here -->
-        </div>
-    </div>
-    <div class="container d-flex justify-content-center">
-        <div class="row g-4 w-75">
-            <!-- House's Visited Card -->
-            <div class="col-md-6">
-                <div class="card bg-primary-subtle shadow p-4">
-                    <div class="card-body text-center">
-                        <h3 class="fw-bold">House's Visited</h3>
-                        <hr class="w-75 mx-auto"/>
-                        <h2>Today: 0</h2>
+                <!-- Navbar -->
+                <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+                    <div class="container">
+                        <a class="navbar-brand" href="#">Sales Rep</a>
+                        <a class="customer_form pl-3" href="customer_form_list">List of customer forms</a>
+                        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                            <span class="navbar-toggler-icon"></span>
+                        </button>
+                        <div class="collapse navbar-collapse" id="navbarNav">
+                            <ul class="navbar-nav me-auto"></ul>
+                            <!-- User Profile Dropdown -->
+                            <div class="dropdown">
+                                <a href="#" class="nav-link dropdown-toggle text-light" id="userDropdown" data-bs-toggle="dropdown">
+                                    <img src="/sale_repo_app/static/src/css/group7 (2).png" alt="User" class="rounded-circle" width="35"/>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end pt-4 bg-success-subtle">
+                                    <li><p class="dropdown-item" style="text-decoration: underline;">Profile Info</p></li>
+                                    <li><p class="dropdown-item">Name: <span id="user_name"></span></p></li>
+                                    <li><p class="dropdown-item">Job Role: <span id="role"></span></p></li>
+                                    <li><p class="dropdown-item">Mobile: <span id="unit"></span></p></li>
+                                    <li><hr class="dropdown-divider"/></li>
+                                    <li><a href="javascript:void(0);" onclick="logout()"><button class="btn btn-primary m-1">Logout</button></a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </nav>
+
+                <div class="date pt-3 pb-3">
+                    <div class="date-container" id="currentDate">
+                        <!-- Date will be displayed here -->
                     </div>
                 </div>
-            </div>
-            <!-- Target Left Card -->
-            <div class="col-md-6">
-                <div class="card bg-primary-subtle shadow p-4">
-                    <div class="card-body text-center">
-                        <h3 class="fw-bold">Target Left</h3>
-                        <hr class="w-75 mx-auto"/>
-                        <h2>Today: 40</h2>
+
+                <div class="container d-flex justify-content-center">
+                    <div class="row g-4 w-75">
+                        <!-- House's Visited -->
+                        <div class="col-md-6">
+                            <div class="card bg-primary-subtle shadow p-4">
+                                <div class="card-body text-center">
+                                    <h3 class="fw-bold">House's Visited</h3>
+                                    <hr class="w-75 mx-auto"/>
+                                    <h2>Today: 0</h2>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Target Left -->
+                        <div class="col-md-6">
+                            <div class="card bg-primary-subtle shadow p-4">
+                                <div class="card-body text-center">
+                                    <h3 class="fw-bold">Target Left</h3>
+                                    <hr class="w-75 mx-auto"/>
+                                    <h2>Today: 40</h2>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- My Route Map -->
+                        <div class="col-12">
+                            <div class="card bg-primary-subtle shadow p-4">
+                                <div class="card-body text-center">
+                                    <h3 class="fw-bold">My Route Map</h3>
+                                    <hr class="w-75 mx-auto"/>
+                                    <h2>NA</h2>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="col-12">
-                <div class="card bg-primary-subtle shadow p-4">
-                    <div class="card-body text-center">
-                        <h3 class="fw-bold">My Route Map</h3>
-                        <hr class="w-75 mx-auto"/>
-                        <h2>NA</h2>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 
+                <!-- Scripts -->
+                <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+                <script type="text/javascript" src="/sale_repo_app/static/src/js/dashboard.js"></script>
+                <script>
+                    document.addEventListener("DOMContentLoaded", function () {
+                        let storedName = localStorage.getItem("name") || "vinay";
+                        let storedRole = localStorage.getItem("role") || "Sales Rep";
+                        let storedUnit = localStorage.getItem("unit") || "N/A";
 
+                        const nameElem = document.getElementById('user_name');
+                        const roleElem = document.getElementById('role');
+                        const unitElem = document.getElementById('unit');
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script type="text/javascript" src="sale_repo_app/static/src/js/dashboard.js"></script>
-</body>
-</html>
+                        if (nameElem) nameElem.textContent = storedName;
+                        if (roleElem) roleElem.textContent = storedRole;
+                        if (unitElem) unitElem.textContent = storedUnit;
+                    });
 
-          </template>
+                    function logout() {
+                        const api_key = localStorage.getItem("api_key");
+                        if (!api_key) {
+                            alert("No token found. Please log in first.");
+                            return;
+                        }
+
+                        fetch("http://localhost:1998/api/logout", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify({
+                                params: {
+                                    token: api_key
+                                }
+                            })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            console.log(data,"vinay");
+                            if (data?.result?.status == "success") {
+                                localStorage.clear();
+                                window.location.href = "http://localhost:1998/lin";
+                            } else {
+                                alert("Logout failed. Please try again.");
+                                console.error(data);
+                            }
+                        })
+
+                        .catch(error => {
+                            console.error("Logout error:", error);
+                            alert("Something went wrong during logout.");
+                        });
+                    }
+                </script>
+            </body>
+            </html>
+        </template>
     </data>
 </odoo>

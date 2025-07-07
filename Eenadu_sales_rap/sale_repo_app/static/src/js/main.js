@@ -92,11 +92,19 @@ document.addEventListener("DOMContentLoaded", function () {
                 // Extract session ID (since Odoo does not provide API key by default)
                 let user_id = jsonData.result.user_id || null;
                 let api_key = jsonData.result.api_key || null;
+                let name = jsonData.result.name || null;
+                let role = jsonData.result.role || null;
+                let unit = jsonData.result.unit || null;
 
                 if (user_id && api_key) {
                     // Store session info in local storage
                     localStorage.setItem("api_key", api_key);
                     localStorage.setItem("user_id", user_id);
+                    localStorage.setItem("name", name);
+                    localStorage.setItem("role", role);
+                    localStorage.setItem("unit", unit);
+
+                    console.log(name,role,unit,"vinay")
 
                     alert("Login successful!\nUser ID: " + user_id);
 
