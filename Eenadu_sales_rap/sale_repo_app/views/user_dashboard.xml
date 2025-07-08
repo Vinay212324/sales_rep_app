@@ -94,19 +94,20 @@
                         const roleElem = document.getElementById('role');
                         const unitElem = document.getElementById('unit');
 
+
                         if (nameElem) nameElem.textContent = storedName;
                         if (roleElem) roleElem.textContent = storedRole;
                         if (unitElem) unitElem.textContent = storedUnit;
                     });
 
                     function logout() {
+                        const base_url = localStorage.getItem("base_url");
                         const api_key = localStorage.getItem("api_key");
                         if (!api_key) {
                             alert("No token found. Please log in first.");
                             return;
                         }
-
-                        fetch("http://localhost:1998/api/logout", {
+                        fetch(base_url + "/api/logout", {
                             method: "POST",
                             headers: {
                                 "Content-Type": "application/json"
@@ -122,7 +123,7 @@
                             console.log(data,"vinay");
                             if (data?.result?.status == "success") {
                                 localStorage.clear();
-                                window.location.href = "http://localhost:1998/lin";
+                                window.location.href = base_url + "/lin";
                             } else {
                                 alert("Logout failed. Please try again.");
                                 console.error(data);
