@@ -45,3 +45,12 @@
         padding: 6px 10px;
     }
 }
+
+/* static/src/css/customer_form_list.css */
+#customer-list-container table {
+    font-size: 14px;
+}
+thead th {
+    background-color: #343a40;
+    color: #fff;
+}

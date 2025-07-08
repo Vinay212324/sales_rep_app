@@ -26,7 +26,7 @@
             "sale_repo_app/static/src/js/main.js",
             "sale_repo_app/static/src/js/dashboard.js",
             'https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap',
-            "sale_repo_app/static/src/js/customer_form_list.js"
+            "sale_repo_app/static/src/js/customer_form_list.js",
 
         ],
     },

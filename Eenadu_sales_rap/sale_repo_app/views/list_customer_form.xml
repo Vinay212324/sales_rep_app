@@ -1,55 +1,132 @@
 <odoo>
     <data>
-        <!-- Define the custom template with id and name -->
-        <template id="list_customer_form" name="List customer forms">
+        <template id="list_customer_form" name="Customer Form Filter">
+            <div class="container mt-5">
+                <h3 class="text-center mb-4">Filter Customer Forms</h3>
 
-            <!-- This section contains your HTML content -->
-            <!-- HTML - Filter Form using Bootstrap -->
-            <div class="container">
-                <h3 class="d-flex justify-content-center align-items-center">Filter Customer Forms</h3>
-                <form id="filter-form">
-                    <div class="form-group">
-                        <label for="user_id">login:</label>
-                        <input type="number" class="form-control" id="login" placeholder="login"/>
+                <form id="filter-form" class="mb-4">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <label for="login">Login (optional)</label>
+                            <input type="text" class="form-control" id="login" placeholder="Agent Login"/>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="unit">Unit</label>
+                            <input type="text" class="form-control" id="unit" placeholder="Unit Name"/>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="start_date">Start Date</label>
+                            <input type="date" class="form-control" id="start_date"/>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="end_date">End Date</label>
+                            <input type="date" class="form-control" id="end_date"/>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="unit">Unit:</label>
-                        <input type="text" class="form-control" id="unit" placeholder="Enter Unit"/>
+                    <div class="text-center mt-3">
+                        <button type="submit" class="btn btn-primary">Filter</button>
                     </div>
-                    <div class="form-group">
-                        <label for="start_date">Start Date:</label>
-                        <input type="date" class="form-control" id="start_date"/>
-                    </div>
-                    <div class="form-group">
-                        <label for="end_date">End Date:</label>
-                        <input type="date" class="form-control" id="end_date"/>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Filter</button>
                 </form>
 
-                <hr/>
-
-                <!-- Container to display filtered customer data -->
-                <div id="customer-list-container"></div>
+                <!-- Results go here -->
+                <div id="customer-list-container" class="mt-4"></div>
             </div>
 
+            <!-- Inline JavaScript -->
+            <script type="text/javascript">
+                document.addEventListener("DOMContentLoaded", function () {
+                    var filterForm = document.getElementById("filter-form");
+                    var loginInput = document.getElementById("login");
+                    var unitInput = document.getElementById("unit");
+                    var startDateInput = document.getElementById("start_date");
+                    var endDateInput = document.getElementById("end_date");
+                    var resultContainer = document.getElementById("customer-list-container");
 
-            <!-- Static CSS inclusion -->
-            <link rel="stylesheet" type="text/css" href="/sale_repo_app/static/src/css/customer_form_list.css"/>
+                    // Autofill unit from localStorage
+                    var savedUnit = localStorage.getItem("unit");
+                    if (savedUnit &amp;&amp; unitInput) {
+                        unitInput.value = savedUnit;
+                    }
 
-            <!-- Static JS inclusion -->
-            <script type="text/javascript" src="sale_repo_app/static/src/js/customer_form_list.js"></script>
+                    filterForm.addEventListener("submit", function (event) {
+                        event.preventDefault();
 
-            <!-- Bootstrap CSS (external CDN) -->
-            <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" crossorigin="anonymous"/>
+                        var token = localStorage.getItem("api_key");
+                        if (!token) {
+                            alert("Session expired. Please log in again.");
+                            window.location.href = "/lin";
+                            return;
+                        }
 
-            <!-- jQuery (external CDN) -->
+                        var payload = {
+                            params: {
+                                token: token,
+                                from_date: startDateInput.value,
+                                to_date: endDateInput.value,
+                                unit_name: unitInput.value,
+                                agent_name: loginInput.value,
+                                order: "asc"
+                            }
+                        };
+
+                        fetch("https://salesrep.esanchaya.com/api/customer_forms_filtered", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify(payload)
+                        })
+                        .then(function(response) {
+                            console.log(response,"vinay11111111132");
+                            return response.json();
+                        })
+                        .then(function(data) {
+                            console.log(data);
+                            if (data.result &amp;&amp; data.result.success &amp;&amp; Array.isArray(data.result.records)) {
+                                renderResults(data.result.records);
+                            } else {
+                                resultContainer.innerHTML = '&lt;div class="alert alert-warning"&gt;No data found&lt;/div&gt;';
+                            }
+                        })
+                        .catch(function(error) {
+                            console.error("Error fetching data:", error);
+                            resultContainer.innerHTML = '&lt;div class="alert alert-danger"&gt;Error fetching data&lt;/div&gt;';
+                        });
+                    });
+
+                    function renderResults(records) {
+                        var html = '&lt;h4&gt;Customer Forms&lt;/h4&gt;';
+                        html += '&lt;table class="table table-bordered table-hover mt-3"&gt;';
+                        html += '&lt;thead class="thead-dark"&gt;&lt;tr&gt;';
+                        html += '&lt;th&gt;#&lt;/th&gt;&lt;th&gt;Agent&lt;/th&gt;&lt;th&gt;Unit&lt;/th&gt;&lt;th&gt;Date&lt;/th&gt;&lt;th&gt;Time&lt;/th&gt;';
+                        html += '&lt;th&gt;Family Head&lt;/th&gt;&lt;th&gt;Mobile&lt;/th&gt;&lt;th&gt;City&lt;/th&gt;&lt;th&gt;Location&lt;/th&gt;&lt;th&gt;Eenadu?&lt;/th&gt;';
+                        html += '&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;';
+
+                        records.forEach(function(rec, index) {
+                            html += '&lt;tr&gt;';
+                            html += '&lt;td&gt;' + (index + 1) + '&lt;/td&gt;';
+                            html += '&lt;td&gt;' + (rec.agent_name || '') + '&lt;/td&gt;';
+                            html += '&lt;td&gt;' + (rec.unit_name || '') + '&lt;/td&gt;';
+                            html += '&lt;td&gt;' + (rec.date || '') + '&lt;/td&gt;';
+                            html += '&lt;td&gt;' + (rec.time || '') + '&lt;/td&gt;';
+                            html += '&lt;td&gt;' + (rec.family_head_name || '') + '&lt;/td&gt;';
+                            html += '&lt;td&gt;' + (rec.mobile_number || '') + '&lt;/td&gt;';
+                            html += '&lt;td&gt;' + (rec.city || '') + '&lt;/td&gt;';
+                            html += '&lt;td&gt;' + (rec.location_address || '') + '&lt;/td&gt;';
+                            html += '&lt;td&gt;' + (rec.eenadu_newspaper ? 'Yes' : 'No') + '&lt;/td&gt;';
+                            html += '&lt;/tr&gt;';
+                        });
+
+                        html += '&lt;/tbody&gt;&lt;/table&gt;';
+                        resultContainer.innerHTML = html;
+                    }
+                });
+            </script>
+
+            <!-- Bootstrap & jQuery -->
+            <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"/>
             <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-
-            <!-- Bootstrap JS (external CDN, Optional for additional features) -->
-            <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
-
+            <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
         </template>
-
     </data>
 </odoo>
