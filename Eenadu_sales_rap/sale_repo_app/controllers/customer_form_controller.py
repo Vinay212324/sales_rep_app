@@ -873,3 +873,55 @@ class CustomerFormAPI(http.Controller):
             return {"success": "True", "user_id": user.id, "code": "200"}
         else:
             return {"success": "False", "code": "403"}
+
+    @http.route("/unit/users", type="json", auth="none", methods=["POST"], csrf=False, cors="*")
+    def _users_in_unit(self, **params):
+        api_key = params.get('token')
+        unit_name = params.get('unit_name')
+
+        # Missing token
+        if not api_key:
+            return {
+                'success': False,
+                'message': 'Token is missing',
+                'code': 403
+            }
+
+        # Verify token
+        user = self._verify_api_key(api_key)
+        if not user:
+            return {
+                'success': False,
+                'message': 'Invalid or expired token',
+                'code': 403
+            }
+
+        # Missing unit name
+        if not unit_name:
+            return {
+                'success': False,
+                'message': 'Unit name is required',
+                'code': 400
+            }
+
+        # Fetch users in unit
+        users_in_unit = request.env['res.users'].sudo().search([('unit_name', '=', unit_name)])
+
+        # Format user data
+        user_data = []
+        for u in users_in_unit:
+            user_data.append({
+                'id': u.id,
+                'name': u.name,
+                'email': u.email,
+                'login': u.login,
+                'unit_name': u.unit_name,  # Assumes unit_name is a Char or stores string
+                'role': u.role if hasattr(u, 'role') else '',  # Avoid crash if role missing
+            })
+
+        return {
+            'success': True,
+            'message': f'{len(user_data)} user(s) found in unit "{unit_name}"',
+            'data': user_data,
+            'code': 200,
+        }
