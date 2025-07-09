@@ -863,7 +863,7 @@ class CustomerFormAPI(http.Controller):
             return {'error': 'User not found', "code": "403"}
         if params.get("target") ==  "":
             return {'error': 'target is missing'}
-        if type(int(params.get("target"))) == type(66):
+        if type(int(params.get("target"))) != type(66):
             return {'error': 'target type is not int, pleas send the number'}
 
         user.write({
