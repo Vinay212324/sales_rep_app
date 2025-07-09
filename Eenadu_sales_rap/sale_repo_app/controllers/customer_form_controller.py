@@ -869,7 +869,7 @@ class CustomerFormAPI(http.Controller):
         user.write({
             'target': params.get("target"),
         })
-        if user.target == params.get("target"):
+        if str(user.target) == str(params.get("target")):
             return {"success": "True", "user_id": user.id, "code": "200"}
         else:
             return {"success": "False", "code": "403"}
