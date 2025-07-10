@@ -338,6 +338,56 @@ class CustomerFormAPI(http.Controller):
         except Exception as e:
             return {'error': 'Internal Server Error', 'message': str(e), 'code': 500}
 
+    @http.route('/api/users_you_created/id', type='json', auth='public', methods=['POST'], csrf=False, cors="*")
+    def users_you_created_byId(self, **kw):
+        try:
+
+            api_key = kw.get('token')
+
+            if not api_key:
+                return {
+                    'success': False,
+                    'message': 'Token is missing',
+                    'code': "403"
+                }
+
+            # Validate Token
+            user = self._verify_api_key(api_key)
+            if not user:
+                return {
+                    'success': False,
+                    'message': 'Invalid or expired token',
+                    "code": "403"
+                }
+
+            user_id = int(kw.get('id'))
+            if not(user_id):
+                return {"message":"user ID Not found"}
+            # Fetch users
+            users = request.env['res.users'].sudo().search([('create_uid', '=', user_id)])
+            user_list = []
+
+            for user in users:
+                user_list.append({
+                    'id': user.id,
+                    'name': user.name,
+                    'email': user.email,
+                    'login': user.login,
+                    'create_uid': user.create_uid,
+                    'unit_name': user.unit_name,
+                    'phone': user.phone,
+                    'state': user.state,
+                    'pan_number': user.pan_number,
+                    'aadhar_number': user.aadhar_number,
+                    'role': user.role,
+                    'status': user.status,
+                })
+
+            return {'status': 200, 'users': user_list}
+
+        except Exception as e:
+            return {'error': 'Internal Server Error', 'message': str(e), 'code': 500}
+
     @http.route('/api/customer_forms_info_one_day', type='json', auth="public", methods=['POST'], csrf=False, cors="*")
     def get_customer_forms_one_day(self, **params):
         """
