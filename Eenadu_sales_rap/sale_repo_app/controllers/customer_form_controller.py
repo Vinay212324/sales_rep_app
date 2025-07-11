@@ -889,7 +889,7 @@ class CustomerFormAPI(http.Controller):
         return response
 
     @http.route("/update/target", type="json", methods=['POST'], csrf=False, cors="*")
-    def _update_status(self, **params):
+    def _update_target(self, **params):
 
         api_key = params.get('token')
         if not api_key:
