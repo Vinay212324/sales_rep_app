@@ -975,3 +975,60 @@ class CustomerFormAPI(http.Controller):
             'data': user_data,
             'code': 200,
         }
+
+    @http.route('/api/user/id', type='json', auth='public', methods=['POST'], csrf=False, cors="*")
+    def get_users(self, **kw):
+        try:
+
+            api_key = kw.get('token')
+            agent_id = kw.get('id')
+
+            if not api_key:
+                return {
+                    'success': False,
+                    'message': 'Token is missing',
+                    'code': "403"
+                }
+
+            # Validate Token
+            user = self._verify_api_key(api_key)
+            if not user:
+                return {
+                    'success': False,
+                    'message': 'Invalid or expired token',
+                    "code": "403"
+                }
+
+            # Fetch users
+            users = request.env['res.users'].sudo().search([('id', '=', int(agent_id))], limit=1)
+            user_list = []
+
+            for user in users:
+                aadhar_image_data = None
+                if user.aadhar_base64:
+                    aadhar_image_data = f"data:image/png;base64,{user.aadhar_base64.decode('utf-8')}"
+                pan_image_data = None
+                if user.Pan_base64:
+                    pan_image_data = f"data:image/png;base64,{user.Pan_base64.decode('utf-8')}"
+
+                user_list.append({
+                    'id': user.id,
+                    'name': user.name,
+                    'email': user.email,
+                    'login': user.login,
+                    'create_uid': user.create_uid.id if user.create_uid else None,
+                    'unit_name': user.unit_name,
+                    'phone': user.phone,
+                    'state': user.state,
+                    'pan_number': user.pan_number,
+                    'aadhar_number': user.aadhar_number,
+                    'role': user.role,
+                    'status': user.status,
+                    'aadhar_image': aadhar_image_data,
+                    'pan_image': pan_image_data,
+                })
+
+            return {'status': 200, 'users': user_list}
+
+        except Exception as e:
+            return {'error': 'Internal Server Error', 'message': str(e), 'code': 500}
