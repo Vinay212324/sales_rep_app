@@ -64,4 +64,5 @@ class CustomerForm(models.Model):
     latitude = fields.Char(string="Latitude")
     longitude = fields.Char(string="Longitude")
     location_address = fields.Char(string="Address")
+    location_url = fields.Char(string='Location Link')
 
