@@ -573,6 +573,7 @@ class CustomerFormAPI(http.Controller):
             'latitude': record.latitude,
             'longitude': record.longitude,
             'location_address': record.location_address,
+            'location_url': record.location_url,
         } for record in customer_forms]
 
         response = {
@@ -877,6 +878,7 @@ class CustomerFormAPI(http.Controller):
             'latitude': form.latitude,
             'longitude': form.longitude,
             'location_address': form.location_address,
+            'location_url': form.location_url,
         } for form in forms]
 
         response = {
