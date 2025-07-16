@@ -65,4 +65,5 @@ class CustomerForm(models.Model):
     longitude = fields.Char(string="Longitude")
     location_address = fields.Char(string="Address")
     location_url = fields.Char(string='Location Link')
+    face_base64 = fields.Binary(string="Face image")
 

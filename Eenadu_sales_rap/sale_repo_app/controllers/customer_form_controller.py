@@ -97,6 +97,7 @@ class CustomerFormAPI(http.Controller):
                 'longitude': kwargs.get('longitude'),
                 'location_address': kwargs.get('location_address'),
                 'location_url': kwargs.get('location_url '),
+                'face_base64': kwargs.get('face_base64 '),
             })
             return {'success': True, 'message': 'Customer Form created successfully', 'customer_id': customer.id,
                     "code": "200"}
@@ -232,6 +233,7 @@ class CustomerFormAPI(http.Controller):
             'longitude': record.longitude,
             'location_address': record.location_address,
             'location_url': record.location_url,
+            'face_base64': f"data:image/png;base64,{record.face_base64.decode('utf-8')}" if record.face_base64 else None,
         } for record in customer_forms]
 
         return {'records': result, "code": "200"}
@@ -475,6 +477,8 @@ class CustomerFormAPI(http.Controller):
             'latitude': record.latitude,
             'longitude': record.longitude,
             'location_address': record.location_address,
+            'location_url': record.location_url,
+            'face_base64': f"data:image/png;base64,{record.face_base64.decode('utf-8')}" if record.face_base64 else None,
         } for record in customer_forms]
 
         response = {
@@ -574,6 +578,7 @@ class CustomerFormAPI(http.Controller):
             'longitude': record.longitude,
             'location_address': record.location_address,
             'location_url': record.location_url,
+            'face_base64': f"data:image/png;base64,{record.face_base64.decode('utf-8')}" if record.face_base64 else None,
         } for record in customer_forms]
 
         response = {
@@ -703,34 +708,56 @@ class CustomerFormAPI(http.Controller):
     #             root_map_rec = request.env['root.map'].sudo().create({
     #                 'root_name': root_map_name,
     #                 'date': date.today(),
-    #                 'stage_dd': 'not_working'
-    #                 ''
+    #                 'stage_dd': 'not_working',
+    #                 'user_id':  [(4, agent.id)]
     #             })
+    #         fromto_obj = request.env['fromto.rootmap'].sudo()
+    #         linked_ids = []
+    #         for pair in from_to_list:
+    #             from_loc = pair.get('from_location')
+    #             to_loc = pair.get('to_location')
     #
+    #             if not from_loc or not to_loc:
+    #                 continue
     #
-    #         # Assign to agent
-    #         print(root_map_rec.id)
+    #             # Find or create fromto.rootmap
+    #             fromto_rec = fromto_obj.search([
+    #                 ('from_location', '=', from_loc),
+    #                 ('to_location', '=', to_loc)
+    #             ], limit=1)
+    #
+    #             if not fromto_rec:
+    #                 fromto_rec = fromto_obj.create({
+    #                     'from_location': from_loc,
+    #                     'to_location': to_loc
+    #                 })
+    #
+    #             # Add link if not already added
+    #             if fromto_rec.id not in root_map_rec.for_fromto_ids.ids:
+    #                 root_map_rec.write({'for_fromto_ids': [(4, fromto_rec.id)]})
+    #             linked_ids.append(fromto_rec.id)
+    #
     #         agent.root_name_id = root_map_rec.id
     #
     #         return {
     #             'success': True,
-    #             'message': 'Root map assigned successfully',
+    #             'message': 'Root map and multiple from-to locations linked successfully',
     #             'status': 200,
     #             'agent_id': agent.id,
     #             'root_map': {
     #                 'id': root_map_rec.id,
     #                 'name': root_map_rec.root_name
-    #             }
+    #             },
+    #             'linked_from_to_ids': linked_ids
     #         }
     #
-    #     except Exception as e:
+    #         except Exception as e:
     #         return {
     #             'success': False,
     #             'error': 'Internal Server Error',
     #             'message': str(e),
     #             'code': 500
     #         }
-    #
     # @http.route('/api/for_agent_root_map_name', type='json', auth='public', methods=['POST'], csrf=False, cors="*")
     # def For_agent_root_map_name(self, **kw):
     #     try:
@@ -879,6 +906,7 @@ class CustomerFormAPI(http.Controller):
             'longitude': form.longitude,
             'location_address': form.location_address,
             'location_url': form.location_url,
+            'face_base64': f"data:image/png;base64,{form.face_base64.decode('utf-8')}" if form.face_base64 else None,
         } for form in forms]
 
         response = {
