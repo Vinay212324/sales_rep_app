@@ -683,109 +683,202 @@ class CustomerFormAPI(http.Controller):
         except Exception as e:
             return {'error': 'Internal Server Error', 'message': str(e), 'code': 500}
 
-    # @http.route('/api/For_root_map_asin', type='json', auth='public', methods=['POST'], csrf=False, cors="*")
-    # def For_root_map_asin(self, **kw):
-    #     try:
-    #         agent_id = kw.get('agent_id')
-    #         api_key = kw.get('token')
-    #         from_to_list= kw.get('from_to_list')
-    #         root_map_name = kw.get('root_map')
-    #
-    #         if not api_key:
-    #             return {'success': False, 'message': 'Token is missing', 'code': 403}
-    #
-    #         user = self._verify_api_key(api_key)
-    #         if not user:
-    #             return {'success': False, 'message': 'Invalid or expired token', 'code': 403}
-    #
-    #         agent = request.env['res.users'].sudo().search([('id', '=', int(agent_id))], limit=1)
-    #         if not agent:
-    #             return {'success': False, 'message': 'Agent not found', 'code': 404}
-    #
-    #         # Search or create root.map
-    #         root_map_rec = request.env['root.map'].sudo().search([('root_name', '=', root_map_name)], limit=1)
-    #         if not root_map_rec:
-    #             root_map_rec = request.env['root.map'].sudo().create({
-    #                 'root_name': root_map_name,
-    #                 'date': date.today(),
-    #                 'stage_dd': 'not_working',
-    #                 'user_id':  [(4, agent.id)]
-    #             })
-    #         fromto_obj = request.env['fromto.rootmap'].sudo()
-    #         linked_ids = []
-    #         for pair in from_to_list:
-    #             from_loc = pair.get('from_location')
-    #             to_loc = pair.get('to_location')
-    #
-    #             if not from_loc or not to_loc:
-    #                 continue
-    #
-    #             # Find or create fromto.rootmap
-    #             fromto_rec = fromto_obj.search([
-    #                 ('from_location', '=', from_loc),
-    #                 ('to_location', '=', to_loc)
-    #             ], limit=1)
-    #
-    #             if not fromto_rec:
-    #                 fromto_rec = fromto_obj.create({
-    #                     'from_location': from_loc,
-    #                     'to_location': to_loc
-    #                 })
-    #
-    #             # Add link if not already added
-    #             if fromto_rec.id not in root_map_rec.for_fromto_ids.ids:
-    #                 root_map_rec.write({'for_fromto_ids': [(4, fromto_rec.id)]})
-    #             linked_ids.append(fromto_rec.id)
-    #
-    #         agent.root_name_id = root_map_rec.id
-    #
-    #         return {
-    #             'success': True,
-    #             'message': 'Root map and multiple from-to locations linked successfully',
-    #             'status': 200,
-    #             'agent_id': agent.id,
-    #             'root_map': {
-    #                 'id': root_map_rec.id,
-    #                 'name': root_map_rec.root_name
-    #             },
-    #             'linked_from_to_ids': linked_ids
-    #         }
-    #
-    #         except Exception as e:
-    #         return {
-    #             'success': False,
-    #             'error': 'Internal Server Error',
-    #             'message': str(e),
-    #             'code': 500
-    #         }
-    # @http.route('/api/for_agent_root_map_name', type='json', auth='public', methods=['POST'], csrf=False, cors="*")
-    # def For_agent_root_map_name(self, **kw):
-    #     try:
-    #         agent_id = int(kw.get('agent_id'))
-    #         api_key = kw.get('token')
-    #
-    #         if not api_key:
-    #             return {'success': False, 'message': 'Token is missing', 'code': 403}
-    #
-    #         user = self._verify_api_key(api_key)
-    #         if not user:
-    #             return {'success': False, 'message': 'Invalid or expired token', 'code': 403}
-    #
-    #         agent = request.env['res.users'].sudo().search([('id', '=', int(agent_id))], limit=1)
-    #         if not agent:
-    #             return {'success': False, 'message': 'Agent not found', 'code': 404}
-    #
-    #         return {
-    #             'status': 200,
-    #             'success': True,
-    #             'root_map': {
-    #                 'id': agent.root_name_id.id if agent.root_name_id else None,
-    #                 'name': agent.root_name_id.root_name if agent.root_name_id else ""
-    #             }
-    #         }
-    #
-    #     except Exception as e:
-    #         return {'success': False, 'error': 'Internal Server Error', 'message': str(e), 'code': 500}
+    @http.route('/api/For_root_map_asin', type='json', auth='public', methods=['POST'], csrf=False, cors="*")
+    def For_root_map_asin(self, **kw):
+        try:
+            agent_id = kw.get('agent_id')
+            api_key = kw.get('token')
+            from_to_list = kw.get('from_to_list')
+            root_map_name = kw.get('root_map')
+
+            if not api_key:
+                return {'success': False, 'message': 'Token is missing', 'code': 403}
+
+            user = self._verify_api_key(api_key)
+            if not user:
+                return {'success': False, 'message': 'Invalid or expired token', 'code': 403}
+
+            agent = request.env['res.users'].sudo().search([('id', '=', int(agent_id))], limit=1)
+            if not agent:
+                return {'success': False, 'message': 'Agent not found', 'code': 404}
+
+            # Search or create root.map
+            root_map_rec = request.env['root.map'].sudo().search([('root_name', '=', root_map_name)], limit=1)
+            if not root_map_rec:
+                root_map_rec = request.env['root.map'].sudo().create({
+                    'root_name': root_map_name,
+                    'date': date.today(),
+                    'stage_dd': 'not_working',
+                    'user_id': [(4, agent.id)]
+                })
+            else:
+                # Link agent to existing root map if not already linked
+                if agent.id not in root_map_rec.user_id.ids:
+                    root_map_rec.write({'user_id': [(4, agent.id)]})
+
+            # Handle from-to locations
+            fromto_obj = request.env['fromto.rootmap'].sudo()
+            linked_ids = []
+
+            for pair in from_to_list:
+                from_loc = pair.get('from_location')
+                to_loc = pair.get('to_location')
+
+                if not from_loc or not to_loc:
+                    continue
+
+                # Search or create the from-to record
+                fromto_rec = fromto_obj.search([
+                    ('from_location', '=', from_loc),
+                    ('to_location', '=', to_loc)
+                ], limit=1)
+
+                if not fromto_rec:
+                    fromto_rec = fromto_obj.create({
+                        'from_location': from_loc,
+                        'to_location': to_loc
+                    })
+
+                # Link to root map if not already linked
+                if fromto_rec.id not in root_map_rec.for_fromto_ids.ids:
+                    root_map_rec.write({'for_fromto_ids': [(4, fromto_rec.id)]})
+
+                linked_ids.append(fromto_rec.id)
+
+            # Assign root to agent
+            agent.sudo().write({'root_name_id': root_map_rec.id})
+
+            return {
+                'success': True,
+                'message': 'Root map and multiple from-to locations linked successfully',
+                'status': 200,
+                'agent_id': agent.id,
+                'root_map': {
+                    'id': root_map_rec.id,
+                    'name': root_map_rec.root_name
+                },
+                'linked_from_to_ids': linked_ids
+            }
+
+        except Exception as e:
+            return {
+                'success': False,
+                'error': 'Internal Server Error',
+                'message': str(e),
+                'code': 500
+            }
+
+    @http.route('/api/user_root_maps_by_stage', type='json', auth='public', methods=['POST'], csrf=False, cors="*")
+    def user_root_maps_by_stage(self, **kw):
+        try:
+            user_id = kw.get('user_id')
+            token = kw.get('token')
+
+            if not token:
+                return {'success': False, 'message': 'Token is missing', 'code': 403}
+
+            user = self._verify_api_key(token)
+            if not user:
+                return {'success': False, 'message': 'Invalid or expired token', 'code': 403}
+
+            # Get the target user (agent)
+            agent = request.env['res.users'].sudo().browse(int(user_id))
+            if not agent.exists():
+                return {'success': False, 'message': 'User not found', 'code': 404}
+
+            # Fetch root.map records linked to this user
+            root_maps = request.env['root.map'].sudo().search([
+                ('user_id', 'in', [agent.id])
+            ])
+
+            # Organize by stage
+            assigned = []
+            working = []
+            done = []
+
+            for record in root_maps:
+                root_data = {
+                    'id': record.id,
+                    'name': record.root_name,
+                    'date': str(record.date),
+                    'stage': record.stage_dd
+                }
+
+                if record.stage_dd == 'not_working':
+                    assigned.append(root_data)
+                elif record.stage_dd == 'vinay':
+                    working.append(root_data)
+                elif record.stage_dd == 'workingg':
+                    done.append(root_data)
+
+            return {
+                'success': True,
+                'status': 200,
+                'user_id': agent.id,
+                'assigned': assigned,
+                'working': working,
+                'done': done
+            }
+
+        except Exception as e:
+            return {
+                'success': False,
+                'error': 'Internal Server Error',
+                'message': str(e),
+                'code': 500
+            }
+
+    @http.route('/api/for_agent_root_map_name', type='json', auth='public', methods=['POST'], csrf=False, cors="*")
+    def For_agent_root_map_name(self, **kw):
+        try:
+            agent_id = kw.get('agent_id')
+            api_key = kw.get('token')
+
+            if not api_key:
+                return {'success': False, 'message': 'Token is missing', 'code': 403}
+
+            user = self._verify_api_key(api_key)
+            if not user:
+                return {'success': False, 'message': 'Invalid or expired token', 'code': 403}
+
+            # Get agent
+            agent = request.env['res.users'].sudo().search([('id', '=', int(agent_id))], limit=1)
+            if not agent:
+                return {'success': False, 'message': 'Agent not found', 'code': 404}
+
+            root_map = agent.root_name_id
+            if not root_map:
+                return {'success': False, 'message': 'No root map assigned to agent', 'code': 404}
+
+            # Collect linked from-to routes
+            from_to_list = []
+            for route in root_map.for_fromto_ids:
+                from_to_list.append({
+                    'id': route.id,
+                    'from_location': route.from_location,
+                    'to_location': route.to_location
+                })
+
+            return {
+                'success': True,
+                'status': 200,
+                'agent_id': agent.id,
+                'root_map': {
+                    'id': root_map.id,
+                    'name': root_map.root_name,
+                    'stage': root_map.stage_dd,
+                    'date': str(root_map.date),
+                    'from_to_list': from_to_list
+                }
+            }
+
+        except Exception as e:
+            return {
+                'success': False,
+                'error': 'Internal Server Error',
+                'message': str(e),
+                'code': 500
+            }
 
     @http.route('/unit_name_of_user', type='json', auth='none', methods=["POST"], csrf=False, cors="*")
     def get_unit_names(self, **kwargs):
