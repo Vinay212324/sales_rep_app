@@ -11,7 +11,7 @@ import time
 from datetime import date
 import logging
 import base64
-
+from datetime import date
 from datetime import date
 import time
 import logging
@@ -686,48 +686,45 @@ class CustomerFormAPI(http.Controller):
     @http.route('/api/For_root_map_asin', type='json', auth='public', methods=['POST'], csrf=False, cors="*")
     def For_root_map_asin(self, **kw):
         try:
-            agent_id = kw.get('agent_id')
-            api_key = kw.get('token')
-            from_to_list = kw.get('from_to_list')
-            root_map_name = kw.get('root_map')
+            user_id = int(kw.get('agent_id'))
+            token = kw.get('token')
+            from_to_list = kw.get('from_to_list', [])
 
-            if not api_key:
+            print("111")
+
+            if not token:
                 return {'success': False, 'message': 'Token is missing', 'code': 403}
 
-            user = self._verify_api_key(api_key)
+            user = self._verify_api_key(token)
             if not user:
-                return {'success': False, 'message': 'Invalid or expired token', 'code': 403}
+                return {'success': False, 'message': 'Invalid token', 'code': 403}
 
-            agent = request.env['res.users'].sudo().search([('id', '=', int(agent_id))], limit=1)
-            if not agent:
+            agent = request.env['res.users'].sudo().browse(user_id)
+            if not agent.exists():
                 return {'success': False, 'message': 'Agent not found', 'code': 404}
 
-            # Search or create root.map
-            root_map_rec = request.env['root.map'].sudo().search([('root_name', '=', root_map_name)], limit=1)
-            if not root_map_rec:
-                root_map_rec = request.env['root.map'].sudo().create({
-                    'root_name': root_map_name,
-                    'date': date.today(),
-                    'stage_dd': 'not_working',
-                    'user_id': [(4, agent.id)]
-                })
-            else:
-                # Link agent to existing root map if not already linked
-                if agent.id not in root_map_rec.user_id.ids:
-                    root_map_rec.write({'user_id': [(4, agent.id)]})
-
-            # Handle from-to locations
             fromto_obj = request.env['fromto.rootmap'].sudo()
             linked_ids = []
+            root_map_rec = False
+
+            # Only create root.map if flag is "true" (string)
+            if 1==1:
+                root_map_rec = request.env['root.map'].sudo().create({
+                    'root_name': user["user_login"],
+                    'date': date.today(),
+                    'stage_dd': 'not_working',
+                    'user_id': [(6, 0, [agent.id])],
+                })
+                print("3333")
 
             for pair in from_to_list:
                 from_loc = pair.get('from_location')
                 to_loc = pair.get('to_location')
+                print("4444")
 
                 if not from_loc or not to_loc:
                     continue
 
-                # Search or create the from-to record
                 fromto_rec = fromto_obj.search([
                     ('from_location', '=', from_loc),
                     ('to_location', '=', to_loc)
@@ -739,25 +736,64 @@ class CustomerFormAPI(http.Controller):
                         'to_location': to_loc
                     })
 
-                # Link to root map if not already linked
-                if fromto_rec.id not in root_map_rec.for_fromto_ids.ids:
+                if root_map_rec and fromto_rec.id not in root_map_rec.for_fromto_ids.ids:
                     root_map_rec.write({'for_fromto_ids': [(4, fromto_rec.id)]})
 
                 linked_ids.append(fromto_rec.id)
 
-            # Assign root to agent
-            agent.sudo().write({'root_name_id': root_map_rec.id})
+            if root_map_rec:
+                agent.sudo().write({'root_name_id': root_map_rec.id})
 
             return {
                 'success': True,
-                'message': 'Root map and multiple from-to locations linked successfully',
+                'message': 'Root map info updated successfully',
+                'linked_ids': linked_ids,
+                'code': 200
+            }
+
+        except Exception as e:
+            return {
+                'success': False,
+                'error': 'Internal Server Error',
+                'message': str(e),
+                'code': 500
+            }
+
+    @http.route('/api/change_root_map_stage', type='json', auth='public', methods=['POST'], csrf=False, cors="*")
+    def change_root_map_stage(self, **kw):
+        try:
+            token = kw.get('token')
+            root_map_id = kw.get('root_map_id')
+            new_stage = kw.get('stage')  # Expected: 'not_working', 'vinay', 'workingg'
+
+            if not token:
+                return {'success': False, 'message': 'Token is missing', 'code': 403}
+
+            user = self._verify_api_key(token)
+            if not user:
+                return {'success': False, 'message': 'Invalid or expired token', 'code': 403}
+
+            if not root_map_id or not new_stage:
+                return {'success': False, 'message': 'Missing root_map_id or stage', 'code': 400}
+
+            if new_stage not in ['not_working', 'vinay', 'workingg']:
+                return {'success': False, 'message': 'Invalid stage value', 'code': 400}
+
+            root_map = request.env['root.map'].sudo().browse(int(root_map_id))
+            if not root_map.exists():
+                return {'success': False, 'message': 'Root map not found', 'code': 404}
+
+            root_map.write({'stage_dd': new_stage})
+
+            return {
+                'success': True,
+                'message': f"Stage updated to '{new_stage}'",
                 'status': 200,
-                'agent_id': agent.id,
                 'root_map': {
-                    'id': root_map_rec.id,
-                    'name': root_map_rec.root_name
-                },
-                'linked_from_to_ids': linked_ids
+                    'id': root_map.id,
+                    'name': root_map.root_name,
+                    'stage': root_map.stage_dd
+                }
             }
 
         except Exception as e:
@@ -797,11 +833,18 @@ class CustomerFormAPI(http.Controller):
             done = []
 
             for record in root_maps:
+                from_to_data = []
+                for fromto in record.for_fromto_ids:
+                    from_to_data.append({
+                        'from_location': fromto.from_location,
+                        'to_location': fromto.to_location,
+                    })
                 root_data = {
                     'id': record.id,
                     'name': record.root_name,
                     'date': str(record.date),
-                    'stage': record.stage_dd
+                    'stage': record.stage_dd,
+                    'from_to': from_to_data
                 }
 
                 if record.stage_dd == 'not_working':
@@ -827,7 +870,6 @@ class CustomerFormAPI(http.Controller):
                 'message': str(e),
                 'code': 500
             }
-
     @http.route('/api/for_agent_root_map_name', type='json', auth='public', methods=['POST'], csrf=False, cors="*")
     def For_agent_root_map_name(self, **kw):
         try:
