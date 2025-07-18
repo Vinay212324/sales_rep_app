@@ -8,5 +8,5 @@
         "web.assets_frontend": ["custom_login_page_user/static/src/css/login.css"]
     }, 
     "installable": True, 
-    "auto_install": False 
+    "auto_install": True
 }
