@@ -1,5 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+
+    <record id="view_kanban_root_map" model="ir.ui.view">
+        <field name="name">root.map.kanban</field>
+        <field name="model">root.map</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_example" default_group_by="stage_dd">
+                <field name="stage_dd"/>
+                <field name="root_name"/>
+                <field name="date"/>
+                <field name="user_id"/>
+
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_card">
+                            <a type="open">
+                                <div class="o_kanban_details">
+                                    <strong>
+                                        <field name="root_name"/>
+                                    </strong>
+                                    <br/>
+                                    <span>
+                                        <field name="date"/>
+                                    </span>
+                                    <br/>
+                                    <t t-if="record.user_id.raw_value.length">
+                                        <ul>
+                                            <t t-foreach="record.user_id.raw_value" t-as="user_id">
+                                                <li>
+                                                    <t t-esc="user_id[1]"/>
+                                                </li>
+                                            </t>
+                                        </ul>
+                                    </t>
+                                </div>
+                            </a>
+                        </div>
+                    </t>
+                </templates>
+
+
+            </kanban>
+        </field>
+        <field name="type">kanban</field> <!-- ✅ Add this -->
+    </record>
+
+
     <record id="view_tree_root_map" model="ir.ui.view">
         <field name="name">root.map.tree</field>
         <field name="model">root.map</field>
@@ -7,6 +53,7 @@
             <tree string="Root Map List">
                 <field name="root_name"/>
                 <field name="date"/>
+                <field name="user_id"/>
             </tree>
         </field>
     </record>
@@ -16,19 +63,31 @@
         <field name="model">root.map</field>
         <field name="arch" type="xml">
             <form string="Root Map">
+                <header>
+                    <field name="stage_dd" widget="statusbar" options="{'clickable': True}"/>
+                </header>
                 <sheet>
                     <group>
+                        <field name="id"/>
                         <field name="root_name"/>
                         <field name="date"/>
                     </group>
                     <notebook>
                         <page string="Assigned Users">
-                            <field name="user_ids">
+                            <field name="user_id">
                                 <tree string="Users">
                                     <field name="name"/>
                                     <field name="login"/>
                                     <field name="phone"/>
                                     <field name="role"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Assigned Root locations">
+                            <field name="for_fromto_ids">
+                                <tree string="Users">
+                                    <field name="from_location"/>
+                                    <field name="to_location"/>
                                 </tree>
                             </field>
                         </page>
@@ -41,11 +100,13 @@
     <record id="action_root_map" model="ir.actions.act_window">
         <field name="name">Root Maps</field>
         <field name="res_model">root.map</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">kanban,tree,form</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">Create the first root map</p>
         </field>
     </record>
 
-    <menuitem id="menu_root_map" name="Root Maps" parent="menu_sales_rep_main" action="action_root_map"/>
+    <menuitem id="menu_root_map" name="Root Maps" parent="menu_sales_rep_main"
+              groups="sale_repo_app.agent_group,sale_repo_app.admin_group,sale_repo_app.unit_manager_group"
+              action="action_root_map"/>
 </odoo>

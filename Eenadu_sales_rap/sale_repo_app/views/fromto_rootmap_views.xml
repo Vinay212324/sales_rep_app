@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Tree View -->
+    <record id="view_tree_fromto_rootmap" model="ir.ui.view">
+        <field name="name">fromto.rootmap.tree</field>
+        <field name="model">fromto.rootmap</field>
+        <field name="arch" type="xml">
+            <tree string="From-To Root Map">
+                <field name="from_location"/>
+                <field name="to_location"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="view_form_fromto_rootmap" model="ir.ui.view">
+        <field name="name">fromto.rootmap.form</field>
+        <field name="model">fromto.rootmap</field>
+        <field name="arch" type="xml">
+            <form string="From-To Root Map">
+                <sheet>
+                    <group>
+                        <field name="from_location"/>
+                        <field name="to_location"/>
+<!--                        <field name="fromto_ids"/>-->
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_fromto_rootmap" model="ir.actions.act_window">
+        <field name="name">From-To Root Map</field>
+        <field name="res_model">fromto.rootmap</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your From-To Root Map entries.
+            </p>
+        </field>
+    </record>
+
+
+    <menuitem id="menu_fromto_rootmap" name="From-To Root Map" parent="menu_sales_rep_main"
+              action="action_fromto_rootmap" sequence="20"/>
+</odoo>

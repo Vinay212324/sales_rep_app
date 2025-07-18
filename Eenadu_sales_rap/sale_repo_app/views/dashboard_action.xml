@@ -1,0 +1,14 @@
+<odoo>
+   <record id="action_dashboard" model="ir.actions.client">
+    <field name="name">Sales Dashboard</field>
+    <field name="tag">sale_repo_app.self_dashboard_manager_sales_rep</field>
+</record>
+
+
+
+    <menuitem id="menu_dashboard_manager"
+              name="Dashboard"
+              parent="menu_sales_rep_main"
+              action="action_dashboard"
+              sequence="10"/>
+</odoo>

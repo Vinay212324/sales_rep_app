@@ -90,6 +90,7 @@
             <xpath expr="//field[@name='login']" position="after">
                 <group string="Custom Information">
                     <field name="role"/>
+                    <field name="target"/>
                     <field name="status"/>
                     <field name="unit_name"/>
                     <field name="unit_name_ids"/>
@@ -100,6 +101,7 @@
                     <field name="state"/>
                     <field name="phone"/>
                     <field name="user_id"/>
+                    <field name="root_name_id"/>
                     <!--                    <field name="api_token" readonly="1"/>-->
                     <!--                    <field name="token_expiry" readonly="1"/>-->
                 </group>
@@ -156,12 +158,8 @@
 
     <!-- Menu Item -->
     <menuitem id="menu_sales_rep_main" name="Sales Reps"
-              action="action_res_users_heirt"
               sequence="10"/>
 
-    <menuitem id="for_users"
-              name="User info"
-              parent="menu_sales_rep_main"
-              action="action_res_users_heirt"
-              sequence="20"/>
+
+
 </odoo>

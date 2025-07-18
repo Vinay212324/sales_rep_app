@@ -1,0 +1,24 @@
+<odoo>
+    <!-- existing group definitions ... -->
+
+    <!-- Define ir.model for unit.name -->
+    <record id="model_unit_name" model="ir.model">
+        <field name="name">unit.name</field>
+        <field name="model">unit.name</field>
+        <field name="state">manual</field>
+    </record>
+
+    <!-- Define ir.model for root.map -->
+    <record id="model_root_map" model="ir.model">
+        <field name="name">root.map</field>
+        <field name="model">root.map</field>
+        <field name="state">manual</field>
+    </record>
+
+    <!-- Define ir.model for customer.form -->
+    <record id="model_customer_form" model="ir.model">
+        <field name="name">customer.form</field>
+        <field name="model">customer.form</field>
+        <field name="state">manual</field>
+    </record>
+</odoo>

@@ -24,7 +24,7 @@ class RootMap(models.Model):
     # stagess_dd = fields.Selection([('not_working','Assigned'),('vinay',"Working"),('workingg','Done')],
     #                               string="Stagess",default='not_working', required=True)
     stage_dd = fields.Selection([('not_working','Assigned'),('vinay',"Working"),('workingg','Done')],
-                                  string="Stages",default='not_working', required=True)
+                                  string="Stages",default='not_working', )
 
     @api.model
     def create(self, vals):
