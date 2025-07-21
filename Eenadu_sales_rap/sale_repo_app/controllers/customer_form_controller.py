@@ -96,8 +96,8 @@ class CustomerFormAPI(http.Controller):
                 'latitude': kwargs.get('latitude'),
                 'longitude': kwargs.get('longitude'),
                 'location_address': kwargs.get('location_address'),
-                'location_url': kwargs.get('location_url '),
-                'face_base64': kwargs.get('face_base64 '),
+                'location_url': kwargs.get('location_url'),
+                'face_base64': kwargs.get('face_base64'),
             })
             return {'success': True, 'message': 'Customer Form created successfully', 'customer_id': customer.id,
                     "code": "200"}
