@@ -689,8 +689,7 @@ class CustomerFormAPI(http.Controller):
             user_id = int(kw.get('agent_id'))
             token = kw.get('token')
             from_to_list = kw.get('from_to_list', [])
-
-            print("111")
+            root_map_id = kw.get('root_map_id')
 
             if not token:
                 return {'success': False, 'message': 'Token is missing', 'code': 403}
@@ -708,19 +707,21 @@ class CustomerFormAPI(http.Controller):
             root_map_rec = False
 
             # Only create root.map if flag is "true" (string)
-            if 1==1:
+            if not root_map_id:
                 root_map_rec = request.env['root.map'].sudo().create({
                     'root_name': user["user_login"],
                     'date': date.today(),
                     'stage_dd': 'not_working',
                     'user_id': [(6, 0, [agent.id])],
                 })
-                print("3333")
+            else:
+                root_map_rec = request.env['root.map'].sudo().browse(int(root_map_id))
+
 
             for pair in from_to_list:
                 from_loc = pair.get('from_location')
                 to_loc = pair.get('to_location')
-                print("4444")
+
 
                 if not from_loc or not to_loc:
                     continue
@@ -836,7 +837,9 @@ class CustomerFormAPI(http.Controller):
                 from_to_data = []
                 for fromto in record.for_fromto_ids:
                     from_to_data.append({
+                        'id':fromto.id,
                         'from_location': fromto.from_location,
+                        'extra_point': fromto.extra_point,
                         'to_location': fromto.to_location,
                     })
                 root_data = {
@@ -870,6 +873,40 @@ class CustomerFormAPI(http.Controller):
                 'message': str(e),
                 'code': 500
             }
+
+    @http.route('/api/for_assign_extra_point', type='json', auth='public', methods=['POST'], csrf=False, cors="*")
+    def for_assign_extra_point(self, **kw):
+        location_id = kw.get('location_id')
+        api_key = kw.get('token')
+        extra_point = kw.get('extra_point')
+
+        if not api_key:
+            return {'success': False, 'message': 'Token is missing', 'code': 403}
+
+        user = self._verify_api_key(api_key)
+        if not user:
+            return {'success': False, 'message': 'Invalid or expired token', 'code': 403}
+
+        if not location_id:
+            return {'success': False, 'message': 'Location ID is missing', 'code': 400}
+
+        if extra_point is None:
+            return {'success': False, 'message': 'Extra point is missing', 'code': 400}
+
+        fromto_rec = request.env['fromto.rootmap'].sudo().search([
+            ('id', '=', int(location_id))
+        ], limit=1)
+
+        if not fromto_rec:
+            return {'success': False, 'message': 'Location not found', 'code': 404}
+
+        try:
+            fromto_rec.sudo().write({'extra_point': extra_point})
+            return {'success': True, 'message': 'Extra point assigned successfully', 'code': 200}
+        except Exception as e:
+            return {'success': False, 'message': f'Error assigning extra point: {str(e)}', 'code': 500}
+
+
     @http.route('/api/for_agent_root_map_name', type='json', auth='public', methods=['POST'], csrf=False, cors="*")
     def For_agent_root_map_name(self, **kw):
         try:

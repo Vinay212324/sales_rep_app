@@ -47,4 +47,5 @@ class From_and_to_rootmap(models.Model):
 
     from_location = fields.Char(string="From location")
     to_location = fields.Char(string="To location")
+    extra_point = fields.Char(string="Add a point")
     fromto_ids = fields.Many2many("root.map", string="From to roots")

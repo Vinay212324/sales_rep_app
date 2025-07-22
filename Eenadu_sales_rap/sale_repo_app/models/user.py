@@ -8,13 +8,13 @@ class Users(models.Model):
     _inherit = 'res.users'
 
     role = fields.Selection(
-        [('agent', 'Level0'),
-         ('Office_staff', 'level1'),
-         ('unit_manager', 'Level2'),
-         ('segment_incharge', 'Level2'),
-         ('circulation_incharge', 'Level2'),
-         ('region_head', 'Level3'),
-         ('circulation_head', 'Level4'),('admin','level5')],
+        [('agent', 'agent'),
+         ('Office_staff', 'Office staff'),
+         ('unit_manager', 'unit manager'),
+         ('segment_incharge', 'segment incharge'),
+         ('circulation_incharge', 'circulation incharge'),
+         ('region_head', 'region head'),
+         ('circulation_head', 'circulation head'),('admin','admin')],
         string="Role", required=True, default="agent"
     )
     unit_name_ids = fields.One2many('unit.name','unit_name_id')

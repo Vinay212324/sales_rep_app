@@ -76,6 +76,7 @@
                             <field name="latitude"/>
                             <field name="longitude"/>
                             <field name="location_address"/>
+                            <field name="location_url"/>
                         </group>
                     </group>
                 </sheet>

@@ -1,7 +1,9 @@
 from odoo import models, api, fields, _
-from datetime import datetime, timedelta
-# from odoo.exceptions import
+from datetime import datetime
+import logging
 
+_logger = logging.getLogger(__name__)
+import requests
 
 class CustomerForm(models.Model):
     _name = 'customer.form'
@@ -66,4 +68,30 @@ class CustomerForm(models.Model):
     location_address = fields.Char(string="Address")
     location_url = fields.Char(string='Location Link')
     face_base64 = fields.Binary(string="Face image")
+
+    def _get_lat_lon_from_ip(self):
+        try:
+            response = requests.get('http://ip-api.com/json/')
+            data = response.json()
+            if data.get('status') == 'success':
+                return str(data.get('lat')), str(data.get('lon'))
+        except Exception as e:
+            _logger.warning("Geo IP fetch failed: %s", e)
+        return "0.0", "0.0"  # fallback values as string (since you use Char)
+
+    @api.model
+    def create(self, vals):
+        if not vals.get('latitude') or not vals.get('longitude'):
+            lat, lon = self._get_lat_lon_from_ip()
+            vals['latitude'] = lat
+            vals['longitude'] = lon
+        return super(CustomerForm, self).create(vals)
+
+    def write(self, vals):
+        if not vals.get('latitude') or not vals.get('longitude'):
+            lat, lon = self._get_lat_lon_from_ip()
+            vals['latitude'] = lat
+            vals['longitude'] = lon
+        return super(CustomerForm, self).write(vals)
+
 

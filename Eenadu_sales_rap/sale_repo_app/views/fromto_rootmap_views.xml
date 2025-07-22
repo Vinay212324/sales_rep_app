@@ -8,6 +8,7 @@
             <tree string="From-To Root Map">
                 <field name="from_location"/>
                 <field name="to_location"/>
+                <field name="extra_point"/>
             </tree>
         </field>
     </record>
@@ -22,6 +23,7 @@
                     <group>
                         <field name="from_location"/>
                         <field name="to_location"/>
+                        <field name="extra_point"/>
 <!--                        <field name="fromto_ids"/>-->
                     </group>
                 </sheet>

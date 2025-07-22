@@ -74,6 +74,18 @@ SECRET_KEY = 'your_secret_key'
 #         return redirect('/lin')
 
 class UserPortal(http.Controller):
+
+    @http.route('/self/dashboard/data', type='json', auth='user')
+    def get_dashboard_data(self):
+        customers = request.env['customer.form'].sudo().search_read([], ['agent_name', 'latitude', 'longitude'])
+        root_maps = request.env['root.map'].sudo().search_read([], ['root_name', 'stage_dd'])
+        from_to_maps = request.env['fromto.rootmap'].sudo().search_read([], ['from_location', 'to_location'])
+
+        return {
+            'customers': customers,
+            'root_maps': root_maps,
+            'from_to_maps': from_to_maps,
+        }
     @http.route('/lin', type='http', auth='public')
     def user_portal(self, **kwargs):
         return http.request.render("sale_repo_app.user_portal_template")

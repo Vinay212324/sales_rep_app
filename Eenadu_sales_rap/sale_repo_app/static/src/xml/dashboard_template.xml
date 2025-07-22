@@ -1,8 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
     <t t-name="sale_repo_app.SelfDashboardTemplate" owl="1">
-        <div>
-            Hello from SelfDashboard!
-        </div>
+        <div class="o_container" style="margin-left:25px;margin-top:15px;">
+            <h1 class="for_head">Houses Visited</h1>
+            <p>Today's House Count: <t t-esc="state.target"/></p>
+            <p>Total Houses Visited: <t t-esc="state.today_customer_forms_count"/></p>
+            <p>Today's Target Left: <t t-esc="state.target_left"/></p>
+
+            <h1 class="for_head">My Route Map</h1>
+            <p>Go to Route Map</p>
+
+            <h1 class="for_head">Reports</h1>
+            <p>Already Subscribed</p>
+            <p>15 Days Offer Accepted</p>
+            <p>15 Days Offer Rejected</p>
+
+            <h1>Hello, <t t-esc="state.name"/>!</h1>
+        </div>+
     </t>
 </templates>
