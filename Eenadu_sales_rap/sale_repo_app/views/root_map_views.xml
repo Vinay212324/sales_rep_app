@@ -87,6 +87,7 @@
                             <field name="for_fromto_ids">
                                 <tree string="Users">
                                     <field name="from_location"/>
+                                    <field name="extra_point_ids" widget="many2many_tags" options="{'no_create_edit': True}" placeholder="Add Extra Points"/>
                                     <field name="to_location"/>
                                 </tree>
                             </field>
