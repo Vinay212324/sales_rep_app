@@ -23,6 +23,7 @@
     ],
     "assets": {
         "web.assets_backend": [
+            "sale_repo_app/static/src/css/agent_dashboard.css",
             "sale_repo_app/static/src/js/dash.js",
             "sale_repo_app/static/src/xml/dashboard_template.xml",
             "sale_repo_app/static/src/js/hide_menu_items.js",

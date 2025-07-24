@@ -85,6 +85,11 @@ class CustomerForm(models.Model):
             lat, lon = self._get_lat_lon_from_ip()
             vals['latitude'] = lat
             vals['longitude'] = lon
+        # Generate Google Maps link
+        if vals.get('latitude') and vals.get('longitude'):
+            lat = vals.get('latitude')
+            lon = vals.get('longitude')
+            vals['location_url'] = f"https://www.google.com/maps?q={lat},{lon}"
         return super(CustomerForm, self).create(vals)
 
     def write(self, vals):
@@ -92,6 +97,12 @@ class CustomerForm(models.Model):
             lat, lon = self._get_lat_lon_from_ip()
             vals['latitude'] = lat
             vals['longitude'] = lon
+        # Generate Google Maps link
+        lat = vals.get('latitude') or self.latitude
+        lon = vals.get('longitude') or self.longitude
+        if lat and lon:
+            vals['location_url'] = f"https://www.google.com/maps?q={lat},{lon}"
         return super(CustomerForm, self).write(vals)
+
 
 

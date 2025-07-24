@@ -7,6 +7,7 @@ access_res_users_unit_manager,access.res.users.unit_manager,base.model_res_users
 access_unit_name_unit_manager,access.unit.name.unit_manager,model_unit_name,unit_manager_group,1,1,1,1
 for_root_map_manager,for_root_manager,model_root_map,unit_manager_group,1,1,1,1
 access_customer_form_manager,access.customer.form_manager,model_customer_form,unit_manager_group,1,1,1,1
+jjj,hhh,model_fromto_rootmap,unit_manager_group,1,1,1,1
 
 
 saleacs,salerep,base.model_res_users,admin_group,1,1,1,1
@@ -18,3 +19,9 @@ access_fromto_rootmap_admin,access.fromto.rootmap.admin,model_fromto_rootmap,adm
 
 ccc,ccc,model_root_map,agent_group,1,1,1,1
 aaa,bbb,model_customer_form,agent_group,1,1,1,1
+bbb,ddd,model_fromto_rootmap,agent_group,1,1,1,1
+
+ssaleacs,ssalerep,base.model_res_users,office_staff_group,1,1,1,1
+aoffic,boffice,model_unit_name,office_staff_group,1,1,1,1
+boffic,coffice,model_root_map,office_staff_group,1,1,1,1
+goffice,doffice,model_fromto_rootmap,office_staff_group,1,1,1,1

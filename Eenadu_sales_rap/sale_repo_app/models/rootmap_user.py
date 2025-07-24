@@ -43,9 +43,18 @@ class RootMap(models.Model):
         return res
 class From_and_to_rootmap(models.Model):
     _name = "fromto.rootmap"
-    _description = "Root Map from to"
+    _description = "Rote Map from to"
 
     from_location = fields.Char(string="From location")
     to_location = fields.Char(string="To location")
     extra_point = fields.Char(string="Add a point")
-    fromto_ids = fields.Many2many("root.map", string="From to roots")
+    # extra_point_ids = fields.Many2many('extra.point', string="Extra Points")
+    fromto_ids = fields.Many2many("root.map", string="From to rotes")
+
+
+
+# class ExtraPoint(models.Model):
+#     _name = 'extra.point'
+#     _description = 'Extra Point'
+#
+#     name = fields.Char(string='Point Name', required=True)

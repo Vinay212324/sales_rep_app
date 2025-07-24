@@ -83,7 +83,7 @@
                                 </tree>
                             </field>
                         </page>
-                        <page string="Assigned Root locations">
+                        <page string="Assigned Rote locations">
                             <field name="for_fromto_ids">
                                 <tree string="Users">
                                     <field name="from_location"/>
@@ -106,7 +106,7 @@
         </field>
     </record>
 
-    <menuitem id="menu_root_map" name="Root Maps" parent="menu_sales_rep_main"
+    <menuitem id="menu_root_map" name="Rote Maps" parent="menu_sales_rep_main"
               groups="sale_repo_app.agent_group,sale_repo_app.admin_group,sale_repo_app.unit_manager_group"
               action="action_root_map"/>
 </odoo>

@@ -44,5 +44,6 @@
               name="Unit Names"
               parent="menu_sales_rep_main"
               action="action_unit_name"
+              groups="sale_repo_app.admin_group"
               sequence="20"/>
 </odoo>
