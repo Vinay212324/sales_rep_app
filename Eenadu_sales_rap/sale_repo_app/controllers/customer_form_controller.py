@@ -805,7 +805,7 @@ class CustomerFormAPI(http.Controller):
                 'code': 500
             }
 
-    @http.route('/api/user_root_maps_by_stage', type='json', auth='public', methods=['POST'], csrf=False, cors="*")
+    @route('/api/user_root_maps_by_stage', type='json', auth='public', methods=['POST'], csrf=False, cors="*")
     def user_root_maps_by_stage(self, **kw):
         try:
             user_id = kw.get('user_id')
@@ -818,17 +818,14 @@ class CustomerFormAPI(http.Controller):
             if not user:
                 return {'success': False, 'message': 'Invalid or expired token', 'code': 403}
 
-            # Get the target user (agent)
             agent = request.env['res.users'].sudo().browse(int(user_id))
             if not agent.exists():
                 return {'success': False, 'message': 'User not found', 'code': 404}
 
-            # Fetch root.map records linked to this user
             root_maps = request.env['root.map'].sudo().search([
                 ('user_id', 'in', [agent.id])
             ])
 
-            # Organize by stage
             assigned = []
             working = []
             done = []
@@ -836,12 +833,18 @@ class CustomerFormAPI(http.Controller):
             for record in root_maps:
                 from_to_data = []
                 for fromto in record.for_fromto_ids:
+                    extra_points = [{
+                        'id': ep.id,
+                        'name': ep.name
+                    } for ep in fromto.extra_point_ids]
+
                     from_to_data.append({
-                        'id':fromto.id,
+                        'id': fromto.id,
                         'from_location': fromto.from_location,
-                        'extra_point': fromto.extra_point,
                         'to_location': fromto.to_location,
+                        'extra_points': extra_points
                     })
+
                 root_data = {
                     'id': record.id,
                     'name': record.root_name,
