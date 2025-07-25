@@ -16,7 +16,7 @@ access_customer_form,access.customer.form,model_customer_form,admin_group,1,1,1,
 for_root_map,for_root,model_root_map,admin_group,1,1,1,1
 for_root_map_extra_point,for_root_extra_point,model_extra_point,admin_group,1,1,1,1
 access_fromto_rootmap_admin,access.fromto.rootmap.admin,model_fromto_rootmap,admin_group,1,1,1,1
-
+access_extra_point,access_extra_point,model_extra_point,,1,1,1,1
 
 ccc,ccc,model_root_map,agent_group,1,1,1,1
 aaa,bbb,model_customer_form,agent_group,1,1,1,1
