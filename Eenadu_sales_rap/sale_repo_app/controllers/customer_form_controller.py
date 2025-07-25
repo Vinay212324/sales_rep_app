@@ -878,7 +878,7 @@ class CustomerFormAPI(http.Controller):
     def for_assign_extra_point(self, **kw):
         location_id = kw.get('location_id')
         api_key = kw.get('token')
-        extra_point = kw.get('extra_point')
+        extra_point_names = kw.get('extra_point_names')  # list of point names
 
         if not api_key:
             return {'success': False, 'message': 'Token is missing', 'code': 403}
@@ -890,8 +890,8 @@ class CustomerFormAPI(http.Controller):
         if not location_id:
             return {'success': False, 'message': 'Location ID is missing', 'code': 400}
 
-        if extra_point is None:
-            return {'success': False, 'message': 'Extra point is missing', 'code': 400}
+        if not extra_point_names or not isinstance(extra_point_names, list):
+            return {'success': False, 'message': 'Extra point names should be a list', 'code': 400}
 
         fromto_rec = request.env['fromto.rootmap'].sudo().search([
             ('id', '=', int(location_id))
@@ -901,11 +901,20 @@ class CustomerFormAPI(http.Controller):
             return {'success': False, 'message': 'Location not found', 'code': 404}
 
         try:
-            fromto_rec.sudo().write({'extra_point': extra_point})
-            return {'success': True, 'message': 'Extra point assigned successfully', 'code': 200}
-        except Exception as e:
-            return {'success': False, 'message': f'Error assigning extra point: {str(e)}', 'code': 500}
+            created_ids = []
+            for name in extra_point_names:
+                point = request.env['extra.point'].sudo().create({'name': name})
+                created_ids.append(point.id)
 
+            fromto_rec.sudo().write({'extra_point_ids': [(4, pid) for pid in created_ids]})
+            return {
+                'success': True,
+                'message': f"{len(created_ids)} Extra Point(s) created and assigned successfully",
+                'created_ids': created_ids,
+                'code': 200
+            }
+        except Exception as e:
+            return {'success': False, 'message': f'Error: {str(e)}', 'code': 500}
 
     @http.route('/api/for_agent_root_map_name', type='json', auth='public', methods=['POST'], csrf=False, cors="*")
     def For_agent_root_map_name(self, **kw):
