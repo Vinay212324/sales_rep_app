@@ -14,7 +14,7 @@ class CustomerForm(models.Model):
     agent_login = fields.Char(string="Agent login")
     unit_name = fields.Char(string="Unit name")
     date = fields.Date(string='Today Date', default=fields.Date.context_today)
-    time = fields.Char(string='Current Time')
+    time = fields.Char( string='Current Time', default=lambda self: datetime.now().strftime('%H:%M') )
 
     # Family Details
     family_head_name = fields.Char(string="Family Head Name")
@@ -104,5 +104,74 @@ class CustomerForm(models.Model):
             vals['location_url'] = f"https://www.google.com/maps?q={lat},{lon}"
         return super(CustomerForm, self).write(vals)
 
+    @api.model
+    def create(self, vals):
+        # Auto-fill agent-related fields if not provided
+        user = self.env.user
+        if not vals.get('agent_name'):
+            vals['agent_name'] = user.name
+        if not vals.get('agent_login'):
+            vals['agent_login'] = user.login
+        if not vals.get('unit_name'):
+            vals['unit_name'] = user.company_id.name  # or custom field if you have unit info elsewhere
 
+        # Auto-fill current time if not provided
+        if not vals.get('time'):
+            vals['time'] = datetime.now().strftime('%H:%M:%S')
 
+        # Auto-fill latitude/longitude if not given
+        if not vals.get('latitude') or not vals.get('longitude'):
+            lat, lon = self._get_lat_lon_from_ip()
+            vals['latitude'] = lat
+            vals['longitude'] = lon
+
+        # Generate Google Maps link
+        if vals.get('latitude') and vals.get('longitude'):
+            lat = vals.get('latitude')
+            lon = vals.get('longitude')
+            vals['location_url'] = f"https://www.google.com/maps?q={lat},{lon}"
+
+        return super(CustomerForm, self).create(vals)
+
+# @api.model
+# def create(self, vals):
+#     user = self.env.user
+#
+#     # Auto-fill agent info
+#     vals.setdefault('agent_name', user.name)
+#     vals.setdefault('agent_login', user.login)
+#     vals.setdefault('unit_name', user.company_id.name)
+#
+#     # Auto-fill current time if not already set
+#     vals.setdefault('time', datetime.now().strftime('%H:%M:%S'))
+#
+#     # Auto-fill latitude and longitude if not provided
+#     if not vals.get('latitude') or not vals.get('longitude'):
+#         lat, lon = self._get_lat_lon_from_ip()
+#         vals['latitude'] = lat
+#         vals['longitude'] = lon
+#
+#     # Auto-fill Google Maps URL
+#     if vals.get('latitude') and vals.get('longitude'):
+#         vals['location_url'] = f"https://www.google.com/maps?q={vals['latitude']},{vals['longitude']}"
+#
+#     return super(CustomerForm, self).create(vals)
+    @api.model
+    def default_get(self, fields_list):
+        """Auto-fill fields when opening the form"""
+        res = super().default_get(fields_list)
+        user = self.env.user
+        if 'agent_name' in fields_list:
+            res['agent_name'] = user.name
+        if 'agent_login' in fields_list:
+            res['agent_login'] = user.login
+        if 'unit_name' in fields_list:
+            res['unit_name'] = user.unit_name
+        if 'time' in fields_list:
+            res['time'] = datetime.now().strftime('%H:%M')
+        if 'latitude' in fields_list or 'longitude' in fields_list or 'location_url' in fields_list:
+            lat, lon = self._get_lat_lon_from_ip()
+            res['latitude'] = lat
+            res['longitude'] = lon
+            res['location_url'] = f"https://www.google.com/maps?q={lat},{lon}"
+        return res

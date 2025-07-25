@@ -6,7 +6,7 @@ class RootMap(models.Model):
     _description = "Root Map"
     _order = "stage_dd"
 
-    root_name = fields.Char(string="Root Map")
+    root_name = fields.Char(string="Rote assigner")
     date = fields.Date( string="Date")
 
     for_fromto_ids = fields.Many2many("fromto.rootmap", "fromto_ids",string="For FROM TO roots")
@@ -41,6 +41,20 @@ class RootMap(models.Model):
                 users = rec.user_id
                 users.write({'root_name_id': rec.id})
         return res
+
+    @api.model
+    def default_get(self, fields_list):
+        """Auto-fill fields when opening the form"""
+        res = super().default_get(fields_list)
+        user = self.env.user
+        if 'root_name' in fields_list:
+            res['root_name'] = user.name
+        if 'date' in fields_list:
+            res['date'] = datetime.now().date()
+
+        return res
+
+
 class From_and_to_rootmap(models.Model):
     _name = "fromto.rootmap"
     _description = "Rote Map from to"
