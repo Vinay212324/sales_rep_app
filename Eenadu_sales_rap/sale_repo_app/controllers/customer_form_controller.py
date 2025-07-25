@@ -804,7 +804,7 @@ class CustomerFormAPI(http.Controller):
                 'message': str(e),
                 'code': 500
             }
-    @route('/api/user_root_maps_by_stage', type='json', auth='public', methods=['POST'], csrf=False, cors="*")
+    @http.route('/api/user_root_maps_by_stage', type='json', auth='public', methods=['POST'], csrf=False, cors="*")
     def user_root_maps_by_stage(self, **kw):
         try:
             user_id = kw.get('user_id')
