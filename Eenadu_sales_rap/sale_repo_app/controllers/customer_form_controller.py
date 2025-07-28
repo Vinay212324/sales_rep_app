@@ -1249,3 +1249,37 @@ class CustomerFormAPI(http.Controller):
 
         except Exception as e:
             return {'error': 'Internal Server Error', 'message': str(e), 'code': 500}
+
+    @http.route('/api/upload_user_image', type='json', auth='public', methods=['POST'], csrf=False)
+    def upload_user_image(self, **kwargs):
+        try:
+            user_id = kwargs.get('user_id')
+            api_key = kwargs.get('token')
+            image = kwargs.get('image')  # base64 string of image
+
+            user = self._verify_api_key(api_key)
+            if not user:
+                return {
+                    'success': False,
+                    'message': 'Invalid or expired token',
+                    "code": "403"
+                }
+
+            if not user_id or not image:
+                return {'success': False, 'message': 'user_id and image are required'}
+
+            user = request.env['res.users'].sudo().browse(int(user_id))
+            if not user.exists():
+                return {'success': False, 'message': 'User not found'}
+
+            # ✅ Assign the base64 image string to image_1920
+            user.image_1920 = image
+
+            return {
+                'success': True,
+                'message': 'Image uploaded successfully',
+                'image_preview': f"data:image/png;base64,{image}"
+            }
+
+        except Exception as e:
+            return {'success': False, 'message': str(e)}

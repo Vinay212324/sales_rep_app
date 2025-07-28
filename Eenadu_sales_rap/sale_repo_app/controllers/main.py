@@ -183,6 +183,7 @@ class UserPortal(http.Controller):
                 'phone': user.phone,
                 'status': user.status,
                 'target': user.target,
+                'image_1920': f"data:image/png;base64,{user.image_1920.decode('utf-8')}" if user.image_1920 else None,
                 'expiration': expiration,  # Set expiration if available
                 'code': "200"
             }
