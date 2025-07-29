@@ -107,7 +107,18 @@
     <menuitem id="for_users"
               name="User info"
               groups="sale_repo_app.admin_group,sale_repo_app.unit_manager_group,sale_repo_app.office_staff_group"
-              parent="menu_sales_rep_main"
+              parent="menu_sales_rep_main"/>
+
+    <menuitem id="active_users_id"
+              name="un active users"
+              groups="sale_repo_app.admin_group,sale_repo_app.unit_manager_group,sale_repo_app.office_staff_group"
+              parent="for_users"
+              action="action_res_users_inactive"/>
+
+    <menuitem id="unactive_users_id"
+              name="active users"
+              groups="sale_repo_app.admin_group,sale_repo_app.unit_manager_group,sale_repo_app.office_staff_group"
+              parent="for_users"
               action="action_res_users_heirt"/>
 
 

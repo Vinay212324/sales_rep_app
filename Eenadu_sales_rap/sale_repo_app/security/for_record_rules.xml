@@ -23,18 +23,34 @@
     </record>
 
 
-    <record id="rule_root_map_unit_manager_user_only" model="ir.rule">
-    <field name="name">Unit Manager: See Only Agents in Same Unit</field>
-    <field name="model_id" ref="base.model_res_users"/>
-    <field name="domain_force">
-        [('role', '=', 'agent'), ('unit_name', '=', user.unit_name)]
-    </field>
-    <field name="groups" eval="[(4, ref('sale_repo_app.unit_manager_group'))]"/>
-    <field name="perm_read" eval="1"/>
-    <field name="perm_write" eval="1"/>
-    <field name="perm_create" eval="1"/>
-    <field name="perm_unlink" eval="0"/>
-</record>
+    <record id="custom_form_agent_user_only" model="ir.rule">
+        <field name="name">Unit Manager: See Only Agents in Same Unit</field>
+        <field name="model_id" ref="model_customer_form"/>
+        <field name="domain_force">[('agent_name', '=', user.name)]</field>
+        <field name="groups" eval="[(4, ref('sale_repo_app.agent_group'))]"/>
+        <field name="perm_read" eval="1"/>
+        <field name="perm_write" eval="1"/>
+        <field name="perm_create" eval="1"/>
+        <field name="perm_unlink" eval="1"/>
+   </record>
+
+
+
+
+
+   <record id="rule_root_map_unit_manager_user_only" model="ir.rule">
+        <field name="name">Unit Manager: See Only Agents in Same Unit</field>
+        <field name="model_id" ref="base.model_res_users"/>
+        <field name="domain_force">[('role', '=', 'agent'), ('unit_name', '=', user.unit_name)]</field>
+        <field name="groups" eval="[(4, ref('sale_repo_app.unit_manager_group'))]"/>
+        <field name="perm_read" eval="1"/>
+        <field name="perm_write" eval="1"/>
+        <field name="perm_create" eval="1"/>
+        <field name="perm_unlink" eval="0"/>
+   </record>
+
+
+
 
 
 <!--<record id="rule_res_users_unit_manager_own" model="ir.rule">-->

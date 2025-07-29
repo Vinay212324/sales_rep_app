@@ -86,21 +86,20 @@ class UserPortal(http.Controller):
             'root_maps': root_maps,
             'from_to_maps': from_to_maps,
         }
-    @http.route('/lin', type='http', auth='public')
-    def user_portal(self, **kwargs):
-        return http.request.render("sale_repo_app.user_portal_template")
+    # @http.route('/lin', type='http', auth='public')
+    # def user_portal(self, **kwargs):
+    #     return http.request.render("sale_repo_app.user_portal_template")
 
-    @http.route('/dashboard', type='http', auth='public')
-    def dashboard(self, **kw):
-        if not request.session.uid:
-            print("kkdkmjljjjojffffffffff")
-     # Redirect if not logged in
-        print("llllllllllllllll")
-        return http.request.render('sale_repo_app.user_dashboard_template')
+    # @http.route('/dashboard', type='http', auth='public')
+    # def dashboard(self, **kw):
+    #     if not request.session.uid:
+    #         print("kkdkmjljjjojffffffffff")
+    #  # Redirect if not logged in
+    #     print("llllllllllllllll")
+    #     return http.request.render('sale_repo_app.user_dashboard_template')
 
     @http.route('/customers_form', type='http', auth='public')
     def customers_form(self, **kwargs):
-
         return http.request.render("sale_repo_app.customers_form")
 
     @http.route(['/someurl'], type='http', auth="public", methods=["POST"], csrf=False)
@@ -250,9 +249,9 @@ class UserPortal(http.Controller):
                     "region_head": ['base.group_user', 'base.group_erp_manager', 'sale_repo_app.region_head_group'],
                     "unit_manager": ['base.group_user', 'base.group_erp_manager', 'sale_repo_app.unit_manager_group'],
                     "segment_incharge": ['base.group_user', 'base.group_erp_manager',
-                                         'sale_repo_app.unit_manager_group'],
+                                         'sale_repo_app.segment_incharge_group'],
                     "circulation_incharge": ['base.group_user', 'base.group_erp_manager',
-                                             'sale_repo_app.unit_manager_group'],
+                                             'sale_repo_app.circulation_incharge_group'],
                     "agent": ['base.group_user', 'base.group_erp_manager', 'sale_repo_app.agent_group'],
                     "admin": ['base.group_user', 'base.group_erp_manager', 'sale_repo_app.agent_group',
                               'sale_repo_app.admin_group'],

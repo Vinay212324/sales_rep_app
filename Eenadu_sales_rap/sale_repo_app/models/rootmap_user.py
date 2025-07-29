@@ -3,15 +3,15 @@ from datetime import datetime, timedelta
 
 class RootMap(models.Model):
     _name = "root.map"
-    _description = "Root Map"
+    _description = "Rote Map"
     _order = "stage_dd"
 
     root_name = fields.Char(string="Rote assigner")
     date = fields.Date( string="Date")
 
-    for_fromto_ids = fields.Many2many("fromto.rootmap", "fromto_ids",string="For FROM TO roots")
+    for_fromto_ids = fields.Many2many("fromto.rootmap", "fromto_ids",string="For From-To Rote")
 
-    user_id = fields.Many2many('res.users', string='Vinay')
+    user_id = fields.Many2many('res.users', string='user information')
     user_ids = fields.One2many('res.users', 'root_name_id', string="user_id")
 
     # stage = fields.Selection([
@@ -23,7 +23,7 @@ class RootMap(models.Model):
     # stagess = fields.Selection([('vinay',"Vinay"),('not working','Working'),('workingg','yess')], string="Stagess")
     # stagess_dd = fields.Selection([('not_working','Assigned'),('vinay',"Working"),('workingg','Done')],
     #                               string="Stagess",default='not_working', required=True)
-    stage_dd = fields.Selection([('not_working','Assigned'),('vinay',"Working"),('workingg','Done')],
+    stage_dd = fields.Selection([('not_working','Assigned'),('workingg','Done')],
                                   string="Stages",default='not_working', )
 
     @api.model

@@ -5,7 +5,7 @@
         <field name="name">fromto.rootmap.tree</field>
         <field name="model">fromto.rootmap</field>
         <field name="arch" type="xml">
-            <tree string="From-To Root Map">
+            <tree string="From-To Rote Map">
                 <field name="from_location"/>
                 <field name="to_location"/>
                 <field name="extra_point_ids" widget="many2many_tags" options="{'no_create_edit': True}" placeholder="Add Extra Points"/>
@@ -18,7 +18,7 @@
         <field name="name">fromto.rootmap.form</field>
         <field name="model">fromto.rootmap</field>
         <field name="arch" type="xml">
-            <form string="From-To Root Map">
+            <form string="From-To Rote Map">
                 <sheet>
                     <group>
                         <field name="from_location"/>
@@ -33,7 +33,7 @@
 
     <!-- Action -->
     <record id="action_fromto_rootmap" model="ir.actions.act_window">
-        <field name="name">From-To Root Map</field>
+        <field name="name">From-To Rote Map</field>
         <field name="res_model">fromto.rootmap</field>
         <field name="view_mode">tree,form</field>
         <field name="help" type="html">

@@ -33,6 +33,21 @@
         <field name="category_id" ref="module_sales_rep_access_group"/>
     </record>
 
+
+    <record id="segment_incharge_group" model="res.groups">
+        <field name="name">Segment incharge</field>
+        <field name="category_id" ref="module_sales_rep_access_group"/>
+    </record>
+
+
+
+    <record id="circulation_incharge_group" model="res.groups">
+        <field name="name">Circulation incharge</field>
+        <field name="category_id" ref="module_sales_rep_access_group"/>
+    </record>
+
+
+
     <!-- Unit Manager Group -->
     <record id="office_staff_group" model="res.groups">
         <field name="name">Office staff</field>
