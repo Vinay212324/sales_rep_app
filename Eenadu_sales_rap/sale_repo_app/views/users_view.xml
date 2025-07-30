@@ -62,8 +62,13 @@
         <field name="arch" type="xml">
             <form string="Users">
                 <header>
-                    <field name="status" widget="statusbar" options="{'clickable': True}"/>
+                    <field name="status"
+                           widget="statusbar"
+                           options="{'clickable': True}"
+                           attrs="{'readonly': [('edit_boll', '=', False)]}" />
+                    <field name="edit_boll" invisible="1"/>
                 </header>
+
                 <sheet>
                     <div class="oe_title">
                         <label for="name"/>

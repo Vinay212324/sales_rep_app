@@ -37,8 +37,13 @@ class Users(models.Model):
     aadhar_base64 = fields.Binary(string="Aadhar image")
     Pan_base64 = fields.Binary(string="Pan image")
     target = fields.Char(string="Target")
+    edit_boll = fields.Boolean(string="Edit Allowed", compute="_compute_sale_user_readonly", store=False)
 
-
+    @api.depends_context('uid')
+    def _compute_sale_user_readonly(self):
+        current_user_in_group = self.env.user.has_group('sale_repo_app.circulation_incharge_group')
+        for rec in self:
+            rec.edit_boll = current_user_in_group
 
     def generate_token(self):
         """ Generate a unique API token and set an expiration time. """

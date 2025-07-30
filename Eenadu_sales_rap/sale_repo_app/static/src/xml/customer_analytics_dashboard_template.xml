@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+<t t-name="customer_analytics_dashboard_template" owl="1">
+    <div class="container-fluid mt-4" style="max-height: 85vh; overflow-y: auto; padding-right: 15px;">
+        <h2>📊 Customer Analytics Dashboard</h2>
+
+        <t t-if="state.stats">
+            <t t-foreach="Object.entries(state.stats)" t-as="entry" t-key="entry[0]">
+                <t t-set="period" t-value="entry[0]"/>
+                <t t-set="data" t-value="entry[1]"/>
+
+                <div class="card p-3 my-3 shadow-sm">
+                    <h4 class="text-capitalize"><t t-esc="period"/> Summary</h4>
+                    <div class="row text-center">
+                        <div class="col-md-3"><strong>📰 Eenadu Users:</strong> <t t-esc="data.eenaduUsers"/></div>
+                        <div class="col-md-3"><strong>🎁 Free Offers:</strong> <t t-esc="data.freeOffer"/></div>
+                        <div class="col-md-3"><strong>🗞 Other Papers:</strong> <t t-esc="data.otherPapers"/></div>
+                        <div class="col-md-3"><strong>🚫 No Paper:</strong> <t t-esc="data.noPaper"/></div>
+                    </div>
+
+                    <!-- Feedback from Eenadu Users -->
+                    <div class="mt-3">
+                        <h6 style="cursor:pointer;" t-on-click="() => state.toggleSection(period, 'feedbacks')">
+                            💬 Feedback from Eenadu Users:
+                        </h6>
+                        <ul t-if="state.openSections[period]?.feedbacks" style="max-height: 150px; overflow-y: auto;">
+                            <t t-foreach="data.feedbacks" t-as="fb" t-key="fb"><li><t t-esc="fb"/></li></t>
+                        </ul>
+                    </div>
+
+                    <!-- Reasons for not using Eenadu -->
+                    <div>
+                        <h6 style="cursor:pointer;" t-on-click="() => state.toggleSection(period, 'reasonsNoEenadu')">
+                            ❌ Reasons for not using Eenadu:
+                        </h6>
+                        <ul t-if="state.openSections[period]?.reasonsNoEenadu" style="max-height: 150px; overflow-y: auto;">
+                            <t t-foreach="data.reasonsNoEenadu" t-as="reason" t-key="reason"><li><t t-esc="reason"/></li></t>
+                        </ul>
+                    </div>
+
+                    <!-- Reasons for not reading any paper -->
+                    <div>
+                        <h6 style="cursor:pointer;" t-on-click="() => state.toggleSection(period, 'reasonsNoReading')">
+                            📵 Reasons for not reading any paper:
+                        </h6>
+                        <ul t-if="state.openSections[period]?.reasonsNoReading" style="max-height: 150px; overflow-y: auto;">
+                            <t t-foreach="data.reasonsNoReading" t-as="reason" t-key="reason"><li><t t-esc="reason"/></li></t>
+                        </ul>
+                    </div>
+                </div>
+            </t>
+        </t>
+
+    </div>
+</t>
+</templates>
