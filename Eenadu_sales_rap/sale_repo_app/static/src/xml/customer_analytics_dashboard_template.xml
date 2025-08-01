@@ -23,7 +23,7 @@
                         <h6 style="cursor:pointer;" t-on-click="() => state.toggleSection(period, 'feedbacks')">
                             💬 Feedback from Eenadu Users:
                         </h6>
-                        <ul t-if="state.openSections[period]?.feedbacks && data.feedbacks.length" style="max-height: 150px; overflow-y: auto;">
+                        <ul t-if="state.openSections[period]?.feedbacks &amp;&amp; data.feedbacks.length" style="max-height: 150px; overflow-y: auto;">
                             <t t-foreach="data.feedbacks" t-as="fb" t-key="fb.id">
                                 <li><t t-esc="fb.text"/></li>
                             </t>
@@ -36,7 +36,7 @@
                         <h6 style="cursor:pointer;" t-on-click="() => state.toggleSection(period, 'reasonsNoEenadu')">
                             ❌ Reasons for not using Eenadu:
                         </h6>
-                        <ul t-if="state.openSections[period]?.reasonsNoEenadu && data.reasonsNoEenadu.length" style="max-height: 150px; overflow-y: auto;">
+                        <ul t-if="state.openSections[period]?.reasonsNoEenadu &amp;&amp; data.reasonsNoEenadu.length" style="max-height: 150px; overflow-y: auto;">
                             <t t-foreach="data.reasonsNoEenadu" t-as="reason" t-key="reason.id">
                                 <li><t t-esc="reason.text"/></li>
                             </t>
@@ -49,7 +49,7 @@
                         <h6 style="cursor:pointer;" t-on-click="() => state.toggleSection(period, 'reasonsNoReading')">
                             📵 Reasons for not reading any paper:
                         </h6>
-                        <ul t-if="state.openSections[period]?.reasonsNoReading && data.reasonsNoReading.length" style="max-height: 150px; overflow-y: auto;">
+                        <ul t-if="state.openSections[period]?.reasonsNoReading &amp;&amp; data.reasonsNoReading.length" style="max-height: 150px; overflow-y: auto;">
                             <t t-foreach="data.reasonsNoReading" t-as="reason" t-key="reason.id">
                                 <li><t t-esc="reason.text"/></li>
                             </t>
