@@ -1,4 +1,5 @@
 /** @odoo-module **/
+
 import { Component, onWillStart } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
@@ -57,23 +58,31 @@ export class CustomerAnalyticsDashboard extends Component {
         let eenaduUsers = 0, freeOffer = 0, otherPapers = 0, noPaper = 0;
         let reasonsNoEenadu = [], reasonsNoReading = [], feedbacks = [];
 
-        for (const rec of records) {
+        for (let i = 0; i < records.length; i++) {
+            const rec = records[i];
+
             if (rec.eenadu_newspaper) {
                 eenaduUsers++;
                 if (rec.feedback_to_improve_eenadu_paper) {
-                    feedbacks.push(rec.feedback_to_improve_eenadu_paper);
+                    feedbacks.push({ id: `fb-${i}`, text: rec.feedback_to_improve_eenadu_paper });
                 }
             }
+
             if (rec.free_offer_15_days) freeOffer++;
+
             if (rec.read_newspaper && rec.current_newspaper && rec.current_newspaper.toLowerCase() !== "eenadu") {
                 otherPapers++;
             }
+
             if (!rec.read_newspaper) {
                 noPaper++;
-                if (rec.reason_not_reading) reasonsNoReading.push(rec.reason_not_reading);
+                if (rec.reason_not_reading) {
+                    reasonsNoReading.push({ id: `nr-${i}`, text: rec.reason_not_reading });
+                }
             }
+
             if (!rec.eenadu_newspaper && rec.reason_for_not_taking_eenadu_newsPaper) {
-                reasonsNoEenadu.push(rec.reason_for_not_taking_eenadu_newsPaper);
+                reasonsNoEenadu.push({ id: `ne-${i}`, text: rec.reason_for_not_taking_eenadu_newsPaper });
             }
         }
 
@@ -90,5 +99,4 @@ export class CustomerAnalyticsDashboard extends Component {
 }
 
 CustomerAnalyticsDashboard.template = "customer_analytics_dashboard_template";
-
 registry.category("actions").add("customer_analytics_dashboard", CustomerAnalyticsDashboard);

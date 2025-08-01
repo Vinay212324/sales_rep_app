@@ -141,12 +141,12 @@ Address: ${address}`);
     get showCurrentPaperSection() { return this.state.read_newspaper; }
     get showNoNewsReason() { return !this.state.read_newspaper; }
     get showFreeTrialSection() { return this.state.eenadu_newspaper; }
-    get showPrivateJobFields() { return !this.state.employed ? false : (this.state.job_type === "private"); }
-    get showGovtJobFields() { return !this.state.employed ? false : (this.state.job_type === "govt"); }
+    get showPrivateJobFields() { return this.state.employed ? false : (this.state.job_type === "private"); }
+    get showGovtJobFields() { return this.state.employed ? false : (this.state.job_type === "govt"); }
     get showProfessionField() { return this.state.employed; }
     get showJobType() { return !this.state.employed; }
     get showJobDesignationOne() { return this.state.job_type === "private" && this.state.employed; }
-    get showJobTypeOne() { return this.state.job_type === "govt" && this.state.employed; }
+    get showJobTypeOne() { return this.state.job_type === "govt" && !this.state.employed; }
 
     async submitForm(ev) {
         ev.preventDefault();
