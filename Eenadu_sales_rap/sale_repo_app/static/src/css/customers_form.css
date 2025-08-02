@@ -1,14 +1,4 @@
 
-body {
-                        font-family: 'Poppins', sans-serif;
-                        background: linear-gradient(to right, #74ebd5, #acb6e5);
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                        min-height: 100vh;
-                        padding: 20px;
-                    }
-
                     .form-container {
                         background: white;
                         border-radius: 12px;

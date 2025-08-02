@@ -84,17 +84,35 @@
         </field>
     </record>
 
+    <record id="view_customer_form_search" model="ir.ui.view">
+        <field name="name">customer.form.search</field>
+        <field name="model">customer.form</field>
+        <field name="arch" type="xml">
+            <search string="Customer Form Search">
+                <field name="agent_name"/>
+                <field name="unit_name"/>
+                <field name="date"/>
+                <filter name="one_day_filter"
+                        string="Today"
+                        domain="[('date', '=', context_today())]"/>
+            </search>
+        </field>
+    </record>
+
+
     <!-- Action -->
     <record id="action_customer_form" model="ir.actions.act_window">
         <field name="name">Customer Forms</field>
         <field name="res_model">customer.form</field>
         <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_customer_form_search"/>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 Create your first customer form record
             </p>
         </field>
     </record>
+
 
     <menuitem id="menu_customer_form_main"
           name="Forms"
@@ -107,7 +125,18 @@
     <menuitem id="for_users"
               name="User info"
               groups="sale_repo_app.admin_group,sale_repo_app.unit_manager_group,sale_repo_app.office_staff_group"
-              parent="menu_sales_rep_main"
+              parent="menu_sales_rep_main"/>
+
+    <menuitem id="active_users_id"
+              name="un active users"
+              groups="sale_repo_app.admin_group,sale_repo_app.unit_manager_group,sale_repo_app.office_staff_group"
+              parent="for_users"
+              action="action_res_users_inactive"/>
+
+    <menuitem id="unactive_users_id"
+              name="active users"
+              groups="sale_repo_app.admin_group,sale_repo_app.unit_manager_group,sale_repo_app.office_staff_group"
+              parent="for_users"
               action="action_res_users_heirt"/>
 
 

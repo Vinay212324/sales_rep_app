@@ -171,13 +171,14 @@ background: linear-gradient(to bottom right,rgb(231, 236, 236) 0%, #ffffff 100%)
             </head>
             <body>
 
-                <div class="wrapper for-bg-img" style="background-image: url('/custom_login_page_user/static/src/img/bg1.png');background-size: cover;">
+                <div class="wrapper for-bg-img" style="background-image: url('/custom_login_page_user/static/src/img/group4.png');background-size: cover;">
 
 
                     <div class="" style="background-image: url(bg1.png);background-size: cover;">
                     <div class="container d-flex align-items-center justify-content-center vh-100">
                         <div class="login-box p-4 rounded shadow-lg">
-                            <h1 class="text-center mb-4">eSanchaya</h1>
+                             <img src="/custom_login_page_user/static/src/img/Screenshot from 2025-07-25 16-22-39.png" alt="Logo" style="max-width: 150px; margin-bottom: 20px;"/>
+<!--                            <h1 class="text-center mb-4">eSanchaya</h1>-->
                             <form class="form" action="/custom/do_login" method="post" id="myForm" >
                                 <div class="form-group">
                                     <input type="text"  id="identity" class="form-control" placeholder="User ID" name="login"/>

@@ -37,8 +37,13 @@ class Users(models.Model):
     aadhar_base64 = fields.Binary(string="Aadhar image")
     Pan_base64 = fields.Binary(string="Pan image")
     target = fields.Char(string="Target")
+    edit_boll = fields.Boolean(string="Edit Allowed", compute="_compute_sale_user_readonly", store=False)
 
-
+    @api.depends_context('uid')
+    def _compute_sale_user_readonly(self):
+        current_user_in_group = self.env.user.has_group('sale_repo_app.circulation_incharge_group')
+        for rec in self:
+            rec.edit_boll = current_user_in_group
 
     def generate_token(self):
         """ Generate a unique API token and set an expiration time. """
@@ -60,6 +65,58 @@ class Users(models.Model):
     def clear_token(self):
         """ Clear the token when the user logs out. """
         self.sudo().write({'api_token': False, 'token_expiry': False})
+
+
+    ROLE_GROUP_MAPPING = {
+        'admin': 'sale_repo_app.admin_group',
+        'circulation_head': 'sale_repo_app.circulation_head_group',
+        'region_head': 'sale_repo_app.region_head_group',
+        'unit_manager': 'sale_repo_app.unit_manager_group',
+        'segment_incharge': 'sale_repo_app.segment_incharge_group',
+        'circulation_incharge': 'sale_repo_app.circulation_incharge_group',
+        'Office_staff': 'sale_repo_app.office_staff_group',
+        'agent': 'sale_repo_app.agent_group',
+    }
+
+    # --- Create override to assign group by role ---
+    @api.model_create_multi
+    def create(self, vals_list):
+        users = super().create(vals_list)
+        for user in users:
+            user._update_user_group_by_role()
+        return users
+
+    # --- Write override to reassign group if role changes ---
+    def write(self, vals):
+        res = super().write(vals)
+        if 'role' in vals:
+            for user in self:
+                user._update_user_group_by_role()
+        return res
+
+    # --- Core logic: remove all mapped groups and assign only current role group ---
+    def _update_user_group_by_role(self):
+        if not self.role:
+            return
+
+        group_ids = []
+        for group_xml_id in self.ROLE_GROUP_MAPPING.values():
+            try:
+                group = self.env.ref(group_xml_id, raise_if_not_found=False)
+                if group:
+                    group_ids.append(group.id)
+            except Exception:
+                continue
+
+        # Remove all role-based groups
+        self.groups_id = [(3, gid) for gid in group_ids]
+
+        # Assign new group based on selected role
+        new_group_xml_id = self.ROLE_GROUP_MAPPING.get(self.role)
+        if new_group_xml_id:
+            new_group = self.env.ref(new_group_xml_id, raise_if_not_found=False)
+            if new_group:
+                self.groups_id = [(4, new_group.id)]
 
 class unit_names(models.Model):
     _name = 'unit.name'

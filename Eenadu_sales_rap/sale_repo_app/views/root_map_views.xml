@@ -75,11 +75,12 @@
                     <notebook>
                         <page string="Assigned Users">
                             <field name="user_id">
-                                <tree string="Users">
-                                    <field name="name"/>
-                                    <field name="login"/>
-                                    <field name="phone"/>
-                                    <field name="role"/>
+                                <tree string="Users" editable="bottom">
+                                    <field name="name" readonly="1"/>
+                                    <field name="login" readonly="1"/>
+                                     <field name="target" />
+                                    <field name="phone" readonly="1"/>
+                                    <field name="role" readonly="1"/>
                                 </tree>
                             </field>
                         </page>

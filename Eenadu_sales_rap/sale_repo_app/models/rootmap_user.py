@@ -3,15 +3,15 @@ from datetime import datetime, timedelta
 
 class RootMap(models.Model):
     _name = "root.map"
-    _description = "Root Map"
+    _description = "Rote Map"
     _order = "stage_dd"
 
-    root_name = fields.Char(string="Root Map")
+    root_name = fields.Char(string="Rote assigner")
     date = fields.Date( string="Date")
 
-    for_fromto_ids = fields.Many2many("fromto.rootmap", "fromto_ids",string="For FROM TO roots")
+    for_fromto_ids = fields.Many2many("fromto.rootmap", "fromto_ids",string="For From-To Rote")
 
-    user_id = fields.Many2many('res.users', string='Vinay')
+    user_id = fields.Many2many('res.users', string='user information')
     user_ids = fields.One2many('res.users', 'root_name_id', string="user_id")
 
     # stage = fields.Selection([
@@ -23,7 +23,7 @@ class RootMap(models.Model):
     # stagess = fields.Selection([('vinay',"Vinay"),('not working','Working'),('workingg','yess')], string="Stagess")
     # stagess_dd = fields.Selection([('not_working','Assigned'),('vinay',"Working"),('workingg','Done')],
     #                               string="Stagess",default='not_working', required=True)
-    stage_dd = fields.Selection([('not_working','Assigned'),('vinay',"Working"),('workingg','Done')],
+    stage_dd = fields.Selection([('not_working','Assigned'),('workingg','Done')],
                                   string="Stages",default='not_working', )
 
     @api.model
@@ -41,13 +41,27 @@ class RootMap(models.Model):
                 users = rec.user_id
                 users.write({'root_name_id': rec.id})
         return res
+
+    @api.model
+    def default_get(self, fields_list):
+        """Auto-fill fields when opening the form"""
+        res = super().default_get(fields_list)
+        user = self.env.user
+        if 'root_name' in fields_list:
+            res['root_name'] = user.name
+        if 'date' in fields_list:
+            res['date'] = datetime.now().date()
+
+        return res
+
+
 class From_and_to_rootmap(models.Model):
     _name = "fromto.rootmap"
     _description = "Rote Map from to"
 
     from_location = fields.Char(string="From location")
     to_location = fields.Char(string="To location")
-    # extra_point = fields.Char(string="Add a point")
+    extra_point = fields.Char(string="Add a point")
     extra_point_ids = fields.Many2many('extra.point', string="Extra Points")
     fromto_ids = fields.Many2many("root.map", string="From to rotes")
 
