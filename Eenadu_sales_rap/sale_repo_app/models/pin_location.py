@@ -5,6 +5,7 @@ class RootMap(models.Model):
     _description = "For Pin Location"
     _order = "location_name"
 
-    code = fields.Char(string="Code")
-    location_name = fields.Char(string="Location Name")
+    code = fields.Char(string="AGTCD")
+    location_name = fields.Char(string="Place")
+    name = fields.Char(string="Name")
 
