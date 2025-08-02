@@ -27,3 +27,8 @@ aoffic,boffice,model_unit_name,office_staff_group,1,1,1,1
 boffic,coffice,model_root_map,office_staff_group,1,1,1,1
 goffice,doffice,model_fromto_rootmap,office_staff_group,1,1,1,1
 gofficekk,dofficekk,model_customer_form,office_staff_group,1,1,1,1
+
+
+
+
+access_pin_location_user,access.pin.location.user,model_pin_location,base.group_user,1,1,1,1
