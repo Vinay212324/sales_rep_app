@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <!-- Tree View -->
+    <record id="view_work_session_tree" model="ir.ui.view">
+        <field name="name">work.session.tree</field>
+        <field name="model">work.session</field>
+        <field name="arch" type="xml">
+            <tree string="Work Sessions">
+                <field name="user_id"/>
+                <field name="start_time"/>
+                <field name="end_time"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="view_work_session_form" model="ir.ui.view">
+        <field name="name">work.session.form</field>
+        <field name="model">work.session</field>
+        <field name="arch" type="xml">
+            <form string="Work Session">
+                <group>
+                    <field name="user_id"/>
+                    <field name="start_time"/>
+                    <field name="end_time"/>
+                </group>
+                <group string="Start Selfie">
+                    <field name="start_selfie" widget="image" class="oe_avatar"/>
+                </group>
+                <group string="End Selfie">
+                    <field name="end_selfie" widget="image" class="oe_avatar"/>
+                </group>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_work_session" model="ir.actions.act_window">
+        <field name="name">Work Sessions</field>
+        <field name="res_model">work.session</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Start and end selfies of user sessions will appear here.
+            </p>
+        </field>
+    </record>
+
+    <!-- Menu Root -->
+    <menuitem id="menu_work_session_root"
+              name="Work Management"
+              sequence="10"/>
+
+    <!-- Submenu & Link to Action -->
+    <menuitem id="menu_work_session_main"
+              name="Work Sessions"
+              parent="menu_work_session_root"
+              action="action_work_session"
+              sequence="10"/>
+
+</odoo>

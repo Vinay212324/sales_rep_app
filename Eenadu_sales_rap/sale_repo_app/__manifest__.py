@@ -22,6 +22,7 @@
         "views/fromto_rootmap_views.xml",
         "views/hide_app_menu.xml",
         'views/pin_location_views.xml',
+        'views/work_session_views.xml',
     ],
     "assets": {
         "web.assets_backend": [
