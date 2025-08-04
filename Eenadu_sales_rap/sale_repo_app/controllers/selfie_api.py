@@ -83,24 +83,79 @@ class SelfieController(http.Controller):
         except Exception as e:
             return {'success': False, 'message': str(e), 'code': 500}
 
-    @http.route('/api/user/selfies', type='json', auth='public', methods=['POST'], csrf=False, cors="*")
-    def get_user_selfies(self, **post):
+    # @http.route('/api/user/selfies', type='json', auth='public', methods=['POST'], csrf=False, cors="*")
+    # def get_user_selfies(self, **post):
+    #     try:
+    #         token = post.get('token')
+    #         if not token:
+    #             return {'success': False, 'message': 'Token is required', 'code': 403}
+    #
+    #         user = self._verify_api_key(token)
+    #         if not user:
+    #             return {'success': False, 'message': 'Invalid or expired token', 'code': 403}
+    #
+    #         sessions = request.env['work.session'].sudo().search([
+    #             ('user_id', '=', user.id)
+    #         ], order='start_time desc')
+    #
+    #         session_list = []
+    #         for session in sessions:
+    #             session_list.append({
+    #                 'session_id': session.id,
+    #                 'start_time': session.start_time,
+    #                 'end_time': session.end_time,
+    #                 'start_selfie': f"data:image/png;base64,{session.start_selfie.decode('utf-8')}" if session.start_selfie else None,
+    #                 'end_selfie': f"data:image/png;base64,{session.end_selfie.decode('utf-8')}" if session.end_selfie else None,
+    #             })
+    #
+    #         return {
+    #             'success': True,
+    #             'user_id': user.id,
+    #             'user_name': user.name,
+    #             'sessions': session_list,
+    #             'code': 200
+    #         }
+    #
+    #     except Exception as e:
+    #         return {
+    #             'success': False,
+    #             'message': str(e),
+    #             'code': 500
+    #         }
+
+    def _verify_api_key(self, token):
+        """Validates token and returns the user"""
+        return request.env['res.users'].sudo().search([('api_key', '=', token)], limit=1)
+
+    @http.route('/api/user/today_selfies', type='json', auth='public', methods=['POST'], csrf=False, cors="*")
+    def get_today_selfies(self, **post):
         try:
             token = post.get('token')
+            user_id = post.get('user_id')
+
             if not token:
                 return {'success': False, 'message': 'Token is required', 'code': 403}
+            if not user_id:
+                return {'success': False, 'message': 'User ID is required', 'code': 400}
 
-            user = self._verify_api_key(token)
-            if not user:
+            requesting_user = self._verify_api_key(token)
+            if not requesting_user:
                 return {'success': False, 'message': 'Invalid or expired token', 'code': 403}
 
-            sessions = request.env['work.session'].sudo().search([
-                ('user_id', '=', user.id)
-            ], order='start_time desc')
+            # Filter sessions by today's date
+            today = date.today()
+            start_of_day = datetime.combine(today, datetime.min.time())
+            end_of_day = datetime.combine(today, datetime.max.time())
 
-            session_list = []
+            sessions = request.env['work.session'].sudo().search([
+                ('user_id', '=', int(user_id)),
+                ('start_time', '>=', start_of_day),
+                ('start_time', '<=', end_of_day)
+            ])
+
+            selfie_sessions = []
             for session in sessions:
-                session_list.append({
+                selfie_sessions.append({
                     'session_id': session.id,
                     'start_time': session.start_time,
                     'end_time': session.end_time,
@@ -110,15 +165,11 @@ class SelfieController(http.Controller):
 
             return {
                 'success': True,
-                'user_id': user.id,
-                'user_name': user.name,
-                'sessions': session_list,
+                'user_id': int(user_id),
+                'date': str(today),
+                'selfies': selfie_sessions,
                 'code': 200
             }
 
         except Exception as e:
-            return {
-                'success': False,
-                'message': str(e),
-                'code': 500
-            }
+            return {'success': False, 'message': str(e), 'code': 500}
