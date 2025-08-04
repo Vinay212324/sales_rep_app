@@ -98,7 +98,7 @@ class CustomerFormAPI(http.Controller):
                 'location_address': kwargs.get('location_address'),
                 'location_url': kwargs.get('location_url'),
                 'face_base64': kwargs.get('face_base64'),
-                'for_consider': kwargs.get('kwargs'),
+                'for_consider': kwargs.get('for_consider'),
                 'shift_to_EENADU': kwargs.get('shift_to_EENADU', False),
                 'Willing_to_Shift_to_EENADU': kwargs.get('Willing_to_Shift_to_EENADU', False),
                 'Start_Circulating':kwargs.get('Start_Circulating'),
