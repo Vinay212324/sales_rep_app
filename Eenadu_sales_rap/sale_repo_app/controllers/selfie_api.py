@@ -8,7 +8,7 @@ class SelfieController(http.Controller):
 
     def _verify_api_key(self, token):
         """Check if the token belongs to a valid user"""
-        user = request.env['res.users'].sudo().search([('api_key', '=', token)], limit=1)
+        user = request.env['res.users'].sudo().search([('api_token', '=', token)], limit=1)
         return user if user else None
 
     @http.route('/api/start_work', type='json', auth='public', methods=['POST'], csrf=False, cors="*")
@@ -125,7 +125,7 @@ class SelfieController(http.Controller):
 
     def _verify_api_key(self, token):
         """Validates token and returns the user"""
-        return request.env['res.users'].sudo().search([('api_key', '=', token)], limit=1)
+        return request.env['res.users'].sudo().search([('api_token', '=', token)], limit=1)
 
     @http.route('/api/user/today_selfies', type='json', auth='public', methods=['POST'], csrf=False, cors="*")
     def get_today_selfies(self, **post):
