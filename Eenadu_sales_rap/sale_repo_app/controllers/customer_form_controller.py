@@ -804,6 +804,7 @@ class CustomerFormAPI(http.Controller):
                 'message': str(e),
                 'code': 500
             }
+
     @http.route('/api/user_root_maps_by_stage', type='json', auth='public', methods=['POST'], csrf=False, cors="*")
     def user_root_maps_by_stage(self, **kw):
         try:
@@ -817,14 +818,17 @@ class CustomerFormAPI(http.Controller):
             if not user:
                 return {'success': False, 'message': 'Invalid or expired token', 'code': 403}
 
+            # Get the target user (agent)
             agent = request.env['res.users'].sudo().browse(int(user_id))
             if not agent.exists():
                 return {'success': False, 'message': 'User not found', 'code': 404}
 
+            # Fetch root.map records linked to this user
             root_maps = request.env['root.map'].sudo().search([
                 ('user_id', 'in', [agent.id])
             ])
 
+            # Organize by stage
             assigned = []
             working = []
             done = []
@@ -832,18 +836,12 @@ class CustomerFormAPI(http.Controller):
             for record in root_maps:
                 from_to_data = []
                 for fromto in record.for_fromto_ids:
-                    extra_points = [{
-                        'id': ep.id,
-                        'name': ep.name
-                    } for ep in fromto.extra_point_ids]
-
                     from_to_data.append({
-                        'id': fromto.id,
+                        'id':fromto.id,
                         'from_location': fromto.from_location,
+                        'extra_point': fromto.extra_point,
                         'to_location': fromto.to_location,
-                        'extra_points': extra_points
                     })
-
                 root_data = {
                     'id': record.id,
                     'name': record.root_name,
@@ -880,7 +878,7 @@ class CustomerFormAPI(http.Controller):
     def for_assign_extra_point(self, **kw):
         location_id = kw.get('location_id')
         api_key = kw.get('token')
-        extra_point_names = kw.get('extra_point_names')  # list of point names
+        extra_point = kw.get('extra_point')
 
         if not api_key:
             return {'success': False, 'message': 'Token is missing', 'code': 403}
@@ -892,8 +890,8 @@ class CustomerFormAPI(http.Controller):
         if not location_id:
             return {'success': False, 'message': 'Location ID is missing', 'code': 400}
 
-        if not extra_point_names or not isinstance(extra_point_names, list):
-            return {'success': False, 'message': 'Extra point names should be a list', 'code': 400}
+        if extra_point is None:
+            return {'success': False, 'message': 'Extra point is missing', 'code': 400}
 
         fromto_rec = request.env['fromto.rootmap'].sudo().search([
             ('id', '=', int(location_id))
@@ -903,20 +901,11 @@ class CustomerFormAPI(http.Controller):
             return {'success': False, 'message': 'Location not found', 'code': 404}
 
         try:
-            created_ids = []
-            for name in extra_point_names:
-                point = request.env['extra.point'].sudo().create({'name': name})
-                created_ids.append(point.id)
-
-            fromto_rec.sudo().write({'extra_point_ids': [(4, pid) for pid in created_ids]})
-            return {
-                'success': True,
-                'message': f"{len(created_ids)} Extra Point(s) created and assigned successfully",
-                'created_ids': created_ids,
-                'code': 200
-            }
+            fromto_rec.sudo().write({'extra_point': extra_point})
+            return {'success': True, 'message': 'Extra point assigned successfully', 'code': 200}
         except Exception as e:
-            return {'success': False, 'message': f'Error: {str(e)}', 'code': 500}
+            return {'success': False, 'message': f'Error assigning extra point: {str(e)}', 'code': 500}
+
 
     @http.route('/api/for_agent_root_map_name', type='json', auth='public', methods=['POST'], csrf=False, cors="*")
     def For_agent_root_map_name(self, **kw):
@@ -1249,37 +1238,3 @@ class CustomerFormAPI(http.Controller):
 
         except Exception as e:
             return {'error': 'Internal Server Error', 'message': str(e), 'code': 500}
-
-    @http.route('/api/upload_user_image', type='json', auth='public', methods=['POST'], csrf=False)
-    def upload_user_image(self, **kwargs):
-        try:
-            user_id = kwargs.get('user_id')
-            api_key = kwargs.get('token')
-            image = kwargs.get('image')  # base64 string of image
-
-            user = self._verify_api_key(api_key)
-            if not user:
-                return {
-                    'success': False,
-                    'message': 'Invalid or expired token',
-                    "code": "403"
-                }
-
-            if not user_id or not image:
-                return {'success': False, 'message': 'user_id and image are required'}
-
-            user = request.env['res.users'].sudo().browse(int(user_id))
-            if not user.exists():
-                return {'success': False, 'message': 'User not found'}
-
-            # ✅ Assign the base64 image string to image_1920
-            user.image_1920 = image
-
-            return {
-                'success': True,
-                'message': 'Image uploaded successfully',
-                'image_preview': f"data:image/png;base64,{image}"
-            }
-
-        except Exception as e:
-            return {'success': False, 'message': str(e)}

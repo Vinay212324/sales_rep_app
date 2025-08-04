@@ -20,7 +20,8 @@
         "views/customer_form_views.xml",
         "views/dashboard_action.xml",
         "views/fromto_rootmap_views.xml",
-        "views/hide_app_menu.xml"
+        "views/hide_app_menu.xml",
+        'views/pin_location_views.xml',
     ],
     "assets": {
         "web.assets_backend": [

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <!-- Tree View -->
+    <record id="view_pin_location_tree" model="ir.ui.view">
+        <field name="name">pin.location.tree</field>
+        <field name="model">pin.location</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="code"/>
+                <field name="location_name"/>
+                <field name="name"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="view_pin_location_form" model="ir.ui.view">
+        <field name="name">pin.location.form</field>
+        <field name="model">pin.location</field>
+        <field name="arch" type="xml">
+            <form>
+                <group>
+                    <field name="code"/>
+                    <field name="location_name"/>
+                    <field name="name"/>
+                </group>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_pin_location" model="ir.actions.act_window">
+        <field name="name">Pin Locations</field>
+        <field name="res_model">pin.location</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <!-- Menu Item -->
+    <menuitem id="menu_pin_location_root" name="Pin Locations"  parent="menu_sales_rep_main"   sequence="10"/>
+
+    <menuitem id="menu_pin_location_main" name="Manage Locations" parent="menu_pin_location_root" action="action_pin_location" sequence="10"/>
+
+</odoo>
