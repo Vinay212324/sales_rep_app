@@ -50,6 +50,7 @@
     <!-- Menu Root -->
     <menuitem id="menu_work_session_root"
               name="Work Management"
+              parent="menu_sales_rep_main"
               sequence="10"/>
 
     <!-- Submenu & Link to Action -->
