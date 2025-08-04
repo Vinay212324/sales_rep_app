@@ -27,3 +27,23 @@ aoffic,boffice,model_unit_name,office_staff_group,1,1,1,1
 boffic,coffice,model_root_map,office_staff_group,1,1,1,1
 goffice,doffice,model_fromto_rootmap,office_staff_group,1,1,1,1
 gofficekk,dofficekk,model_customer_form,office_staff_group,1,1,1,1
+
+
+
+# Access for res.users
+access_res_users_circulation_incharge,access.res.users.circulation_incharge,base.model_res_users,circulation_incharge_group,1,1,1,1
+
+# Access for unit_name model
+access_unit_name_circulation_incharge,access.unit.name.circulation_incharge,model_unit_name,circulation_incharge_group,1,1,1,1
+
+# Access for customer_form model
+access_customer_form_circulation_incharge,access.customer.form.circulation_incharge,model_customer_form,circulation_incharge_group,1,1,1,1
+
+# Access for root_map model
+access_root_map_circulation_incharge,access.root.map.circulation_incharge,model_root_map,circulation_incharge_group,1,1,1,1
+
+# Access for fromto_rootmap model
+access_fromto_rootmap_circulation_incharge,access.fromto.rootmap.circulation_incharge,model_fromto_rootmap,circulation_incharge_group,1,1,1,1
+
+# Access for extra_point model
+access_extra_point_circulation_incharge,access.extra.point.circulation_incharge,model_extra_point,circulation_incharge_group,1,1,1,1

@@ -96,7 +96,7 @@
             <xpath expr="//field[@name='login']" position="after">
                 <group string="Custom Information">
                     <field name="role"/>
-                    <field name="target"/>
+                    <field name="target" attrs="{'invisible': [('role', '!=', 'agent')]}" />
 <!--                    <field name="status"/>-->
                     <field name="unit_name"/>
                     <field name="unit_name_ids"/>
