@@ -7,7 +7,6 @@ from odoo.http import request
 from datetime import datetime, date
 
 
-
 class SelfieController(http.Controller):
 
     def _verify_api_key(self, token):
