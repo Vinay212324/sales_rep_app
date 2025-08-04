@@ -68,6 +68,10 @@ class CustomerForm(models.Model):
     location_address = fields.Char(string="Address")
     location_url = fields.Char(string='Location Link')
     face_base64 = fields.Binary(string="Face image")
+    for_consider = fields.Char(string="May Consider")
+    shift_to_EENADU = fields.Boolean()
+    Willing_to_Shift_to_EENADU = fields.Boolean()
+    Start_Circulating = fields.Char(string="Start_Circulating")
 
     def _get_lat_lon_from_ip(self):
         try:

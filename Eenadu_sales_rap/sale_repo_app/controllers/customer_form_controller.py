@@ -98,6 +98,10 @@ class CustomerFormAPI(http.Controller):
                 'location_address': kwargs.get('location_address'),
                 'location_url': kwargs.get('location_url'),
                 'face_base64': kwargs.get('face_base64'),
+                'for_consider': kwargs.get('kwargs'),
+                'shift_to_EENADU': kwargs.get('shift_to_EENADU', False),
+                'Willing_to_Shift_to_EENADU': kwargs.get('Willing_to_Shift_to_EENADU', False),
+                'Start_Circulating':kwargs.get('Start_Circulating'),
             })
             return {'success': True, 'message': 'Customer Form created successfully', 'customer_id': customer.id,
                     "code": "200"}
@@ -234,6 +238,10 @@ class CustomerFormAPI(http.Controller):
             'location_address': record.location_address,
             'location_url': record.location_url,
             'face_base64': f"data:image/png;base64,{record.face_base64.decode('utf-8')}" if record.face_base64 else None,
+            'for_consider':record.for_consider,
+            'shift_to_EENADU':record.shift_to_EENADU,
+            'Willing_to_Shift_to_EENADU':record.Willing_to_Shift_to_EENADU,
+            'Start_Circulating':record.Start_Circulating,
         } for record in customer_forms]
 
         return {'records': result, "code": "200"}
@@ -479,6 +487,10 @@ class CustomerFormAPI(http.Controller):
             'location_address': record.location_address,
             'location_url': record.location_url,
             'face_base64': f"data:image/png;base64,{record.face_base64.decode('utf-8')}" if record.face_base64 else None,
+            'for_consider': record.for_consider,
+            'shift_to_EENADU': record.shift_to_EENADU,
+            'Willing_to_Shift_to_EENADU': record.Willing_to_Shift_to_EENADU,
+            'Start_Circulating': record.Start_Circulating,
         } for record in customer_forms]
 
         response = {
