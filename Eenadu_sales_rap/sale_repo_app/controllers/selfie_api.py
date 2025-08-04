@@ -82,3 +82,43 @@ class SelfieController(http.Controller):
 
         except Exception as e:
             return {'success': False, 'message': str(e), 'code': 500}
+
+    @http.route('/api/user/selfies', type='json', auth='public', methods=['POST'], csrf=False, cors="*")
+    def get_user_selfies(self, **post):
+        try:
+            token = post.get('token')
+            if not token:
+                return {'success': False, 'message': 'Token is required', 'code': 403}
+
+            user = self._verify_api_key(token)
+            if not user:
+                return {'success': False, 'message': 'Invalid or expired token', 'code': 403}
+
+            sessions = request.env['work.session'].sudo().search([
+                ('user_id', '=', user.id)
+            ], order='start_time desc')
+
+            session_list = []
+            for session in sessions:
+                session_list.append({
+                    'session_id': session.id,
+                    'start_time': session.start_time,
+                    'end_time': session.end_time,
+                    'start_selfie': f"data:image/png;base64,{session.start_selfie.decode('utf-8')}" if session.start_selfie else None,
+                    'end_selfie': f"data:image/png;base64,{session.end_selfie.decode('utf-8')}" if session.end_selfie else None,
+                })
+
+            return {
+                'success': True,
+                'user_id': user.id,
+                'user_name': user.name,
+                'sessions': session_list,
+                'code': 200
+            }
+
+        except Exception as e:
+            return {
+                'success': False,
+                'message': str(e),
+                'code': 500
+            }
