@@ -2,6 +2,10 @@ from odoo import http, fields
 from odoo.http import request
 import base64
 import werkzeug
+from odoo import http, fields
+from odoo.http import request
+from datetime import datetime, date
+
 
 
 class SelfieController(http.Controller):
