@@ -24,8 +24,7 @@ class SelfieController(http.Controller):
             if not user:
                 return {'success': False, 'message': 'Invalid or expired token', 'code': 403}
 
-            # Convert to IST time
-            ist_now = pytz.utc.localize(datetime.utcnow()).astimezone(pytz.timezone('Asia/Kolkata'))
+            ist_now = pytz.utc.localize(datetime.utcnow()).astimezone(pytz.timezone('Asia/Kolkata')).replace(tzinfo=None)
 
             session = request.env['work.session'].sudo().create({
                 'user_id': user.id,
@@ -66,7 +65,7 @@ class SelfieController(http.Controller):
             if not session:
                 return {'success': False, 'message': 'No active session found', 'code': 404}
 
-            ist_now = pytz.utc.localize(datetime.utcnow()).astimezone(pytz.timezone('Asia/Kolkata'))
+            ist_now = pytz.utc.localize(datetime.utcnow()).astimezone(pytz.timezone('Asia/Kolkata')).replace(tzinfo=None)
 
             session.write({
                 'end_time': ist_now,
@@ -97,8 +96,8 @@ class SelfieController(http.Controller):
 
             ist = pytz.timezone("Asia/Kolkata")
             today = datetime.now(ist).date()
-            start_of_day = ist.localize(datetime.combine(today, time.min))
-            end_of_day = ist.localize(datetime.combine(today, time.max))
+            start_of_day = datetime.combine(today, time.min).replace(tzinfo=None)
+            end_of_day = datetime.combine(today, time.max).replace(tzinfo=None)
 
             sessions = request.env['work.session'].sudo().search([
                 ('user_id', '=', int(user_id)),
@@ -133,11 +132,11 @@ class SelfieController(http.Controller):
             token = kwargs.get('token')
 
             if not token:
-                return {'error': 'Token is missing'}
+                return {'success': False, 'message': 'Token is missing'}
 
             user = self._verify_api_key(token)
             if not user:
-                return {'error': 'Invalid or expired token'}
+                return {'success': False, 'message': 'Invalid or expired token'}
 
             pins = request.env['pin.location'].sudo().search([])
             data = [{'id': p.id, 'name': p.name, 'code': p.code, 'location_name': p.location_name} for p in pins]
@@ -155,19 +154,19 @@ class SelfieController(http.Controller):
             pin_location_id = kwargs.get('pin_lo_id')
 
             if not token or not user_id or not pin_location_id:
-                return {'error': 'Missing token, user_id, or pin_lo_id'}
+                return {'success': False, 'message': 'Missing token, user_id, or pin_lo_id'}
 
             user = self._verify_api_key(token)
             if not user:
-                return {'error': 'Invalid or expired token'}
+                return {'success': False, 'message': 'Invalid or expired token'}
 
             target_user = request.env['res.users'].sudo().browse(int(user_id))
             pin_location = request.env['pin.location'].sudo().browse(int(pin_location_id))
 
             if not target_user.exists():
-                return {'error': 'User not found'}
+                return {'success': False, 'message': 'User not found'}
             if not pin_location.exists():
-                return {'error': 'Pin location not found'}
+                return {'success': False, 'message': 'Pin location not found'}
 
             target_user.write({
                 'pin_location_ids': [(4, pin_location.id)],
