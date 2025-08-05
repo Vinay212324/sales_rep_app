@@ -31,7 +31,7 @@ class OtpAPI(http.Controller):
             return {'status': 'error', 'message': 'Phone number is required'}
 
         otp = str(random.randint(100000, 999999))
-        msg = f"EENADU Teams {otp}."
+        msg = f"EENADU Teams {otp}.  "
 
         url = "https://www.smsstriker.com/API/sms.php"
         payload = {
@@ -77,7 +77,7 @@ class OtpAPI(http.Controller):
         if not phone or not otp:
             return {'status': 'error', 'message': 'Phone and OTP are required'}
 
-        record = request.env['otp.verification'].sudo().search([
+        record = request.env['phone.verification.otp'].sudo().search([
             ('phone_number', '=', phone),
             ('otp_code', '=', otp),
             ('is_verified', '=', False)
