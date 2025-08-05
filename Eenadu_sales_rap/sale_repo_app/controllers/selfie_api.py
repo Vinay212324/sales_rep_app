@@ -158,23 +158,25 @@ class SelfieController(http.Controller):
             if not requesting_user:
                 return {'success': False, 'message': 'Invalid or expired token', 'code': 403}
 
-            # Filter sessions by today's date
-            today = date.today()
-            start_of_day = datetime.combine(today, datetime.min.time())
-            end_of_day = datetime.combine(today, datetime.max.time())
+            # Get IST timezone-aware datetime for today
+            ist = pytz.timezone("Asia/Kolkata")
+            today = datetime.now(ist).date()
+            start_of_day = ist.localize(datetime.combine(today, time.min))
+            end_of_day = ist.localize(datetime.combine(today, time.max))
 
+            # Get user's sessions today
             sessions = request.env['work.session'].sudo().search([
                 ('user_id', '=', int(user_id)),
                 ('start_time', '>=', start_of_day),
-                ('start_time', '<=', end_of_day)
+                ('start_time', '<=', end_of_day),
             ])
 
             selfie_sessions = []
             for session in sessions:
                 selfie_sessions.append({
                     'session_id': session.id,
-                    'start_time': session.start_time,
-                    'end_time': session.end_time,
+                    'start_time': str(session.start_time),
+                    'end_time': str(session.end_time) if session.end_time else None,
                     'start_selfie': f"data:image/png;base64,{session.start_selfie.decode('utf-8')}" if session.start_selfie else None,
                     'end_selfie': f"data:image/png;base64,{session.end_selfie.decode('utf-8')}" if session.end_selfie else None,
                 })
@@ -251,6 +253,35 @@ class SelfieController(http.Controller):
         return {
             'success': True,
             'message': f'Pin location {pin_location.location_name} assigned to user {user.name}'
+        }
+
+    @http.route('/api/get_current_pin_location', type='json', auth='public', methods=['POST'], csrf=False, cors="*")
+    def get_current_pin_location(self, **kwargs):
+        token = kwargs.get('token')
+
+        if not token:
+            return {'success': False, 'message': 'Token is required', 'code': 403}
+
+        # Authenticate user
+        user = request.env['res.users'].sudo().search([('api_token', '=', token)], limit=1)
+        if not user or not user.token_expiry or user.token_expiry < fields.Datetime.now():
+            return {'success': False, 'message': 'Invalid or expired token', 'code': 403}
+
+        pin = user.present_pin_id
+
+        if not pin:
+            return {'success': False, 'message': 'No current pin location assigned', 'code': 404}
+
+        # Return pin location info
+        return {
+            'success': True,
+            'data': {
+                'id': pin.id,
+                'name': pin.name,
+                'location_name': pin.location_name,
+                'code': pin.code
+            },
+            'code': 200
         }
 
 
