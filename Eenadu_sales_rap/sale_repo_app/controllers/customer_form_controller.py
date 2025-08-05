@@ -100,7 +100,7 @@ class CustomerFormAPI(http.Controller):
                 'face_base64': kwargs.get('face_base64'),
                 'for_consider': kwargs.get('for_consider'),
                 'shift_to_EENADU': kwargs.get('shift_to_EENADU', False),
-                'Willing_to_Shift_to_EENADU': kwargs.get('Willing_to_Shift_to_EENADU', False),
+                'Willing_to_Shift_to_EENADU': kwargs.get('would_like_to_stay_with_existing_news_papar', False),
                 'Start_Circulating':kwargs.get('Start_Circulating'),
             })
             return {'success': True, 'message': 'Customer Form created successfully', 'customer_id': customer.id,
@@ -240,7 +240,7 @@ class CustomerFormAPI(http.Controller):
             'face_base64': f"data:image/png;base64,{record.face_base64.decode('utf-8')}" if record.face_base64 else None,
             'for_consider':record.for_consider,
             'shift_to_EENADU':record.shift_to_EENADU,
-            'Willing_to_Shift_to_EENADU':record.Willing_to_Shift_to_EENADU,
+            'would_like_to_stay_with_existing_news_papar':record.Willing_to_Shift_to_EENADU,
             'Start_Circulating':record.Start_Circulating,
         } for record in customer_forms]
 
@@ -489,7 +489,7 @@ class CustomerFormAPI(http.Controller):
             'face_base64': f"data:image/png;base64,{record.face_base64.decode('utf-8')}" if record.face_base64 else None,
             'for_consider': record.for_consider,
             'shift_to_EENADU': record.shift_to_EENADU,
-            'Willing_to_Shift_to_EENADU': record.Willing_to_Shift_to_EENADU,
+            'would_like_to_stay_with_existing_news_papar': record.Willing_to_Shift_to_EENADU,
             'Start_Circulating': record.Start_Circulating,
         } for record in customer_forms]
 
