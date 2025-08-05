@@ -1,13 +1,13 @@
-# models/otp_verification.py
 from odoo import models, fields, api
 import random
-import requests
-from odoo.exceptions import ValidationError
+import logging
+_logger = logging.getLogger(__name__)
 
-class PhoneOTPVerification(models.Model):
-    _name = 'phone.otp.verification'
-    _description = 'Phone OTP Verification'
+class OtpVerification(models.Model):
+    _name = 'otp.verification'
+    _description = 'OTP Verification'
 
-    phone = fields.Char(string="Phone Number", required=True)
-    otp = fields.Char(string="OTP")
-    is_verified = fields.Boolean(string="Verified", default=False)
+    phone = fields.Char(required=True)
+    otp = fields.Char(required=True)
+    is_verified = fields.Boolean(default=False)
+    created_at = fields.Datetime(auto_now_add=True)
