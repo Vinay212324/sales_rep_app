@@ -3,7 +3,7 @@ from odoo.http import request
 from datetime import datetime
 import random
 import requests
-_logger = logging.getLogger(__name__)
+
 class PhoneVerificationController(http.Controller):
 
     @http.route('/api/send_otp', type='json', auth='public', methods=['POST'], csrf=False)
