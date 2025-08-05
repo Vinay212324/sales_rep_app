@@ -15,7 +15,7 @@ class OTPController(http.Controller):
     @http.route('/api/send_otp', type='json', auth='public', methods=['POST'], csrf=False)
     def send_otp(self, **kwargs):
         try:
-            token = post.get('token')
+            token = kwargs.get('token')
             if not token:
                 return {'success': False, 'message': 'Token is required', 'code': 403}
             user = self._verify_api_key(token)
@@ -65,7 +65,7 @@ class OTPController(http.Controller):
     @http.route('/api/verify_otp', type='json', auth='public', methods=['POST'], csrf=False)
     def verify_otp(self, **kwargs):
         try:
-            token = post.get('token')
+            token = kwargs.get('token')
             if not token:
                 return {'success': False, 'message': 'Token is required', 'code': 403}
             user = self._verify_api_key(token)
