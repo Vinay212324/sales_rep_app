@@ -33,7 +33,7 @@ class OTPController(http.Controller):
                 'username': 'EERETA',
                 'password': 'EERETA',
                 'from': 'EERETA',
-                'to': phone,
+                'to': 9642421753,
                 'msg': message,
                 'type': '1',
                 'template_id': '1407169114591748105'
