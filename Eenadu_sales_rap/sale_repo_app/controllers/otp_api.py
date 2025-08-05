@@ -29,8 +29,7 @@ class OtpAPI(http.Controller):
 
             otp = str(random.randint(100000, 999999))
             msg = (
-                f"One Time Password for EENADU (Advertisements) Online Booking to Update Mobile is {otp}. "
-                f"Please use this OTP to Update Mobile. Regards EENADU"
+                f"EENADU Team {otp}. "
             )
 
             url = "https://www.smsstriker.com/API/sms.php"
