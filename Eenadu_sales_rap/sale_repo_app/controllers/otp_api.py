@@ -38,7 +38,7 @@ class OtpAPI(http.Controller):
             'username': 'EERETA',
             'password': 'EERETA',
             'from': 'EERETA',
-            'to': str(phone),
+            'to': phone,
             'msg': msg,
             'type': '1',
             'template_id': '1407169114591748105'
