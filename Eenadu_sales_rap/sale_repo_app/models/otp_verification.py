@@ -14,4 +14,5 @@ class PhoneVerificationOTP(models.Model):
 
     phone_number = fields.Char(string="Phone Number", required=True)
     otp_code = fields.Char(string="OTP")
+    is_verified = fields.Boolean()
     otp_time = fields.Datetime(string="OTP Sent Time")
