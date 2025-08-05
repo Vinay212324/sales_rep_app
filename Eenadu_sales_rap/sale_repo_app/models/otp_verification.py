@@ -6,7 +6,7 @@ from datetime import datetime
 from odoo.exceptions import ValidationError
 import logging
 
-# _logger = logging.getLogger(__name__)
+_logger = logging.getLogger(__name__)
 
 class PhoneVerificationOTP(models.Model):
     _name = 'phone.verification.otp'
