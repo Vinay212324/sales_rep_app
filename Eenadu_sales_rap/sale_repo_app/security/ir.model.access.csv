@@ -31,3 +31,6 @@ gofficekk,dofficekk,model_customer_form,office_staff_group,1,1,1,1
 
 access_pin_location_read_only,access.pin.location.readonly,model_pin_location,,1,1,1,1
 access_work_session_user,access.work.session.user,model_work_session,base.group_user,1,1,1,0
+
+
+access_phone_otp_verification,access.phone.otp.verification,model_phone_otp_verification,,1,1,1,1

@@ -210,3 +210,4 @@ class SelfieController(http.Controller):
 
         except Exception as e:
             return {'success': False, 'message': str(e), 'code': 500}
+
