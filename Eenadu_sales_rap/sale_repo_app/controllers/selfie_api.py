@@ -5,6 +5,9 @@ import werkzeug
 from odoo import http, fields
 from odoo.http import request
 from datetime import datetime, date
+from datetime import datetime
+import pytz
+
 
 
 class SelfieController(http.Controller):
@@ -16,7 +19,6 @@ class SelfieController(http.Controller):
 
     @http.route('/api/start_work', type='json', auth='public', methods=['POST'], csrf=False, cors="*")
     def start_work(self, **post):
-        print("vinay")
         try:
             token = post.get('token')
             selfie_base64 = post.get('selfie')
@@ -30,10 +32,15 @@ class SelfieController(http.Controller):
             if not user:
                 return {'success': False, 'message': 'Invalid or expired token', 'code': 403}
 
+            # Convert to IST time
+            utc_now = datetime.utcnow()
+            ist_tz = pytz.timezone('Asia/Kolkata')
+            ist_now = pytz.utc.localize(utc_now).astimezone(ist_tz)
+
             # Save work session
             session = request.env['work.session'].sudo().create({
                 'user_id': user.id,
-                'start_time': fields.Datetime.now(),
+                'start_time': ist_now,
                 'start_selfie': selfie_base64.encode('utf-8'),
             })
 
@@ -62,18 +69,24 @@ class SelfieController(http.Controller):
             if not user:
                 return {'success': False, 'message': 'Invalid or expired token', 'code': 403}
 
-            # Find latest work session for user
+            # Find the latest open session for the user
             session = request.env['work.session'].sudo().search([
                 ('user_id', '=', user.id),
                 ('end_time', '=', False)
-            ], order="start_time desc", limit=1)
+            ], order='start_time desc', limit=1)
 
             if not session:
                 return {'success': False, 'message': 'No active session found', 'code': 404}
 
+            # Convert UTC now to IST
+            utc_now = datetime.utcnow()
+            ist_tz = pytz.timezone('Asia/Kolkata')
+            ist_now = pytz.utc.localize(utc_now).astimezone(ist_tz)
+
+            # Update the session
             session.write({
-                'end_time': fields.Datetime.now(),
-                'end_selfie': selfie_base64.encode('utf-8'),
+                'end_time': ist_now,
+                'end_selfie': selfie_base64  # Do not encode again if already base64
             })
 
             return {
@@ -176,3 +189,68 @@ class SelfieController(http.Controller):
 
         except Exception as e:
             return {'success': False, 'message': str(e), 'code': 500}
+
+    @http.route('/api/all_pin_locations', type='json', auth='public', methods=['POST'], csrf=False)
+    def get_all_pin_locations(self, **kwargs):
+        ensure_db()
+        token = kwargs.get('token')
+
+        if not token:
+            return {'error': 'Token is missing'}
+
+        # Validate token
+        user = request.env['res.users'].sudo().search([('api_token', '=', token)], limit=1)
+        if not user or not user.token_expiry or user.token_expiry < fields.Datetime.now():
+            return {'error': 'Invalid or expired token'}
+
+        # Fetch all pin location records
+        pin_locations = request.env['pin.location'].sudo().search([])
+
+        data = []
+        for loc in pin_locations:
+            data.append({
+                'id': loc.id,
+                'name': loc.name,
+                'code': loc.code,
+                'location_name': loc.location_name,
+            })
+
+        return {'success': True, 'data': data}
+
+    @http.route('/api/Pin_location_asin', type='json', auth='public', methods=['POST'], csrf=False)
+    def Pin_location_asin(self, **kwargs):
+        token = kwargs.get('token')
+        user_id = kwargs.get('user_id')
+        pin_location_id = kwargs.get('pin_lo_id')
+
+        # Validate inputs
+        if not token or not user_id or not pin_location_id:
+            return {'error': 'Missing token, user_id, or pin_lo_id'}
+
+        # Validate token
+        auth_user = request.env['res.users'].sudo().search([('api_token', '=', token)], limit=1)
+        if not auth_user or not auth_user.token_expiry or auth_user.token_expiry < fields.Datetime.now():
+            return {'error': 'Invalid or expired token'}
+
+        # Fetch the user and pin location
+        user = request.env['res.users'].sudo().browse(int(user_id))
+        pin_location = request.env['pin.location'].sudo().browse(int(pin_location_id))
+
+        if not user.exists():
+            return {'error': f'User with ID {user_id} not found'}
+
+        if not pin_location.exists():
+            return {'error': f'Pin location with ID {pin_location_id} not found'}
+
+        # Assign the pin location
+        user.write({
+            'pin_location_ids': [(4, pin_location.id)],
+            'present_pin_id': pin_location.id,
+        })
+
+        return {
+            'success': True,
+            'message': f'Pin location {pin_location.location_name} assigned to user {user.name}'
+        }
+
+

@@ -2,6 +2,7 @@ from odoo import models, api, fields, _
 from datetime import datetime, timedelta
 import secrets
 from odoo.exceptions import AccessDenied, ValidationError
+from odoo.fields import Many2one
 
 
 class Users(models.Model):
@@ -24,6 +25,9 @@ class Users(models.Model):
       ],
         string="Role", required=True, default="un_activ"
     )
+
+    pin_location_ids = fields.Many2many('pin.location','user_id')
+    present_pin_id = fields.Many2one("pin.location")
     aadhar_number = fields.Char(string="Aadhar")
     root_name_id = fields.Many2one('root.map', string="Root Map")
     pan_number = fields.Char(string="PAN")

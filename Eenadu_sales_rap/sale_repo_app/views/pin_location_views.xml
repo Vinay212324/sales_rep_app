@@ -21,6 +21,7 @@
         <field name="arch" type="xml">
             <form>
                 <group>
+                    <field name="user_id"/>
                     <field name="code"/>
                     <field name="location_name"/>
                     <field name="name"/>
