@@ -182,7 +182,7 @@ class SelfieController(http.Controller):
             return {'success': False, 'message': str(e)}
 
     @http.route('/api/get_current_pin_location', type='json', auth='public', methods=['POST'], csrf=False, cors="*")
-    def get_current_pin_location(self, **kwargs):
+    def get_current_pin_location_of_user(self, **kwargs):
         try:
             token = kwargs.get('token')
 
