@@ -23,6 +23,7 @@
         "views/hide_app_menu.xml",
         'views/pin_location_views.xml',
         'views/work_session_views.xml',
+        'views/verification_otp_views.xml',
     ],
     "assets": {
         "web.assets_backend": [

@@ -1,8 +1,3 @@
-
-
-
-
-
 from odoo import http
 from odoo.http import request
 import random
@@ -20,18 +15,19 @@ class OtpAPI(http.Controller):
     @http.route('/api/send_otp', auth='public', methods=['POST'], type='json', csrf=False)
     def send_otp(self, **post):
         token = post.get('token')
-
         if not token:
             return {'success': False, 'message': 'Token is required', 'code': 403}
+
         user = self._verify_api_key(token)
         if not user:
             return {'success': False, 'message': 'Invalid or expired token', 'code': 403}
+
         phone = post.get('phone')
         if not phone:
             return {'status': 'error', 'message': 'Phone number is required'}
 
         otp = str(random.randint(100000, 999999))
-        msg = f"EENADU Teams {otp}.  "
+        msg = "One Time Password for EENADU (Advertisements) Online Booking to Update Mobile is " + str(otp) + ". Please use this OTP to Update Mobile.Regards EENADU"
 
         url = "https://www.smsstriker.com/API/sms.php"
         payload = {
@@ -46,11 +42,13 @@ class OtpAPI(http.Controller):
 
         try:
             response = requests.post(url, data=payload)
-            if "Invalid" in response.text or response.status_code != 200:
+            print(response.text, response.status_code )
+            if not(response.status_code) :
                 _logger.error(f"SMS sending failed: {response.text}")
                 return {'status': 'error', 'message': 'Failed to send OTP'}
 
-            request.env['phone.verification.otp'].sudo().create({
+            # Store OTP
+            request.env['verification.otp'].sudo().create({
                 'phone_number': phone,
                 'otp_code': otp,
             })
@@ -62,29 +60,28 @@ class OtpAPI(http.Controller):
 
     @http.route('/api/verify_otp', auth='public', methods=['POST'], type='json', csrf=False)
     def verify_otp(self, **post):
-
         token = post.get('token')
-        phone = post.get('phone')
-
         if not token:
             return {'success': False, 'message': 'Token is required', 'code': 403}
+
         user = self._verify_api_key(token)
         if not user:
             return {'success': False, 'message': 'Invalid or expired token', 'code': 403}
+
         phone = post.get('phone')
         otp = post.get('otp')
 
         if not phone or not otp:
             return {'status': 'error', 'message': 'Phone and OTP are required'}
 
-        record = request.env['phone.verification.otp'].sudo().search([
+        record = request.env['verification.otp'].sudo().search([
             ('phone_number', '=', phone),
             ('otp_code', '=', otp),
             ('is_verified', '=', False)
         ], limit=1)
 
         if record:
-            record.sudo().write({'phone.verification.otp': True})
+            record.sudo().write({'is_verified': True})
             return {'status': 'success', 'message': 'OTP verified'}
         else:
             return {'status': 'error', 'message': 'Invalid OTP'}
