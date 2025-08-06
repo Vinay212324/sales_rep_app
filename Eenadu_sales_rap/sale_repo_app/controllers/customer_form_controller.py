@@ -102,6 +102,9 @@ class CustomerFormAPI(http.Controller):
                 'shift_to_EENADU': kwargs.get('shift_to_EENADU', False),
                 'Willing_to_Shift_to_EENADU': kwargs.get('would_like_to_stay_with_existing_news_papar', False),
                 'Start_Circulating':kwargs.get('Start_Circulating'),
+                'Agency':kwargs.get('Agency'),
+                'age':kwargs.get('age'),
+                'customer_type':kwargs.get('customer_type'),
             })
             return {'success': True, 'message': 'Customer Form created successfully', 'customer_id': customer.id,
                     "code": "200"}
@@ -242,6 +245,9 @@ class CustomerFormAPI(http.Controller):
             'shift_to_EENADU':record.shift_to_EENADU,
             'would_like_to_stay_with_existing_news_papar':record.Willing_to_Shift_to_EENADU,
             'Start_Circulating':record.Start_Circulating,
+            'Agency':record.Agency,
+            'age':record.age,
+            'customer_type':record.customer_type
         } for record in customer_forms]
 
         return {'records': result, "code": "200"}
@@ -491,6 +497,9 @@ class CustomerFormAPI(http.Controller):
             'shift_to_EENADU': record.shift_to_EENADU,
             'would_like_to_stay_with_existing_news_papar': record.Willing_to_Shift_to_EENADU,
             'Start_Circulating': record.Start_Circulating,
+            'Agency': record.Agency,
+            'age': record.age,
+            'customer_type': record.customer_type
         } for record in customer_forms]
 
         response = {
@@ -591,6 +600,13 @@ class CustomerFormAPI(http.Controller):
             'location_address': record.location_address,
             'location_url': record.location_url,
             'face_base64': f"data:image/png;base64,{record.face_base64.decode('utf-8')}" if record.face_base64 else None,
+            'for_consider': record.for_consider,
+            'shift_to_EENADU': record.shift_to_EENADU,
+            'would_like_to_stay_with_existing_news_papar': record.Willing_to_Shift_to_EENADU,
+            'Start_Circulating': record.Start_Circulating,
+            'Agency': record.Agency,
+            'age': record.age,
+            'customer_type': record.customer_type
         } for record in customer_forms]
 
         response = {
@@ -1091,6 +1107,13 @@ class CustomerFormAPI(http.Controller):
             'location_address': form.location_address,
             'location_url': form.location_url,
             'face_base64': f"data:image/png;base64,{form.face_base64.decode('utf-8')}" if form.face_base64 else None,
+            'for_consider': record.for_consider,
+            'shift_to_EENADU': record.shift_to_EENADU,
+            'would_like_to_stay_with_existing_news_papar': record.Willing_to_Shift_to_EENADU,
+            'Start_Circulating': record.Start_Circulating,
+            'Agency': record.Agency,
+            'age': record.age,
+            'customer_type': record.customer_type
         } for form in forms]
 
         response = {

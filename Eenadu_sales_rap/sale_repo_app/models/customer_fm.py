@@ -72,6 +72,9 @@ class CustomerForm(models.Model):
     shift_to_EENADU = fields.Boolean()
     Willing_to_Shift_to_EENADU = fields.Boolean()
     Start_Circulating = fields.Char(string="Start_Circulating")
+    Agency = fields.Char()
+    age = fields.Char()
+    customer_type = fields.Char()
 
     def _get_lat_lon_from_ip(self):
         try:
