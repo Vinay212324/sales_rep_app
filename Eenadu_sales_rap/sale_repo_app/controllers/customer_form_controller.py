@@ -105,6 +105,7 @@ class CustomerFormAPI(http.Controller):
                 'Agency':kwargs.get('Agency'),
                 'age':kwargs.get('age'),
                 'customer_type':kwargs.get('customer_type'),
+                'occupation':kwargs.get('occupation'),
             })
             return {'success': True, 'message': 'Customer Form created successfully', 'customer_id': customer.id,
                     "code": "200"}
@@ -247,7 +248,8 @@ class CustomerFormAPI(http.Controller):
             'Start_Circulating':record.Start_Circulating,
             'Agency':record.Agency,
             'age':record.age,
-            'customer_type':record.customer_type
+            'customer_type':record.customer_type,
+            'occupation':record.occupation
         } for record in customer_forms]
 
         return {'records': result, "code": "200"}
@@ -499,7 +501,8 @@ class CustomerFormAPI(http.Controller):
             'Start_Circulating': record.Start_Circulating,
             'Agency': record.Agency,
             'age': record.age,
-            'customer_type': record.customer_type
+            'customer_type': record.customer_type,
+            'occupation': record.occupation
         } for record in customer_forms]
 
         response = {
@@ -606,7 +609,8 @@ class CustomerFormAPI(http.Controller):
             'Start_Circulating': record.Start_Circulating,
             'Agency': record.Agency,
             'age': record.age,
-            'customer_type': record.customer_type
+            'customer_type': record.customer_type,
+            'occupation': record.occupation
         } for record in customer_forms]
 
         response = {
@@ -1113,7 +1117,8 @@ class CustomerFormAPI(http.Controller):
             'Start_Circulating': form.Start_Circulating,
             'Agency': form.Agency,
             'age': form.age,
-            'customer_type': form.customer_type
+            'customer_type': form.customer_type,
+            'occupation': form.occupation
         } for form in forms]
 
         response = {

@@ -75,7 +75,7 @@ class CustomerForm(models.Model):
     Agency = fields.Char()
     age = fields.Char()
     customer_type = fields.Char()
-
+    occupation =  fields.Char()
     def _get_lat_lon_from_ip(self):
         try:
             response = requests.get('http://ip-api.com/json/')
