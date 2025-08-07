@@ -1107,13 +1107,13 @@ class CustomerFormAPI(http.Controller):
             'location_address': form.location_address,
             'location_url': form.location_url,
             'face_base64': f"data:image/png;base64,{form.face_base64.decode('utf-8')}" if form.face_base64 else None,
-            'for_consider': record.for_consider,
-            'shift_to_EENADU': record.shift_to_EENADU,
-            'would_like_to_stay_with_existing_news_papar': record.Willing_to_Shift_to_EENADU,
-            'Start_Circulating': record.Start_Circulating,
-            'Agency': record.Agency,
-            'age': record.age,
-            'customer_type': record.customer_type
+            'for_consider': form.for_consider,
+            'shift_to_EENADU': form.shift_to_EENADU,
+            'would_like_to_stay_with_existing_news_papar': form.Willing_to_Shift_to_EENADU,
+            'Start_Circulating': form.Start_Circulating,
+            'Agency': form.Agency,
+            'age': form.age,
+            'customer_type': form.customer_type
         } for form in forms]
 
         response = {
