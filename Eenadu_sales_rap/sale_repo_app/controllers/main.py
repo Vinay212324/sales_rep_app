@@ -222,12 +222,10 @@ class UserPortal(http.Controller):
                                "circulation_incharge", "agent"]
             elif env.user.has_group('sale_repo_app.unit_manager_group'):
                 valid_roles = ["unit_manager", "Office_staff", "segment_incharge", "circulation_incharge", "agent"]
-            elif env.user.has_group('sale_repo_app.circulation_incharge'):
+            elif env.user.has_group('sale_repo_app.circulation_incharge_group'):
                 valid_roles = ["Office_staff", "segment_incharge", "circulation_incharge", "agent"]
-            elif env.user.has_group('sale_repo_app.segment_incharge'):
+            elif env.user.has_group('sale_repo_app.segment_incharge_group'):
                 valid_roles = ["unit_manager", "Office_staff", "segment_incharge", "agent"]
-            elif env.user.has_group('sale_repo_app.Office_staff'):
-                valid_roles = ["unit_manager", "Office_staff", "agent"]
             elif env.user.has_group('sale_repo_app.office_staff_group'):
                 valid_roles = ["Office_staff", "agent"]
             else:
