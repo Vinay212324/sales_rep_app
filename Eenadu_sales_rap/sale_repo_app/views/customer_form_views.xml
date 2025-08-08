@@ -117,7 +117,7 @@
     <menuitem id="menu_customer_form_main"
           name="Forms"
           parent="menu_sales_rep_main"
-          groups="sale_repo_app.agent_group,sale_repo_app.admin_group,sale_repo_app.unit_manager_group"
+          groups="sale_repo_app.admin_group,sale_repo_app.unit_manager_group"
           action="action_customer_form"
           sequence="1"/>
 
