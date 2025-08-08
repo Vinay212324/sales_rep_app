@@ -1,7 +1,7 @@
 <odoo>
     <record id="action_dashboard" model="ir.actions.client">
         <field name="name">Sales Dashboard</field>
-        <field name="tag">sale_repo_app.self_dashboard_manager_sales_rep</field>
+        <field name="tag">sale_repo_app.sales_dashboard_desktop</field>
     </record>
 
     <record id="action_customer_form_filling" model="ir.actions.client">

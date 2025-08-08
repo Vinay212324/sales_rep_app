@@ -10,30 +10,72 @@ class CustomerFormAPI(http.Controller):
 
     @http.route('/api/dashboard_data', type='json', auth='user', methods=['POST'], csrf=False, cors="*")
     def dashboard_data(self, **kwargs):
-        user = request.env.user  # Gets the currently logged-in user
-        role = user.role or 'unknown'  # Access your custom 'role' field
+        user = request.env.user
         name = user.name
-        target = user.target
+        target = user.target or 0
         agent_login = user.login
+        from datetime import date
         today_date = date.today()
-
-        now = time.time()
 
         today_customer_forms_count = request.env['customer.form'].sudo().search_count([
             ('agent_login', '=', agent_login),
             ('date', '=', today_date)
         ])
 
-        target_left = int(target) - today_customer_forms_count
+        target_left = max(0, int(target) - today_customer_forms_count)
 
         return {
             "success": True,
             "name": name,
-            "role": role,
-            "target":target,
-            "today_customer_forms_count":today_customer_forms_count,
-            "target_left":target_left,
+            "target": target,
+            "today_customer_forms_count": today_customer_forms_count,
+            "target_left": target_left,
+            # You can add other fields here as needed
+            "subscribed_count": getattr(user, 'subscribed_count', 0),
+            "shift_start_time": getattr(user, 'shift_start_time', ''),
         }
+
+    @http.route('/get_all_agencies_web', type='json', auth='user', methods=['GET', 'POST'], csrf=True)
+    def get_all_agencies_web(self, **kwargs):
+        pins = request.env['pin.location'].sudo().search([])
+        data = [{'id': p.id, 'name': p.name, 'code': p.code, 'location_name': p.location_name} for p in pins]
+        return {'success': True, 'data': data}
+
+    @http.route('/assign_agency_web', type='json', auth='user', methods=['POST'], csrf=True)
+    def assign_agency_web(self, pin_lo_id=None, **kwargs):
+        user = request.env.user
+        if not pin_lo_id:
+            return {'success': False, 'message': 'Please select an agency.'}
+        pin_location = request.env['pin.location'].sudo().browse(int(pin_lo_id))
+        if not pin_location.exists():
+            return {'success': False, 'message': 'Selected agency was not found.'}
+
+        user.sudo().write({
+            'present_pin_id': pin_location.id,
+        })
+
+        return {'success': True,
+                'message': f'Agency {pin_location.location_name or pin_location.name} assigned to {user.name}.'}
+
+    @http.route('/get_current_agency_web', type='json', auth='user', methods=['GET', 'POST'], csrf=True)
+    def get_current_agency_web(self, **kwargs):
+        user = request.env.user
+        pin = user.present_pin_id
+        if not pin:
+            return {'success': False, 'message': 'No current agency assigned.'}
+        pin = request.env['pin.location'].sudo().browse(int(pin))
+        if not pin.exists():
+            return {'success': False, 'message': 'Current agency not found.'}
+        return {
+            'success': True,
+            'data': {
+                'id': pin.id,
+                'name': pin.name,
+                'location_name': pin.location_name,
+                'code': pin.code,
+            }
+        }
+
 
     @http.route('/for/api/customer_form', type='json', auth='user', methods=['POST'], csrf=False, cors="*")
     def apiCustomerForm(self, **kwargs):
@@ -96,3 +138,4 @@ class CustomerFormAPI(http.Controller):
             'customer_id': customer.id,
             "code": "200"
         }
+
