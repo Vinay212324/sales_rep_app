@@ -1,0 +1,75 @@
+<odoo>
+    <!-- Main Menu -->
+    <menuitem id="menu_sales_rep_main" name="Sales Reps" sequence="10"
+              groups="sale_repo_app.agent_group,sale_repo_app.admin_group,sale_repo_app.circulation_head_group,sale_repo_app.region_head_group,sale_repo_app.unit_manager_group,sale_repo_app.segment_incharge_group,sale_repo_app.circulation_incharge_group,sale_repo_app.office_staff_group"/>
+
+    <menuitem id="menu_root_map"
+              name="Route Maps"
+              parent="menu_sales_rep_main"
+              action="action_root_map"
+              sequence="13"
+              groups="sale_repo_app.admin_group,sale_repo_app.circulation_head_group,sale_repo_app.region_head_group,sale_repo_app.unit_manager_group,sale_repo_app.segment_incharge_group,sale_repo_app.circulation_incharge_group,sale_repo_app.office_staff_group"/>
+
+    <menuitem id="menu_fromto_rootmap"
+              name="From-To Route Map"
+              parent="menu_sales_rep_main"
+              action="action_fromto_rootmap"
+              sequence="14"
+              groups="sale_repo_app.admin_group,sale_repo_app.circulation_head_group,sale_repo_app.region_head_group,sale_repo_app.unit_manager_group,sale_repo_app.segment_incharge_group,sale_repo_app.circulation_incharge_group,sale_repo_app.office_staff_group"/>
+
+    <menuitem id="menu_pin_location_root"
+              name="Pin Locations"
+              parent="menu_sales_rep_main"
+              sequence="15"
+              groups="sale_repo_app.admin_group,sale_repo_app.circulation_head_group,sale_repo_app.region_head_group,sale_repo_app.unit_manager_group,sale_repo_app.segment_incharge_group,sale_repo_app.circulation_incharge_group,sale_repo_app.office_staff_group"/>
+
+    <menuitem id="menu_pin_location_main"
+              name="Manage Locations"
+              parent="menu_pin_location_root"
+              action="action_pin_location"
+              sequence="10"/>
+
+    <menuitem id="menu_customer_form_main"
+              name="Forms"
+              parent="menu_sales_rep_main"
+              action="action_customer_form"
+              sequence="16"
+              groups="sale_repo_app.admin_group,sale_repo_app.circulation_head_group,sale_repo_app.region_head_group,sale_repo_app.unit_manager_group,sale_repo_app.segment_incharge_group,sale_repo_app.circulation_incharge_group,sale_repo_app.office_staff_group"/>
+
+    <menuitem id="for_users"
+              name="User info"
+              parent="menu_sales_rep_main"
+              sequence="17"
+              groups="sale_repo_app.admin_group,sale_repo_app.circulation_head_group,sale_repo_app.region_head_group,sale_repo_app.unit_manager_group,sale_repo_app.segment_incharge_group,sale_repo_app.circulation_incharge_group,sale_repo_app.office_staff_group"/>
+
+    <menuitem id="active_users_id"
+              name="In-Active Users"
+              parent="for_users"
+              action="action_res_users_inactive"
+              sequence="10"/>
+
+    <menuitem id="unactive_users_id"
+              name="Active Users"
+              parent="for_users"
+              action="action_res_users_heirt"
+              sequence="20"/>
+
+    <menuitem id="menu_verification_otp_root"
+              name="OTP Management"
+              parent="menu_sales_rep_main"
+              sequence="18"
+              groups="sale_repo_app.admin_group,sale_repo_app.circulation_head_group,sale_repo_app.region_head_group,sale_repo_app.unit_manager_group,sale_repo_app.segment_incharge_group,sale_repo_app.circulation_incharge_group,sale_repo_app.office_staff_group"/>
+
+    <menuitem id="menu_verification_otp_main"
+              name="OTP Verifications"
+              parent="menu_verification_otp_root"
+              action="action_verification_otp"
+              sequence="10"/>
+
+    <menuitem id="menu_unit_name"
+              name="Unit Names"
+              parent="menu_sales_rep_main"
+              action="action_unit_name"
+              sequence="19"
+              groups="sale_repo_app.admin_group"/>
+</odoo>

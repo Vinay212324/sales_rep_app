@@ -114,30 +114,4 @@
     </record>
 
 
-    <menuitem id="menu_customer_form_main"
-          name="Forms"
-          parent="menu_sales_rep_main"
-          groups="sale_repo_app.agent_group,sale_repo_app.admin_group,sale_repo_app.unit_manager_group"
-          action="action_customer_form"
-          sequence="1"/>
-
-
-    <menuitem id="for_users"
-              name="User info"
-              groups="sale_repo_app.admin_group,sale_repo_app.unit_manager_group,sale_repo_app.office_staff_group"
-              parent="menu_sales_rep_main"/>
-
-    <menuitem id="active_users_id"
-              name="un active users"
-              groups="sale_repo_app.admin_group,sale_repo_app.unit_manager_group,sale_repo_app.office_staff_group"
-              parent="for_users"
-              action="action_res_users_inactive"/>
-
-    <menuitem id="unactive_users_id"
-              name="active users"
-              groups="sale_repo_app.admin_group,sale_repo_app.unit_manager_group,sale_repo_app.office_staff_group"
-              parent="for_users"
-              action="action_res_users_heirt"/>
-
-
 </odoo>
