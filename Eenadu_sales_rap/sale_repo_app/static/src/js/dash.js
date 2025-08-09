@@ -9,6 +9,7 @@ export class SalesDashboardDesktop extends Component {
 
     setup() {
         this.rpc = useService("rpc");
+        this.actionService = useService("action");
 
         this.state = useState({
             name: "",
@@ -25,7 +26,7 @@ export class SalesDashboardDesktop extends Component {
             saving: false,
             saveSuccess: "",
             saveError: "",
-            showAgencySelect: false, // Controls showing the select or button
+            showAgencySelect: false,
         });
 
         onWillStart(async () => {
@@ -35,7 +36,7 @@ export class SalesDashboardDesktop extends Component {
                 if (res.success) {
                     this.state.agencies = res.data || [];
 
-                    // Then fetch current agency after agencies loaded
+                    // Fetch current agency after agencies are loaded
                     const currentAgency = await this.rpc("/get_current_agency_web", {});
                     if (currentAgency.success && currentAgency.data) {
                         this.state.selectedAgencyId = String(currentAgency.data.id);
@@ -86,7 +87,7 @@ export class SalesDashboardDesktop extends Component {
             const res = await this.rpc("/assign_agency_web", { pin_lo_id: this.state.selectedAgencyId });
             if (res.success) {
                 this.state.saveSuccess = res.message || "Agency assigned successfully.";
-                this.state.showAgencySelect = false; // Hide select after assigning
+                this.state.showAgencySelect = false;
             } else {
                 this.state.saveError = res.message || "Failed to assign agency.";
             }
@@ -103,6 +104,14 @@ export class SalesDashboardDesktop extends Component {
 
     startWork() {
         alert("Starting work!");
+    }
+
+    goToCustomerForm() {
+        if (this.actionService) {
+            this.actionService.doAction("sale_repo_app.self_customer_form_filling_sales_rep");
+        } else {
+            console.error("actionService is not available.");
+        }
     }
 }
 
