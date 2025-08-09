@@ -100,15 +100,12 @@
     </record>
 
     <record id="action_root_map" model="ir.actions.act_window">
-        <field name="name">Root Maps</field>
+        <field name="name">Rout Maps</field>
         <field name="res_model">root.map</field>
         <field name="view_mode">kanban,tree,form</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">Create the first root map</p>
+            <p class="o_view_nocontent_smiling_face">Create the first rout map</p>
         </field>
     </record>
 
-    <menuitem id="menu_root_map" name="Rote Maps" parent="menu_sales_rep_main"
-              groups="sale_repo_app.agent_group,sale_repo_app.admin_group,sale_repo_app.unit_manager_group"
-              action="action_root_map"/>
 </odoo>

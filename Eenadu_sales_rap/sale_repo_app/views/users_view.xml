@@ -196,10 +196,4 @@
 <!--    </record>-->
 <!--        <menuitem action="action_res_users" id="menu_action_res_users" parent="base.menu_users" sequence="0"/>-->
 
-    <!-- Menu Item -->
-    <menuitem id="menu_sales_rep_main" name="Sales Reps"
-              sequence="10"/>
-
-
-
 </odoo>
