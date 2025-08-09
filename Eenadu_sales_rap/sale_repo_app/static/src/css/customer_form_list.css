@@ -233,4 +233,30 @@
     font-weight: 400;
 }
 
+/*floating button css*/
+
+.floating-button {
+  position: fixed;
+  bottom: 10%;
+  right: 25%;
+  width: 11.3%;
+  height: 60px;
+  border-radius: 20px;
+  border:0px;
+  background-color: #007bff;
+  color: white;
+  font-size: 20px;
+  text-align: center;
+  line-height: 60px;
+  cursor: pointer;
+  box-shadow: 5px 10px 15px #0056b3;
+  z-index: 1000;
+  transition: background-color 0.3s;
+}
+
+.floating-button:hover {
+  background-color: #0056b3;
+}
+
+
 /* Keep your existing styles for dashboard wrapper, cards, selects, buttons, messages */
