@@ -1034,6 +1034,7 @@ class CustomerFormAPI(http.Controller):
         to_date = params.get('to_date')  # format: "YYYY-MM-DD"
         unit_name = params.get('unit_name')  # string
         agent_name = params.get('agent_name')  # string
+        Agency = params.get('Agency')  # string
         order = params.get('order', 'desc')  # 'asc' or 'desc'
 
         # Compose domain (search filters)
@@ -1053,6 +1054,9 @@ class CustomerFormAPI(http.Controller):
 
             if agent_name:
                 domain.append(('agent_name', '=', agent_name))
+            if agent_name:
+                domain.append(('Agency', '=', Agency))
+
         except Exception as e:
             return {'success': False, 'message': f'Invalid filter values: {e}', 'code': "400"}
 
