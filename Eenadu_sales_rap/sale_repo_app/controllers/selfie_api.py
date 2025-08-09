@@ -101,8 +101,6 @@ class SelfieController(http.Controller):
 
             sessions = request.env['work.session'].sudo().search([
                 ('user_id', '=', int(user_id)),
-                ('start_time', '>=', start_of_day),
-                ('start_time', '<=', end_of_day),
             ])
 
             selfie_sessions = []
