@@ -1,0 +1,262 @@
+.dashboard-wrapper {
+  display: flex;
+  justify-content: center;
+  min-height: 96vh;
+  width: 100%;
+  background: #f3f6fa;
+  padding: 30px 0;
+}
+
+.dashboard-main {
+  width: 100%;
+  max-width: 1100px;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 8px 32px #3c3c408a;
+  padding: 35px 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.dashboard-header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.dashboard-header h1 {
+  font-size: 2.2rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.greeting, .date {
+  font-size: 18px;
+  color: #273c5b;
+  margin-top: 3px;
+}
+
+.dashboard-row {
+  display: flex;
+  gap: 28px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+  justify-content: stretch;
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(313px, 1fr));
+  gap: 28px;
+}
+
+.dashboard-card {
+  background: #fdfdfd;
+  border-radius: 14px;
+  box-shadow: 0 1px 8px rgba(0,0,0,0.07);
+  padding: 28px 22px;
+  min-width: 300px;
+  font-size: 17px;
+  color: #34495e;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.dashboard-card h3 {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 14px;
+  color: #245580;
+}
+
+.dashboard-stats-row {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.dashboard-stats-row p {
+  margin: 0;
+  font-weight: 600;
+  font-size: 1rem;
+  color: #22739c;
+}
+
+.agency-card {
+  min-width: 350px;
+  flex: 1;
+  align-items: flex-start;
+}
+
+.agency-label {
+  font-weight: 600;
+  font-size: 17px;
+  margin-bottom: 9px;
+  color: #245580;
+}
+
+.form-select {
+  width: 100%;
+  max-width: 370px;
+  padding: 11px 14px;
+  border-radius: 8px;
+  border: 1px solid #d0dde8;
+  font-size: 16px;
+  background: #f7fcff;
+  margin-bottom: 7px;
+  transition: border-color 0.2s;
+}
+
+.form-select:focus {
+  border-color: #3085d6;
+  outline: none;
+  background: #fff;
+}
+
+.info-message {
+  color: #288cf1;
+  margin-top: 6px;
+  font-weight: 600;
+}
+
+.success-message {
+  color: #1b8832;
+  margin-top: 7px;
+  font-weight: 600;
+}
+
+.error-message {
+  color: #e02424;
+  margin-top: 7px;
+  font-weight: 600;
+}
+
+.current-agency-info {
+  margin-top: 12px;
+  font-size: 16px;
+  color: #2a4365;
+  font-weight: 600;
+}
+
+.current-agency-info span {
+  margin-left: 6px;
+  font-weight: 400;
+}
+
+.start-work-btn {
+  margin-top: 18px;
+  padding: 11px 32px;
+  background: #3085d6;
+  color: #fff;
+  border: none;
+  border-radius: 9px;
+  font-weight: bold;
+  font-size: 16px;
+  cursor: pointer;
+  box-shadow: 0 1px 8px rgba(30,80,160,0.10);
+  transition: background 0.2s;
+}
+
+.start-work-btn:hover {
+  background: #256fc2;
+}
+
+.dashboard-loader {
+  font-size: 20px;
+  color: #888;
+  margin-top: 18px;
+  text-align: center;
+}
+
+.dashboard-error {
+  font-size: 16px;
+  color: #d74a4a;
+  margin-top: 15px;
+  font-weight: bold;
+  text-align: center;
+}
+
+@media (max-width: 950px) {
+  .dashboard-main {
+    padding: 21px 7vw;
+  }
+}
+
+@media (max-width: 650px) {
+  .dashboard-row,
+  .grid-3 {
+    flex-direction: column;
+    display: block;
+    margin-bottom: 0;
+    gap: 0;
+  }
+  .dashboard-card {
+    min-width: 0;
+    margin-bottom: 20px;
+  }
+  .dashboard-main {
+    padding: 15px 1vw;
+    border-radius: 0;
+    box-shadow: none;
+  }
+}
+.change-agency-btn {
+    padding: 11px 28px;
+    background: #3085d6;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 16px;
+    cursor: pointer;
+    margin-bottom: 7px;
+    transition: background 0.2s;
+    user-select: none;
+}
+.change-agency-btn:hover,
+.change-agency-btn:focus {
+    background: #256fc2;
+    outline: none;
+}
+
+.current-agency-info {
+    margin-top: 12px;
+    font-size: 16px;
+    color: #2a4365;
+    font-weight: 600;
+}
+.current-agency-info span {
+    margin-left: 6px;
+    font-weight: 400;
+}
+
+/*floating button css*/
+
+.floating-button {
+  position: fixed;
+  bottom: 4%;
+  right: 10%;
+  width: 210px;
+  height: 60px;
+  border-radius: 20px;
+  border:0px;
+  background-color: #007bff;
+  color: white;
+  font-size: 20px;
+  text-align: center;
+  line-height: 60px;
+  cursor: pointer;
+  box-shadow: 5px 10px 15px #0056b3;
+  z-index: 1000;
+  transition: background-color 0.3s;
+}
+
+.floating-button:hover {
+  background-color: #0056b3;
+}
+
+
+/* Keep your existing styles for dashboard wrapper, cards, selects, buttons, messages */

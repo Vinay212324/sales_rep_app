@@ -108,6 +108,7 @@
                     <field name="phone"/>
                     <field name="user_id"/>
                     <field name="root_name_id"/>
+                    <field name="present_pin_id"/>
                     <!--                    <field name="api_token" readonly="1"/>-->
                     <!--                    <field name="token_expiry" readonly="1"/>-->
                 </group>
@@ -195,11 +196,5 @@
 <!--        <field name="domain">[('role', '!=', False)]</field>-->
 <!--    </record>-->
 <!--        <menuitem action="action_res_users" id="menu_action_res_users" parent="base.menu_users" sequence="0"/>-->
-
-    <!-- Menu Item -->
-    <menuitem id="menu_sales_rep_main" name="Sales Reps"
-              sequence="10"/>
-
-
 
 </odoo>

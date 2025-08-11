@@ -10,6 +10,7 @@
                 <field name="code"/>
                 <field name="location_name"/>
                 <field name="name"/>
+                <field name="phone"/>
             </tree>
         </field>
     </record>
@@ -25,6 +26,7 @@
                     <field name="code"/>
                     <field name="location_name"/>
                     <field name="name"/>
+                    <field name="phone"/>
                 </group>
             </form>
         </field>
@@ -36,10 +38,5 @@
         <field name="res_model">pin.location</field>
         <field name="view_mode">tree,form</field>
     </record>
-
-    <!-- Menu Item -->
-    <menuitem id="menu_pin_location_root" name="Pin Locations"  parent="menu_sales_rep_main"   sequence="10"/>
-
-    <menuitem id="menu_pin_location_main" name="Manage Locations" parent="menu_pin_location_root" action="action_pin_location" sequence="10"/>
 
 </odoo>
