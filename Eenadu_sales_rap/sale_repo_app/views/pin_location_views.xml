@@ -10,6 +10,7 @@
                 <field name="code"/>
                 <field name="location_name"/>
                 <field name="name"/>
+                <field name="phone"/>
             </tree>
         </field>
     </record>
@@ -25,6 +26,7 @@
                     <field name="code"/>
                     <field name="location_name"/>
                     <field name="name"/>
+                    <field name="phone"/>
                 </group>
             </form>
         </field>
