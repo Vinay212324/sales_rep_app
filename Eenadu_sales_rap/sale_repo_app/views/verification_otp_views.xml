@@ -40,11 +40,4 @@
         </field>
     </record>
 
-    <!-- Menu Items -->
-    <menuitem id="menu_verification_otp_root" parent="menu_sales_rep_main" action=""  name="OTP Management" sequence="10"/>
-
-    <menuitem id="menu_verification_otp_main" name="OTP Verifications"
-              parent="menu_verification_otp_root"
-              action="action_verification_otp"
-              sequence="20"/>
 </odoo>

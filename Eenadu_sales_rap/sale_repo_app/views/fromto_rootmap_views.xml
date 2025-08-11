@@ -43,7 +43,4 @@
         </field>
     </record>
 
-
-    <menuitem id="menu_fromto_rootmap" name="From-To Rote Map" parent="menu_sales_rep_main" groups="sale_repo_app.admin_group"
-              action="action_fromto_rootmap" sequence="20"/>
 </odoo>
