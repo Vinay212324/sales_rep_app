@@ -9,5 +9,6 @@ class RootMap(models.Model):
     code = fields.Char(string="AGTCD")
     location_name = fields.Char(string="Place")
     name = fields.Char(string="Name")
+    phone = fields.Char(string="phone")
 
 
