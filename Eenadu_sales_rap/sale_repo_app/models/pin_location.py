@@ -10,5 +10,6 @@ class RootMap(models.Model):
     location_name = fields.Char(string="Place")
     name = fields.Char(string="Name")
     phone = fields.Char(string="phone")
+    unit_name = fields.Char(string="Unit")
 
 
