@@ -237,9 +237,9 @@
 
 .floating-button {
   position: fixed;
-  bottom: 10%;
-  right: 25%;
-  width: 11.3%;
+  bottom: 4%;
+  right: 10%;
+  width: 210px;
   height: 60px;
   border-radius: 20px;
   border:0px;
