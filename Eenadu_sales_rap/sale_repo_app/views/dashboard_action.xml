@@ -15,24 +15,23 @@
     </record>
 
     <menuitem id="menu_dashboard_manager"
-              name="Dashboard"
-              parent="menu_sales_rep_main"
+              name="Sales Representative Staff"
               action="action_dashboard"
               sequence="10"
-              groups="sale_repo_app.agent_group,sale_repo_app.admin_group,sale_repo_app.circulation_head_group,sale_repo_app.region_head_group,sale_repo_app.unit_manager_group,sale_repo_app.segment_incharge_group,sale_repo_app.circulation_incharge_group,sale_repo_app.office_staff_group"/>
+              groups="sale_repo_app.agent_group"/>
 
-    <menuitem id="menu_customer_analytics"
-              name="Analytics Dashboard"
-              parent="menu_sales_rep_main"
-              action="action_customer_analytics_dashboard"
-              sequence="11"
-              groups="sale_repo_app.agent_group,sale_repo_app.admin_group,sale_repo_app.circulation_head_group,sale_repo_app.region_head_group,sale_repo_app.unit_manager_group,sale_repo_app.segment_incharge_group,sale_repo_app.circulation_incharge_group,sale_repo_app.office_staff_group"/>
+<!--    <menuitem id="menu_customer_analytics"-->
+<!--              name="Analytics Dashboard"-->
+<!--              parent="menu_sales_rep_main"-->
+<!--              action="action_customer_analytics_dashboard"-->
+<!--              sequence="11"-->
+<!--              groups="sale_repo_app.agent_group,sale_repo_app.admin_group,sale_repo_app.circulation_head_group,sale_repo_app.region_head_group,sale_repo_app.unit_manager_group,sale_repo_app.segment_incharge_group,sale_repo_app.circulation_incharge_group,sale_repo_app.office_staff_group"/>-->
 
-    <menuitem id="menu_customer_for_filling"
-              name="Customer Form"
-              parent="menu_sales_rep_main"
-              action="action_customer_form_filling"
-              sequence="12"
-              groups="sale_repo_app.agent_group,sale_repo_app.admin_group,sale_repo_app.circulation_head_group,sale_repo_app.region_head_group,sale_repo_app.unit_manager_group,sale_repo_app.segment_incharge_group,sale_repo_app.circulation_incharge_group,sale_repo_app.office_staff_group"/>
+<!--    <menuitem id="menu_customer_for_filling"-->
+<!--              name="Customer Form"-->
+<!--              parent="menu_sales_rep_main"-->
+<!--              action="action_customer_form_filling"-->
+<!--              sequence="12"-->
+<!--              groups="sale_repo_app.agent_group,sale_repo_app.admin_group,sale_repo_app.circulation_head_group,sale_repo_app.region_head_group,sale_repo_app.unit_manager_group,sale_repo_app.segment_incharge_group,sale_repo_app.circulation_incharge_group,sale_repo_app.office_staff_group"/>-->
 
 </odoo>
