@@ -7,6 +7,21 @@
             <i class="fa fa-plus-square" style="margin-right:5px; background-color: transparent;"></i>
             Customer Form
         </button>
+
+        <button class="start-work-button"
+              t-if="!state.workStarted"
+              t-on-click="toggleWork">
+          <i class="fa fa-play-circle" style="margin-right:5px; background-color: transparent;"></i>
+          Start Work
+      </button>
+
+      <button class="stop-work-button"
+              t-if="state.workStarted"
+              t-on-click="toggleWork">
+          <i class="fa fa-stop-circle" style="margin-right:5px; background-color: transparent;"></i>
+          Stop Work
+      </button>
+
       <div class="dashboard-main">
 
         <!-- Header -->
@@ -17,8 +32,8 @@
         </div>
 
         <!-- Agency Selection Card -->
-        <div class="dashboard-row">
-          <div class="dashboard-card agency-card">
+        <div class="dashboard-row" style="display: flex; justify-content: center;">
+          <div class="agency-card" style="display: flex; flex-direction: column; align-items: center; text-align: center;">
 
             <!-- Show Change Agency button when select is hidden -->
             <t t-if="!state.showAgencySelect">
@@ -43,7 +58,7 @@
 
             <!-- Show agency select when toggled -->
             <t t-if="state.showAgencySelect">
-              <label for="agency-select" class="agency-label">Select an agency</label>
+              <label for="agency-select" class="agency-label" style="margin-bottom: 5px;">Select an agency</label>
               <select id="agency-select"
                       class="form-select"
                       t-model="state.selectedAgencyId"
@@ -75,26 +90,29 @@
         </div>
 
         <!-- Dashboard cards -->
-        <div class="dashboard-row grid-3">
-          <div class="dashboard-card">
+        <div class="dashboard-row grid-3" style="display: flex; justify-content: center;">
+          <div class="dashboard-card" style="text-align: center;">
             <h3>Houses Visited</h3>
             <div class="dashboard-stats-row">
               <p>Today's Count: <b t-esc="state.target"/></p>
               <p>Total Visited: <b t-esc="state.today_customer_forms_count"/></p>
-              <p>Target Left: <b t-esc="state.target_left"/></p>
+<!--              <p>Target Left: <b t-esc="state.target_left"/></p>-->
             </div>
+            <button class="history-button" t-on-click="goToCustomerList">
+                      History
+            </button>
           </div>
 
-          <div class="dashboard-card">
-            <h3>Reports</h3>
-            <p>Already Subscribed: <b t-esc="state.subscribed_count"/></p>
-          </div>
+<!--          <div class="dashboard-card">-->
+<!--            <h3>Reports</h3>-->
+<!--            <p>Already Subscribed: <b t-esc="state.subscribed_count"/></p>-->
+<!--          </div>-->
 
-          <div class="dashboard-card">
-            <h3>Shift Details</h3>
-            <p>Start Time: <b t-esc="state.shift_start_time"/></p>
-            <button class="start-work-btn" t-on-click="startWork">Start Work</button>
-          </div>
+<!--          <div class="dashboard-card">-->
+<!--            <h3>Shift Details</h3>-->
+<!--            <p>Start Time: <b t-esc="state.shift_start_time"/></p>-->
+<!--            <button class="start-work-btn" t-on-click="startWork">Start Work</button>-->
+<!--          </div>-->
         </div>
 
         <!-- Loading indicator -->

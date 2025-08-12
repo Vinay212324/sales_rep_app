@@ -27,6 +27,7 @@ export class SalesDashboardDesktop extends Component {
             saveSuccess: "",
             saveError: "",
             showAgencySelect: false,
+            workStarted: false,
         });
 
         onWillStart(async () => {
@@ -113,6 +114,26 @@ export class SalesDashboardDesktop extends Component {
             console.error("actionService is not available.");
         }
     }
+
+    goToCustomerList() {
+        if (this.actionService) {
+            this.actionService.doAction("sale_repo_app.action_customer_form");
+        } else {
+            console.error("actionService is not available.");
+        }
+    }
+
+    toggleWork() {
+        this.state.workStarted = !this.state.workStarted;
+        // Optional: perform actions when work starts or stops
+        if (this.state.workStarted) {
+            console.log("Work started");
+        } else {
+            console.log("Work stopped");
+        }
+    }
+
+
 }
 
 registry.category("actions").add("sale_repo_app.sales_dashboard_desktop", SalesDashboardDesktop);

@@ -16,6 +16,32 @@
         </field>
     </record>
 
+    <record id="view_customer_form_kanban" model="ir.ui.view">
+    <field name="name">customer.form.kanban</field>
+    <field name="model">customer.form</field>
+    <field name="arch" type="xml">
+        <kanban class="card" sample="1">
+            <field name="agent_name"/>
+            <field name="unit_name"/>
+            <field name="mobile_number"/>
+            <field name="profession"/> <!-- Ensure 'profession' is also defined here -->
+            <templates>
+                <t t-name="kanban-box"> <!-- Changed from "card" to "kanban-box" -->
+                    <div class="oe_kanban_global_click">
+                        <div>
+                            <strong><field name="agent_name"/></strong>
+                            <br> </br>
+                            <b>Unit: </b><field name="unit_name"/>
+                            <br> </br>
+                            <b>Mobile: </b><field name="mobile_number"/>
+                        </div>
+                    </div>
+                </t>
+            </templates>
+        </kanban>
+    </field>
+</record>
+
     <record id="view_customer_form_form" model="ir.ui.view">
         <field name="name">customer.form.form</field>
         <field name="model">customer.form</field>
@@ -79,7 +105,7 @@
                             <field name="location_url" widget="url"/>
                         </group>
                     </group>
-                </sheet>
+                </sheet>08/11/2025
             </form>
         </field>
     </record>
@@ -102,9 +128,10 @@
 
     <!-- Action -->
     <record id="action_customer_form" model="ir.actions.act_window">
-        <field name="name">Customer Forms</field>
+        <field name="name">History</field>
         <field name="res_model">customer.form</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">kanban,form</field>
+        <field name="context">{'edit': 0,'create': 0}</field>
         <field name="search_view_id" ref="view_customer_form_search"/>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">

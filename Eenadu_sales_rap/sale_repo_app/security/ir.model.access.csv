@@ -34,3 +34,7 @@ access_work_session_user,access.work.session.user,model_work_session,base.group_
 
 
 access_verification_otp,access.verification.otp,model_verification_otp,,1,1,1,1
+
+
+
+access_unit_names,access.unit.names,model_unit_names,base.group_user,1,1,1,1
