@@ -17,6 +17,7 @@
         'views/verification_otp_views.xml',
         "views/unit_name_views.xml",
         "views/dashboard_action.xml",
+        "views/unit_names_views.xml",
         #"views/manager_dashboard_action.xml",
         # "views/user_dashboard.xml",
         # "views/customers_form.xml",

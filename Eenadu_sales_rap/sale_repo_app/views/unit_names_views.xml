@@ -1,0 +1,38 @@
+<odoo>
+    <!-- Tree View -->
+    <record id="view_unit_names_tree" model="ir.ui.view">
+        <field name="name">unit.names.tree</field>
+        <field name="model">unit.names</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="unit_name"/>
+                <field name="phone_number"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="view_unit_names_form" model="ir.ui.view">
+        <field name="name">unit.names.form</field>
+        <field name="model">unit.names</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="unit_name"/>
+                        <field name="phone_number"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_unit_names" model="ir.actions.act_window">
+        <field name="name">Unit Names</field>
+        <field name="res_model">unit.names</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+
+</odoo>
