@@ -35,6 +35,8 @@
             "sale_repo_app/static/src/js/dash.js",
             "sale_repo_app/static/src/js/customer_analytics_dashboard.js",
             "sale_repo_app/static/src/js/form_filling.js",
+            "sale_repo_app/static/src/xml/for_office_staf.xml",
+            "sale_repo_app/static/src/js/office_staff.js",
             "sale_repo_app/static/src/xml/dashboard_template.xml",
             "sale_repo_app/static/src/xml/customer_form_filling_file.xml",
             "sale_repo_app/static/src/xml/customer_analytics_dashboard_template.xml",
