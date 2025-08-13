@@ -98,8 +98,8 @@
                     <field name="role"/>
                     <field name="target" attrs="{'invisible': [('role', '!=', 'agent')]}" />
 <!--                    <field name="status"/>-->
-                    <field name="unit_name"/>
-                    <field name="unit_name_ids"/>
+                    <field name="unit_name" attrs="{'invisible': ['|', ('role', '=', 'circulation_head'), ('role', '=', 'region_head')]}"/>
+                    <field name="unit_name_ids" attrs="{'invisible': [('role', '!=', 'circulation_head'),('role', '!=', 'region_head')]}"/>
                     <field name="aadhar_number"/>
                     <field name="aadhar_base64" filename="aadhar_number"/>
                     <field name="pan_number"/>
@@ -108,6 +108,7 @@
                     <field name="phone"/>
                     <field name="user_id"/>
                     <field name="root_name_id"/>
+                    <field name="present_pin_id"/>
                     <!--                    <field name="api_token" readonly="1"/>-->
                     <!--                    <field name="token_expiry" readonly="1"/>-->
                 </group>
@@ -195,11 +196,5 @@
 <!--        <field name="domain">[('role', '!=', False)]</field>-->
 <!--    </record>-->
 <!--        <menuitem action="action_res_users" id="menu_action_res_users" parent="base.menu_users" sequence="0"/>-->
-
-    <!-- Menu Item -->
-    <menuitem id="menu_sales_rep_main" name="Sales Reps"
-              sequence="10"/>
-
-
 
 </odoo>

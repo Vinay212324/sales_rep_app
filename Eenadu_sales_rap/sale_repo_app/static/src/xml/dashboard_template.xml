@@ -1,37 +1,125 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
-    <t t-name="sale_repo_app.SelfDashboardTemplate" owl="1">
-        <div style="display: flex; flex-direction: row; justify-content: center; height: 100vh;">
-            <!-- Container with scroll enabled -->
-            <div class="o_container"
-                 style="
-                    margin-top: 15px;
-                    display: flex;
-                    flex-direction: column;
-                    justify-content: start;
-                    height: 90vh;
-                    overflow-y: auto;
-                    padding: 20px;
-                    width: 100%;
-                    max-width: auto;
-                 ">
+  <t t-name="sale_repo_app.SalesDashboardDesktopTemplate" owl="1">
 
-                <h1 class="for_head">Houses Visited</h1>
-                <p>Today's House Count: <span class="bold" t-esc="state.target"/></p>
-                <p>Total Houses Visited: <span class="bold" t-esc="state.today_customer_forms_count"/></p>
-                <p>Today's Target Left: <span class="bold" t-esc="state.target_left"/></p>
+    <div class="dashboard-wrapper container-fluid"  style="max-height: 85vh; overflow-y: auto; padding-right: 15px;">
+        <button class="floating-button" t-on-click="goToCustomerForm">
+            <i class="fa fa-plus-square" style="margin-right:5px; background-color: transparent;"></i>
+            Customer Form
+        </button>
 
-<!--                <h1 class="for_head">My Route Map</h1>-->
-<!--                <p>Go to Route Map</p>-->
+        <button class="start-work-button"
+              t-if="!state.workStarted"
+              t-on-click="toggleWork">
+          <i class="fa fa-play-circle" style="margin-right:5px; background-color: transparent;"></i>
+          Start Work
+      </button>
 
-<!--                <h1 class="for_head">Reports</h1>-->
-<!--                <p>Already Subscribed</p>-->
-<!--                <p>15 Days Offer Accepted</p>-->
-<!--                <p>15 Days Offer Rejected</p>-->
+      <button class="stop-work-button"
+              t-if="state.workStarted"
+              t-on-click="toggleWork">
+          <i class="fa fa-stop-circle" style="margin-right:5px; background-color: transparent;"></i>
+          Stop Work
+      </button>
 
-                <h1>Hello, <span t-esc="state.name"/>!</h1>
+      <div class="dashboard-main">
 
-            </div>
+        <!-- Header -->
+        <div class="dashboard-header">
+          <h1>Sales Representative</h1>
+          <div class="greeting">Welcome, <span t-esc="state.name"/>!</div>
+          <div class="date">Today: <span t-esc="state.date"/></div>
         </div>
-    </t>
+
+        <!-- Agency Selection Card -->
+        <div class="dashboard-row" style="display: flex; justify-content: center;">
+          <div class="agency-card" style="display: flex; flex-direction: column; align-items: center; text-align: center;">
+
+            <!-- Show Change Agency button when select is hidden -->
+            <t t-if="!state.showAgencySelect">
+              <button class="change-agency-btn" t-on-click="showAgencyDropdown" type="button">
+                Select an Agency
+              </button>
+
+              <!-- Display current agency info -->
+              <t t-if="state.selectedAgencyId">
+                  <t t-if="state.agencies.length">
+                <t t-set="currentAgency" t-value="state.agencies.find(a => a.id == state.selectedAgencyId)" />
+                <t t-if="currentAgency">
+                  <div class="current-agency-info">
+                    <strong>Current Agency:</strong>
+                    <span><t t-esc="currentAgency.location_name"/></span>
+                    <span>(Code: <t t-esc="currentAgency.code"/>)</span>
+                  </div>
+                </t>
+                </t>
+              </t>
+            </t>
+
+            <!-- Show agency select when toggled -->
+            <t t-if="state.showAgencySelect">
+              <label for="agency-select" class="agency-label" style="margin-bottom: 5px;">Select an agency</label>
+              <select id="agency-select"
+                      class="form-select"
+                      t-model="state.selectedAgencyId"
+                      t-on-change="onAgencyChange"
+                      t-att-disabled="state.saving">
+                <option value="" selected="selected" disabled="disabled">Select agency</option>
+                <t t-foreach="state.agencies" t-as="agency" t-key="agency.id">
+                  <option t-att-value="agency.id">
+                    <t t-esc="agency.location_name"/> (Code: <t t-esc="agency.code"/>)
+                  </option>
+                </t>
+              </select>
+
+              <!-- Saving message -->
+              <t t-if="state.saving">
+                <div class="info-message">Saving selection…</div>
+              </t>
+
+              <!-- Success and error messages -->
+              <t t-if="state.saveSuccess">
+                <div class="success-message" t-esc="state.saveSuccess"/>
+              </t>
+              <t t-if="state.saveError">
+                <div class="error-message" t-esc="state.saveError"/>
+              </t>
+            </t>
+
+          </div>
+        </div>
+
+        <!-- Dashboard cards -->
+        <div class="dashboard-row grid-3" style="display: flex; justify-content: center;">
+          <div class="dashboard-card" style="text-align: center;">
+            <h3>Houses Visited</h3>
+            <div class="dashboard-stats-row">
+              <p>Today's Count: <b t-esc="state.target"/></p>
+              <p>Total Visited: <b t-esc="state.today_customer_forms_count"/></p>
+<!--              <p>Target Left: <b t-esc="state.target_left"/></p>-->
+            </div>
+            <button class="history-button" t-on-click="goToCustomerList">
+                      History
+            </button>
+          </div>
+
+<!--          <div class="dashboard-card">-->
+<!--            <h3>Reports</h3>-->
+<!--            <p>Already Subscribed: <b t-esc="state.subscribed_count"/></p>-->
+<!--          </div>-->
+
+<!--          <div class="dashboard-card">-->
+<!--            <h3>Shift Details</h3>-->
+<!--            <p>Start Time: <b t-esc="state.shift_start_time"/></p>-->
+<!--            <button class="start-work-btn" t-on-click="startWork">Start Work</button>-->
+<!--          </div>-->
+        </div>
+
+        <!-- Loading indicator -->
+        <div t-if="state.loading" class="dashboard-loader">Loading…</div>
+        <!-- Error message -->
+        <div t-if="state.error" class="dashboard-error"><span t-esc="state.error"/></div>
+      </div>
+    </div>
+  </t>
 </templates>

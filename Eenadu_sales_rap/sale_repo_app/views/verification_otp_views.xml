@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Form View -->
+    <record id="view_verification_otp_form" model="ir.ui.view">
+        <field name="name">verification.otp.form</field>
+        <field name="model">verification.otp</field>
+        <field name="arch" type="xml">
+            <form string="OTP Verification">
+                <group>
+                    <field name="phone_number"/>
+                    <field name="otp_code"/>
+                    <field name="is_verified"/>
+                    <field name="otp_time"/>
+                </group>
+            </form>
+        </field>
+    </record>
+
+    <!-- Tree View -->
+    <record id="view_verification_otp_tree" model="ir.ui.view">
+        <field name="name">verification.otp.tree</field>
+        <field name="model">verification.otp</field>
+        <field name="arch" type="xml">
+            <tree string="OTP Verifications">
+                <field name="phone_number"/>
+                <field name="otp_code"/>
+                <field name="is_verified"/>
+                <field name="otp_time"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_verification_otp" model="ir.actions.act_window">
+        <field name="name">OTP Verifications</field>
+        <field name="res_model">verification.otp</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No OTP Verifications found</p>
+        </field>
+    </record>
+
+</odoo>

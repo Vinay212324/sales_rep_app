@@ -2,34 +2,138 @@
 
 import { Component, onWillStart, useState } from "@odoo/owl";
 import { registry } from "@web/core/registry";
-import { useService } from "@web/core/utils/hooks";  // ✅ CORRECT way to use rpc in OWL
-import { rpc } from "@web/core/network/rpc_service";
+import { useService } from "@web/core/utils/hooks";
 
-export class SelfDashboardManagerSalesRep extends Component {
-    static template = "sale_repo_app.SelfDashboardTemplate";
+export class SalesDashboardDesktop extends Component {
+    static template = "sale_repo_app.SalesDashboardDesktopTemplate";
 
     setup() {
-        this.rpc = useService("rpc");  // ✅ Get the rpc service
-        this.state = useState({ name: "", target: "", today_customer_forms_count: "", target_left:""});
+        this.rpc = useService("rpc");
+        this.actionService = useService("action");
 
+        this.state = useState({
+            name: "",
+            date: "",
+            target: 0,
+            today_customer_forms_count: 0,
+            target_left: 0,
+            subscribed_count: 0,
+            shift_start_time: "",
+            loading: true,
+            error: "",
+            agencies: [],
+            selectedAgencyId: "",
+            saving: false,
+            saveSuccess: "",
+            saveError: "",
+            showAgencySelect: false,
+            workStarted: false,
+        });
 
         onWillStart(async () => {
             try {
-                const result = await this.rpc("/api/dashboard_data", {});
-                if (result.success) {
-                    this.state.name = result.name || "";
-                    this.state.target = result.target || "";
-                    this.state.today_customer_forms_count = result.today_customer_forms_count || 0;
-                    this.state.target_left = result.target_left || 0;
+                // Fetch all agencies
+                const res = await this.rpc("/get_all_agencies_web", {});
+                if (res.success) {
+                    this.state.agencies = res.data || [];
+
+                    // Fetch current agency after agencies are loaded
+                    const currentAgency = await this.rpc("/get_current_agency_web", {});
+                    if (currentAgency.success && currentAgency.data) {
+                        this.state.selectedAgencyId = String(currentAgency.data.id);
+                    } else {
+                        this.state.selectedAgencyId = "";
+                    }
                 } else {
-                    console.error("❌ Failed to fetch data:", result.message);
+                    this.state.error = res.message || "Failed to fetch agencies";
+                }
+
+                // Fetch dashboard data
+                const dashboardResult = await this.rpc("/api/dashboard_data", {});
+                if (dashboardResult.success) {
+                    this.state.name = dashboardResult.name || "";
+                    this.state.date = dashboardResult.date || (new Date()).toLocaleDateString();
+                    this.state.target = dashboardResult.target || 0;
+                    this.state.today_customer_forms_count = dashboardResult.today_customer_forms_count || 0;
+                    this.state.target_left = dashboardResult.target_left || 0;
+                    this.state.subscribed_count = dashboardResult.subscribed_count || 0;
+                    this.state.shift_start_time = dashboardResult.shift_start_time || "";
+                } else {
+                    this.state.error = dashboardResult.message || "Failed to fetch dashboard data";
                 }
             } catch (error) {
-                console.error("❌ RPC Error:", error);
+                this.state.error = error.message || "RPC Error";
+            } finally {
+                this.state.loading = false;
             }
         });
     }
+
+    showAgencyDropdown() {
+        this.state.saveSuccess = "";
+        this.state.saveError = "";
+        this.state.showAgencySelect = true;
+    }
+
+    async onAgencyChange() {
+        this.state.saveSuccess = "";
+        this.state.saveError = "";
+
+        if (!this.state.selectedAgencyId) {
+            return;
+        }
+
+        this.state.saving = true;
+        try {
+            const res = await this.rpc("/assign_agency_web", { pin_lo_id: this.state.selectedAgencyId });
+            if (res.success) {
+                this.state.saveSuccess = res.message || "Agency assigned successfully.";
+                this.state.showAgencySelect = false;
+            } else {
+                this.state.saveError = res.message || "Failed to assign agency.";
+            }
+        } catch (e) {
+            this.state.saveError = e.message || "Network error.";
+        } finally {
+            this.state.saving = false;
+        }
+    }
+
+    showRouteMap() {
+        alert("Route Map feature under development!");
+    }
+
+    startWork() {
+        alert("Starting work!");
+    }
+
+    goToCustomerForm() {
+        if (this.actionService) {
+            this.actionService.doAction("sale_repo_app.self_customer_form_filling_sales_rep");
+        } else {
+            console.error("actionService is not available.");
+        }
+    }
+
+    goToCustomerList() {
+        if (this.actionService) {
+            this.actionService.doAction("sale_repo_app.action_customer_form");
+        } else {
+            console.error("actionService is not available.");
+        }
+    }
+
+    toggleWork() {
+        this.state.workStarted = !this.state.workStarted;
+        // Optional: perform actions when work starts or stops
+        if (this.state.workStarted) {
+            console.log("Work started");
+        } else {
+            console.log("Work stopped");
+        }
+    }
+
+
 }
 
-
-registry.category("actions").add("sale_repo_app.self_dashboard_manager_sales_rep", SelfDashboardManagerSalesRep);
+registry.category("actions").add("sale_repo_app.sales_dashboard_desktop", SalesDashboardDesktop);

@@ -98,10 +98,14 @@ class CustomerFormAPI(http.Controller):
                 'location_address': kwargs.get('location_address'),
                 'location_url': kwargs.get('location_url'),
                 'face_base64': kwargs.get('face_base64'),
-                'for_consider': kwargs.get('kwargs'),
+                'for_consider': kwargs.get('for_consider'),
                 'shift_to_EENADU': kwargs.get('shift_to_EENADU', False),
-                'Willing_to_Shift_to_EENADU': kwargs.get('Willing_to_Shift_to_EENADU', False),
+                'Willing_to_Shift_to_EENADU': kwargs.get('would_like_to_stay_with_existing_news_papar', False),
                 'Start_Circulating':kwargs.get('Start_Circulating'),
+                'Agency':kwargs.get('Agency'),
+                'age':kwargs.get('age'),
+                'customer_type':kwargs.get('customer_type'),
+                'occupation':kwargs.get('occupation'),
             })
             return {'success': True, 'message': 'Customer Form created successfully', 'customer_id': customer.id,
                     "code": "200"}
@@ -240,14 +244,18 @@ class CustomerFormAPI(http.Controller):
             'face_base64': f"data:image/png;base64,{record.face_base64.decode('utf-8')}" if record.face_base64 else None,
             'for_consider':record.for_consider,
             'shift_to_EENADU':record.shift_to_EENADU,
-            'Willing_to_Shift_to_EENADU':record.Willing_to_Shift_to_EENADU,
+            'would_like_to_stay_with_existing_news_papar':record.Willing_to_Shift_to_EENADU,
             'Start_Circulating':record.Start_Circulating,
+            'Agency':record.Agency,
+            'age':record.age,
+            'customer_type':record.customer_type,
+            'occupation':record.occupation
         } for record in customer_forms]
 
         return {'records': result, "code": "200"}
 
     @http.route('/api/users', type='json', auth='public', methods=['POST'], csrf=False, cors="*")
-    def get_users(self, **kw):
+    def getting_users(self, **kw):
         try:
 
             api_key = kw.get('token')
@@ -489,8 +497,12 @@ class CustomerFormAPI(http.Controller):
             'face_base64': f"data:image/png;base64,{record.face_base64.decode('utf-8')}" if record.face_base64 else None,
             'for_consider': record.for_consider,
             'shift_to_EENADU': record.shift_to_EENADU,
-            'Willing_to_Shift_to_EENADU': record.Willing_to_Shift_to_EENADU,
+            'would_like_to_stay_with_existing_news_papar': record.Willing_to_Shift_to_EENADU,
             'Start_Circulating': record.Start_Circulating,
+            'Agency': record.Agency,
+            'age': record.age,
+            'customer_type': record.customer_type,
+            'occupation': record.occupation
         } for record in customer_forms]
 
         response = {
@@ -591,6 +603,14 @@ class CustomerFormAPI(http.Controller):
             'location_address': record.location_address,
             'location_url': record.location_url,
             'face_base64': f"data:image/png;base64,{record.face_base64.decode('utf-8')}" if record.face_base64 else None,
+            'for_consider': record.for_consider,
+            'shift_to_EENADU': record.shift_to_EENADU,
+            'would_like_to_stay_with_existing_news_papar': record.Willing_to_Shift_to_EENADU,
+            'Start_Circulating': record.Start_Circulating,
+            'Agency': record.Agency,
+            'age': record.age,
+            'customer_type': record.customer_type,
+            'occupation': record.occupation
         } for record in customer_forms]
 
         response = {
@@ -1014,6 +1034,7 @@ class CustomerFormAPI(http.Controller):
         to_date = params.get('to_date')  # format: "YYYY-MM-DD"
         unit_name = params.get('unit_name')  # string
         agent_name = params.get('agent_name')  # string
+        Agency = params.get('Agency')  # string
         order = params.get('order', 'desc')  # 'asc' or 'desc'
 
         # Compose domain (search filters)
@@ -1033,6 +1054,9 @@ class CustomerFormAPI(http.Controller):
 
             if agent_name:
                 domain.append(('agent_name', '=', agent_name))
+            if agent_name:
+                domain.append(('Agency', '=', Agency))
+
         except Exception as e:
             return {'success': False, 'message': f'Invalid filter values: {e}', 'code': "400"}
 
@@ -1091,6 +1115,14 @@ class CustomerFormAPI(http.Controller):
             'location_address': form.location_address,
             'location_url': form.location_url,
             'face_base64': f"data:image/png;base64,{form.face_base64.decode('utf-8')}" if form.face_base64 else None,
+            'for_consider': form.for_consider,
+            'shift_to_EENADU': form.shift_to_EENADU,
+            'would_like_to_stay_with_existing_news_papar': form.Willing_to_Shift_to_EENADU,
+            'Start_Circulating': form.Start_Circulating,
+            'Agency': form.Agency,
+            'age': form.age,
+            'customer_type': form.customer_type,
+            'occupation': form.occupation
         } for form in forms]
 
         response = {

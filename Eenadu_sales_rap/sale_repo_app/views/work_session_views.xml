@@ -47,17 +47,4 @@
         </field>
     </record>
 
-    <!-- Menu Root -->
-    <menuitem id="menu_work_session_root"
-              name="Work Management"
-              parent="menu_sales_rep_main"
-              sequence="10"/>
-
-    <!-- Submenu & Link to Action -->
-    <menuitem id="menu_work_session_main"
-              name="Work Sessions"
-              parent="menu_work_session_root"
-              action="action_work_session"
-              sequence="10"/>
-
 </odoo>
