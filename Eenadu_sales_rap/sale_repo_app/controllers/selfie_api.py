@@ -209,3 +209,43 @@ class SelfieController(http.Controller):
         except Exception as e:
             return {'success': False, 'message': str(e), 'code': 500}
 
+    @http.route('/api/create_pin_location', type='json', auth='public', methods=['POST'], csrf=False)
+    def create_pin_location(self, **kwargs):
+        try:
+            # Token authentication
+            token = kwargs.get('token')
+            if not token:
+                return {'success': False, 'message': 'Token is missing'}
+
+            user = self._verify_api_key(token)
+            if not user:
+                return {'success': False, 'message': 'Invalid or expired token'}
+
+            # Required fields
+            required_fields = ['code', 'location_name', 'name', 'phone', 'unit_name']
+            for field in required_fields:
+                if not kwargs.get(field):
+                    return {'success': False, 'message': f'Missing field: {field}'}
+
+            # Create the record
+            pin = request.env['pin.location'].sudo().create({
+                'code': kwargs.get('code'),
+                'location_name': kwargs.get('location_name'),
+                'phone': kwargs.get('phone'),
+                'unit_name': kwargs.get('unit_name'),
+            })
+
+            return {
+                'success': True,
+                'message': 'Pin location created successfully',
+                'data': {
+                    'id': pin.id,
+                    'code': pin.code,
+                    'location_name': pin.location_name,
+                    'phone': pin.phone,
+                    'unit_name': pin.unit_name
+                }
+            }
+
+        except Exception as e:
+            return {'success': False, 'message': str(e)}
