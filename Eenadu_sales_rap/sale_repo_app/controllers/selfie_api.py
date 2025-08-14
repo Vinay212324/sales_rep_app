@@ -137,7 +137,7 @@ class SelfieController(http.Controller):
                 return {'success': False, 'message': 'Invalid or expired token'}
 
             pins = request.env['pin.location'].sudo().search([])
-            data = [{'id': p.id, 'name': p.name, 'code': p.code, 'location_name': p.location_name} for p in pins]
+            data = [{'id': p.id, 'name': p.name, 'code': p.code, 'location_name': p.location_name, 'phone':p.phone, 'unit_name':p.unit_name} for p in pins]
 
             return {'success': True, 'data': data}
 
