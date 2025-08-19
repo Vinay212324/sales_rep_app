@@ -1,7 +1,7 @@
 {
     "name": "Sales REPO",
     "version": "1.0",
-    "depends": ["base", "web", "web_tour"],
+    "depends": ["base", "web", "web_tour","website"],
     "author": "Your Name",
     "category": "Custom",
     "summary": "Manage user hierarchy with OWL authentication",
@@ -26,6 +26,7 @@
         "views/hide_app_menu.xml",
         'views/work_session_views.xml',
         "views/sales_repo_menu.xml",
+        'views/daily_data_template.xml',
 
     ],
     "assets": {
@@ -54,5 +55,6 @@
         ]
     },
     "installable": True,
-    "application": True
+    "application": True,
+    'license': 'LGPL-3',
 }
