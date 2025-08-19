@@ -8,5 +8,6 @@
         "web.assets_frontend": ["custom_login_page_user/static/src/css/login.css"]
     }, 
     "installable": True, 
-    "auto_install": True
+    "auto_install": True,
+    'license': 'LGPL-3',
 }

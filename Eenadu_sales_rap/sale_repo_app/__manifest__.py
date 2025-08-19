@@ -1,7 +1,7 @@
 {
     "name": "Sales REPO",
     "version": "1.0",
-    "depends": ["base", "web", "web_tour"],
+    "depends": ["base", "web", "web_tour","website"],
     "author": "Your Name",
     "category": "Custom",
     "summary": "Manage user hierarchy with OWL authentication",
@@ -26,6 +26,7 @@
         "views/hide_app_menu.xml",
         'views/work_session_views.xml',
         "views/sales_repo_menu.xml",
+        'views/daily_data_template.xml',
 
     ],
     "assets": {
@@ -35,6 +36,8 @@
             "sale_repo_app/static/src/js/dash.js",
             "sale_repo_app/static/src/js/customer_analytics_dashboard.js",
             "sale_repo_app/static/src/js/form_filling.js",
+            "sale_repo_app/static/src/xml/for_office_staf.xml",
+            "sale_repo_app/static/src/js/office_staff.js",
             "sale_repo_app/static/src/xml/dashboard_template.xml",
             "sale_repo_app/static/src/xml/customer_form_filling_file.xml",
             "sale_repo_app/static/src/xml/customer_analytics_dashboard_template.xml",
@@ -52,5 +55,6 @@
         ]
     },
     "installable": True,
-    "application": True
+    "application": True,
+    'license': 'LGPL-3',
 }

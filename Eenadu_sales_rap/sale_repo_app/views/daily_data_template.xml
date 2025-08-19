@@ -1,0 +1,33 @@
+<odoo>
+    <template id="daily_data_template" name="Daily Data Page">
+        <div class="container mt-5">
+            <h2>Daily Data Information</h2>
+            <table class="table table-bordered">
+                <tr>
+                    <th>Date</th>
+                    <td><t t-esc="date"/></td>
+                </tr>
+                <tr>
+                    <th>City</th>
+                    <td><t t-esc="city"/></td>
+                </tr>
+                <tr>
+                    <th>Name</th>
+                    <td><t t-esc="name"/></td>
+                </tr>
+            </table>
+
+            <!-- Download PDF -->
+            <a t-att-href="'/daily-data/pdf/%s/%s/%s' % (date, city, name)"
+               class="btn btn-primary mt-3">
+                Download PDF
+            </a>
+
+            <!-- Download Excel -->
+            <a t-att-href="'/daily-data/excel/%s/%s/%s' % (date, city, name)"
+               class="btn btn-success mt-3">
+                Download Excel
+            </a>
+        </div>
+    </template>
+</odoo>

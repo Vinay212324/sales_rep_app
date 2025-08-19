@@ -25,10 +25,12 @@ class OtpAPI(http.Controller):
         phone = post.get('phone')
         if not phone:
             return {'status': 'error', 'message': 'Phone number is required'}
-
+        ot = ""
         otp = str(random.randint(100000, 999999))
-        msg = "One Time Password for EENADU (Advertisements) Online Booking to Update Mobile is " + str(otp) + ". Please use this OTP to Update Mobile.Regards EENADU"
-
+        msg = (
+            f"One Time Password for EENADU (Circulation) Online Booking is {ot} {otp} "
+            f"Please use this OTP to confirm online booking. EENADU-CIRCULATION"
+        )
         url = "https://www.smsstriker.com/API/sms.php"
         payload = {
             'username': 'EERETA',
@@ -37,7 +39,7 @@ class OtpAPI(http.Controller):
             'to': phone,
             'msg': msg,
             'type': '1',
-            'template_id': '1407169114591748105'
+            'template_id': '1407175507692048299'
         }
 
         try:
