@@ -255,7 +255,7 @@ class CustomerFormAPI(http.Controller):
         return {'records': result, "code": "200"}
 
     @http.route('/api/users', type='json', auth='public', methods=['POST'], csrf=False, cors="*")
-    def get_users(self, **kw):
+    def getting_users(self, **kw):
         try:
 
             api_key = kw.get('token')

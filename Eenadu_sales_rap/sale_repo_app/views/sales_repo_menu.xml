@@ -10,12 +10,12 @@
 <!--              sequence="13"-->
 <!--              groups="sale_repo_app.admin_group,sale_repo_app.circulation_head_group,sale_repo_app.region_head_group,sale_repo_app.unit_manager_group,sale_repo_app.segment_incharge_group,sale_repo_app.circulation_incharge_group,sale_repo_app.office_staff_group"/>-->
 
-    <menuitem id="menu_fromto_rootmap"
-              name="From-To Route Map"
-              parent="menu_sales_rep_main"
-              action="action_fromto_rootmap"
-              sequence="14"
-              groups="sale_repo_app.admin_group,sale_repo_app.circulation_head_group,sale_repo_app.region_head_group,sale_repo_app.unit_manager_group,sale_repo_app.segment_incharge_group,sale_repo_app.circulation_incharge_group,sale_repo_app.office_staff_group"/>
+<!--    <menuitem id="menu_fromto_rootmap"-->
+<!--              name="From-To Route Map"-->
+<!--              parent="menu_sales_rep_main"-->
+<!--              action="action_fromto_rootmap"-->
+<!--              sequence="14"-->
+<!--              groups="sale_repo_app.admin_group,sale_repo_app.circulation_head_group,sale_repo_app.region_head_group,sale_repo_app.unit_manager_group,sale_repo_app.segment_incharge_group,sale_repo_app.circulation_incharge_group,sale_repo_app.office_staff_group"/>-->
 
     <menuitem id="menu_pin_location_root"
               name="Pin Locations"
@@ -72,4 +72,10 @@
               action="action_unit_name"
               sequence="19"
               groups="sale_repo_app.admin_group"/>
+
+    <!-- Menu -->
+    <menuitem id="menu_unit_root" name="Unit Management" parent="menu_sales_rep_main" />
+
+    <menuitem id="menu_unit_namess" name="Unit Namess" parent="menu_unit_root"
+              action="action_unit_names"/>
 </odoo>
