@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="form_circulation_incharge_view" model="ir.ui.view">
+        <field name="name">circulation_incharge.view</field>
+        <field name="model">circulation_incharge.view</field>
+        <field name="arch" type="xml">
+            <form string="Circulation Incharge View">
+                <sheet>
+                    <group>
+                        <field name="show_buttons" invisible="1"/>
+                    </group>
+
+                    <div class="center-button" style="text-align: center;">
+                        <group style="display: flex; align-items: center; justify-content: center;">
+                            <button name="view_all_staff_record" type="object"
+                                    class="btn btn-primary green-button"
+                                    attrs="{'invisible': [('show_buttons', '=', True)]}">
+                                Number Of Resources
+                            </button>
+                        </group>
+                    </div>
+
+                    <div class="center-button" style="text-align: center;">
+                        <group style="display: flex; align-items: center; justify-content: center;">
+                            <button name="view_all_customer_form" type="object"
+                                    class="btn btn-primary green-button"
+                                    attrs="{'invisible': [('show_buttons', '=', True)]}">
+                                View All Customer Forms
+                            </button>
+                        </group>
+                    </div>
+
+                    <div class="center-button" style="text-align: center;">
+                        <group style="display: flex; align-items: center; justify-content: center;">
+                            <button name="create_office_staff" type="object"
+                                    class="btn btn-primary green-button"
+                                    attrs="{'invisible': [('show_buttons', '=', True)]}">
+                                Create Office Staff
+                            </button>
+                        </group>
+                    </div>
+
+                    <div class="center-button" style="text-align: center;">
+                        <group style="display: flex; align-items: center; justify-content: center;">
+                            <button name="approved_staff_list" type="object"
+                                    class="btn btn-primary green-button"
+                                    attrs="{'invisible': [('show_buttons', '=', True)]}">
+                                Approved Staff
+                            </button>
+                            <button name="waiting_for_approval_staff_list" type="object"
+                                    class="btn btn-primary green-button"
+                                    attrs="{'invisible': [('show_buttons', '=', True)]}"
+                                    style="margin-left: 10px;">
+                                Staff Waiting For Approval
+                            </button>
+                        </group>
+                    </div>
+
+                    <div class="history-container" attrs="{'invisible': [('show_buttons', '!=', True)]}">
+                    <div class="customer-count-box">
+                        <label for="customer_form_count" string="Total Forms" style="color:black;"/>
+                        <field name="customer_form_count" readonly="1" class="oe_read_only"
+                               style="text-align: center;"/>
+                    </div>
+
+                    <div class="history-buttons">
+                        <button name="today_history_action" type="object" string="Today's History" class="btn btn-primary"/>
+                        <button name="overall_history_action" type="object" string="Overall History" class="btn btn-primary"/>
+                    </div>
+                </div>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_circulation_incharge_view" model="ir.actions.act_window">
+        <field name="name">Circulation Incharge View</field>
+        <field name="res_model">circulation_incharge.view</field>
+        <field name="view_mode">form</field>
+        <field name="context">{'edit': 0,'create': 0}</field>
+    </record>
+
+    <menuitem id="menu_circulation_incharge_view"
+              name="Circulation Incharge View"
+              action="action_circulation_incharge_view"
+              groups="sale_repo_app.circulation_incharge_group"/>
+
+
+</odoo>

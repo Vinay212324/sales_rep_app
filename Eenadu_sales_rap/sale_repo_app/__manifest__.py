@@ -17,6 +17,9 @@
         'views/verification_otp_views.xml',
         "views/unit_name_views.xml",
         "views/dashboard_action.xml",
+        "views/circulation_incharge_views.xml",
+        "views/office_staff.xml",   
+
         "views/unit_names_views.xml",
         #"views/manager_dashboard_action.xml",
         # "views/user_dashboard.xml",
@@ -33,6 +36,7 @@
         "web.assets_backend": [
             "sale_repo_app/static/src/css/agent_dashboard.css",
             "sale_repo_app/static/src/css/customer_form_list.css",
+            "sale_repo_app/static/src/css/circulation_incharge.css",
             "sale_repo_app/static/src/js/dash.js",
             "sale_repo_app/static/src/js/customer_analytics_dashboard.js",
             "sale_repo_app/static/src/js/form_filling.js",

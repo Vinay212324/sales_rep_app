@@ -3,21 +3,21 @@
   <t t-name="sale_repo_app.SalesDashboardDesktopTemplate" owl="1">
 
     <div class="dashboard-wrapper container-fluid"  style="max-height: 85vh; overflow-y: auto; padding-right: 15px;">
-        <button class="floating-button" t-on-click="goToCustomerForm">
+        <button class="floating-button" t-if="state.workStarted" t-on-click="goToCustomerForm">
             <i class="fa fa-plus-square" style="margin-right:5px; background-color: transparent;"></i>
             Customer Form
         </button>
 
         <button class="start-work-button"
               t-if="!state.workStarted"
-              t-on-click="toggleWork">
+              t-on-click="startWork">
           <i class="fa fa-play-circle" style="margin-right:5px; background-color: transparent;"></i>
           Start Work
       </button>
 
       <button class="stop-work-button"
               t-if="state.workStarted"
-              t-on-click="toggleWork">
+              t-on-click="endWork">
           <i class="fa fa-stop-circle" style="margin-right:5px; background-color: transparent;"></i>
           Stop Work
       </button>

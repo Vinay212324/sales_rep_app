@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<odoo>
+    <record id="office_staff_form" model="ir.ui.view">
+        <field name="name">office.staff</field>
+        <field name="model">office.staff</field>
+        <field name="arch" type="xml">
+            <form string="Office Staff Form">
+                <header>
+
+                    <button name="waiting_for_approve"
+                            string="Waiting"
+                            type="object"
+                            class="btn btn-primary"
+                            attrs="{'invisible': [('id', '=', False)]}"
+                            />
+
+                    <button name="approved_staff"
+                            string="Approve"
+                            type="object"
+                            class="btn btn-primary"
+                            attrs="{'invisible': [('id', '=', False)]}"
+                            />
+
+                    <field name="state" widget="statusbar" attrs="{'invisible': [('id', '=', False)]}" readonly="1"/>
+
+                </header>
+
+                <sheet>
+                    <widget name="web_ribbon" text="Approved" attrs="{'invisible': [('state', '!=', 'approved')]}"/>
+                    <widget name="web_ribbon" text="Waiting" bg_color="bg-warning" attrs="{'invisible': [('state', '!=', 'waiting')]}"/>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="unit_name"/>
+                            <field name="phone"/>
+                            <field name="email"/>
+                            <field name="password"/>
+                            <field name="address"/>
+                            <field name="aadhar"/>
+                            <field name="pan"/>
+                        </group>
+                        <group>
+                            <field name="aadhar_photo"/>
+                            <field name="pan_photo"/>
+                        </group>
+                    </group>
+                    <div class="center-button" style="text-align: center;">
+                            <group style="display: flex; align-items: center; justify-content: center;">
+                            <button name="create_record" type="object"
+                                    class="btn btn-primary green-button"
+                                    attrs="{'invisible': [('id', '!=', False)]}">
+                                Create
+                            </button>
+                        </group>
+                    </div>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_office_staff_form" model="ir.actions.act_window">
+        <field name="name">Office Staff</field>
+        <field name="res_model">office.staff</field>
+        <field name="view_mode">form,tree</field>
+    </record>
+
+</odoo>
