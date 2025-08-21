@@ -1,48 +1,53 @@
 <odoo>
+    <!-- ================= DASHBOARD ACTIONS ================= -->
+
+    <!-- Sales Representative Dashboard -->
     <record id="action_dashboard" model="ir.actions.client">
         <field name="name">Sales Dashboard</field>
         <field name="tag">sale_repo_app.sales_dashboard_desktop</field>
     </record>
 
-    <record id="action_customer_form_filling" model="ir.actions.client">
-        <field name="name">Sales customer form</field>
-        <field name="tag">sale_repo_app.self_customer_form_filling_sales_rep</field>
-    </record>
-
-    <record id="action_customer_analytics_dashboard" model="ir.actions.client">
-        <field name="name">Customer Analytics</field>
-        <field name="tag">customer_analytics_dashboard</field>
-    </record>
-
+    <!-- Office Staff Dashboard -->
     <record id="action_office_staff_dashboard" model="ir.actions.client">
-        <field name="name">Office staff</field>
+        <field name="name">Office Staff Dashboard</field>
         <field name="tag">sale_repo_app.office_staff_dashboard</field>
     </record>
 
-    <menuitem id="menu_office_staff"
-              name="Office Staff"
-              action="action_office_staff_dashboard"
-              sequence="4"
-              groups="sale_repo_app.office_staff_group"/>
+    <!-- Unit Manager Dashboard -->
+    <record id="action_unit_manager_dashboard_um" model="ir.actions.client">
+        <field name="name">Unit Manager Dashboard</field>
+        <field name="tag">sale_repo_app.unit_manager_dashboard_um</field>
+    </record>
 
+    <!-- ================= MENUS ================= -->
+
+    <!-- Top Level Dashboards Menu -->
+    <menuitem id="menu_dashboards_root"
+              name="Dashboards"
+              sequence="1"
+              groups="sale_repo_app.agent_group,sale_repo_app.office_staff_group,sale_repo_app.unit_manager_group"/>
+
+    <!-- Sales Representative -->
     <menuitem id="menu_dashboard_manager"
-              name="Sales Representative Staff"
+              name="Sales Representative"
+              parent="menu_dashboards_root"
               action="action_dashboard"
               sequence="10"
               groups="sale_repo_app.agent_group"/>
 
-<!--    <menuitem id="menu_customer_analytics"-->
-<!--              name="Analytics Dashboard"-->
-<!--              parent="menu_sales_rep_main"-->
-<!--              action="action_customer_analytics_dashboard"-->
-<!--              sequence="11"-->
-<!--              groups="sale_repo_app.agent_group,sale_repo_app.admin_group,sale_repo_app.circulation_head_group,sale_repo_app.region_head_group,sale_repo_app.unit_manager_group,sale_repo_app.segment_incharge_group,sale_repo_app.circulation_incharge_group,sale_repo_app.office_staff_group"/>-->
+    <!-- Office Staff -->
+    <menuitem id="menu_office_staff"
+              name="Office Staff"
+              parent="menu_dashboards_root"
+              action="action_office_staff_dashboard"
+              sequence="20"
+              groups="sale_repo_app.office_staff_group"/>
 
-<!--    <menuitem id="menu_customer_for_filling"-->
-<!--              name="Customer Form"-->
-<!--              parent="menu_sales_rep_main"-->
-<!--              action="action_customer_form_filling"-->
-<!--              sequence="12"-->
-<!--              groups="sale_repo_app.agent_group,sale_repo_app.admin_group,sale_repo_app.circulation_head_group,sale_repo_app.region_head_group,sale_repo_app.unit_manager_group,sale_repo_app.segment_incharge_group,sale_repo_app.circulation_incharge_group,sale_repo_app.office_staff_group"/>-->
-
+    <!-- Unit Manager -->
+    <menuitem id="menu_unit_manager_dashboard_um"
+              name="Unit Manager"
+              parent="menu_dashboards_root"
+              action="action_unit_manager_dashboard_um"
+              sequence="30"
+              groups="sale_repo_app.unit_manager_group"/>
 </odoo>

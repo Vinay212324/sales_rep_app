@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="sale_repo_app.UnitManagerDashboardUM" owl="1">
+        <div class="o_unit_manager_dashboard p-5">
+            <h1>Welcome, Unit Manager!</h1>
+            <p>This is your dashboard. All your unit management tasks will appear here.</p>
+        </div>
+    </t>
+</templates>
+
+
+
+
+
+
+
+
+
+
