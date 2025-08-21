@@ -222,7 +222,7 @@ class SelfieController(http.Controller):
                 return {'success': False, 'message': 'Invalid or expired token'}
 
             # Required fields
-            required_fields = ['code', 'location_name', 'name', 'phone', 'unit_name']
+            required_fields = ['code', 'location_name', 'phone', 'unit_name']
             for field in required_fields:
                 if not kwargs.get(field):
                     return {'success': False, 'message': f'Missing field: {field}'}
