@@ -120,7 +120,7 @@ class CustomerForm(models.Model):
         if not vals.get('agent_login'):
             vals['agent_login'] = user.login
         if not vals.get('unit_name'):
-            vals['unit_name'] = user.company_id.name  # or custom field if you have unit info elsewhere
+            vals['unit_name'] = user.unit_name # or custom field if you have unit info elsewhere
 
         # Auto-fill current time if not provided
         if not vals.get('time'):

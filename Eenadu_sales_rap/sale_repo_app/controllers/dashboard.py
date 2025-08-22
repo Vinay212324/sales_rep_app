@@ -90,6 +90,7 @@ class CustomerFormAPI(http.Controller):
 
         customer = request.env['customer.form'].sudo().create({
             'agent_name': user.name,
+            'Agency': user.present_pin_id.location_name,
             'agent_login': user.login,
             'unit_name': user.unit_name,
             'date': kwargs.get('date'),
