@@ -346,6 +346,46 @@ class MyMessage(http.Controller):
             ]
         )
 
+    @http.route('/api/message/history', type='http', auth='public', methods=['GET'], csrf=False)
+    def get_message_history(self, **post):
+
+        token = post.get('token')
+        if not token:
+            return {'success': False, 'message': 'Token is required', 'code': 403}
+
+        user = self._verify_api_key(token)
+        if not user:
+            return {'success': False, 'message': 'Invalid or expired token', 'code': 403}
+
+
+        try:
+            # Fetch all records
+            records = request.env['message.history'].sudo().search([])
+
+            # Convert records to dictionary format
+            data = []
+            for rec in records:
+                data.append({
+                    "id": rec.id,
+                    "unit_name": rec.unit_name,
+                    "agency": rec.agency,
+                    "date": str(rec.date) if rec.date else None,
+                    "unic_code": rec.unic_code,
+                    "time": str(rec.time) if rec.time else None,
+                })
+
+            # Return JSON response
+            return request.make_response(
+                json.dumps({"status": "success", "data": data}, ensure_ascii=False),
+                headers=[('Content-Type', 'application/json')]
+            )
+
+        except Exception as e:
+            return request.make_response(
+                json.dumps({"status": "error", "message": str(e)}),
+                headers=[('Content-Type', 'application/json')]
+            )
+
     # @http.route('/api/circulation_send_mes', type='json', auth='public', methods=['POST'], csrf=False, cors="*")
     # def getting_users(self, **kw):
     #     token = kw.get('token')

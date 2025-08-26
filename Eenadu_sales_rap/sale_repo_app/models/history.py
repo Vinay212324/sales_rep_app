@@ -9,6 +9,7 @@ class RootMap(models.Model):
     agency = fields.Char()
     date = fields.Date()
     unic_code = fields.Char()
+    time = fields.Datetime(default=fields.Datetime.now)
 
     def generate_token(self):
         """Generate a short 7-character alphanumeric token and set it as unic_code."""
