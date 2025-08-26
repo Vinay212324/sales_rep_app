@@ -107,6 +107,35 @@ class CustomerFormAPI(http.Controller):
                 'customer_type':kwargs.get('customer_type'),
                 'occupation':kwargs.get('occupation'),
             })
+
+
+
+            msg = (
+                    f"ఈనాడు చందాదారునిగా చేరినందుకు ధన్యవాదాలు.మీరు కోరిన విధంగా {kwargs.get('date')} వ తేదీ నుండి పత్రిక సరఫరా చేయబడుతుంది.ఈనాడు సర్క్యులేషన్."
+            )
+            url = "https://smsstriker.com/API/unicodesms.php"
+
+
+            payload = {
+                'username': 'EERETA',
+                'password': 'EERETA',
+                'from': 'EERETA',
+                'to': kwargs.get('mobile_number'),
+                'msg': msg,
+                'type': '1',
+                'template_id': '1407175508018474089'
+            }
+
+            response = requests.post(url, data=payload)
+            # if not (response.status_code):
+            #     _logger.error(f"SMS sending failed: {response.text}")
+            #     res[str(i)] = {'status': 'error', 'message': 'Failed to send OTP'}
+
+
+
+
+
+
             return {'success': True, 'message': 'Customer Form created successfully', 'customer_id': customer.id,
                     "code": "200"}
         except Exception as e:

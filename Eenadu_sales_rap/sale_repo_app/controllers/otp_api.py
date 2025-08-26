@@ -4,7 +4,8 @@ import random
 import requests
 import logging
 from datetime import date
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time
+#from apscheduler.schedulers.background import BackgroundScheduler
 from odoo.http import request
 _logger = logging.getLogger(__name__)
 
@@ -97,7 +98,7 @@ class OtpAPI(http.Controller):
 
 
     @http.route('/api/send_url_message', auth='public', methods=['POST'], type='json', csrf=False)
-    def send_mes(self, **post):
+    def send_mes(self):
         print("ppppppppp")
         token = post.get('token')
         if not token:
@@ -203,9 +204,17 @@ class OtpAPI(http.Controller):
                 res[str(i)] = {'status': 'success', 'message': 'OTP sent successfully'}
             else:
                 return res
-
+            _logger.info("SMS Response: %s %s", response.status_code, response.text)
         except Exception as e:
             _logger.exception("Error sending OTP")
             return {'status': 'error', 'message': str(e)}
 
-
+    # def check_and_run_on_restart(self):
+    #     now = datetime.now()
+    #     scheduled = time(19,0)
+    #     if now.time()>scheduled:
+    #         send_mes()
+    #
+    # if __name__ == "__main__":
+    #     check_and_run_on_restart()
+    #     t.sleep(60)

@@ -14,10 +14,10 @@
             </table>
 
             <!-- Download PDF -->
-            <a t-att-href="'/daily_data_agency/pdf/%s' % (unic_code)"
-               class="btn btn-primary mt-3">
-                Download PDF
-            </a>
+<!--            <a t-att-href="'/daily_data_agency/pdf/%s' % (unic_code)"-->
+<!--               class="btn btn-primary mt-3">-->
+<!--                Download PDF-->
+<!--            </a>-->
 
             <!-- Download Excel -->
             <a t-att-href="'/daily_data_agency/excel/%s' % (unic_code)"

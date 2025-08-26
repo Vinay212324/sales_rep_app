@@ -1,6 +1,6 @@
 <odoo>
     <template id="daily_data_template" name="Daily Data Page">
-        <div class="container mt-5">
+        <div class="container mt-5" style="background-color:red;">
             <h2>Daily Data Information</h2>
             <table class="table table-bordered">
                 <tr>
@@ -14,13 +14,14 @@
             </table>
 
             <!-- Download PDF -->
-            <a t-att-href="'/daily-data/pdf/%s' % (unic_code)"
-               class="btn btn-primary mt-3">
-                Download PDF
-            </a>
+<!--            <a t-att-href="'/daily-data/pdf/%s' % (unic_code)"-->
+<!--               class="btn btn-primary mt-3">-->
+<!--                Download PDF-->
+<!--            </a>-->
 
             <!-- Download Excel -->
             <a t-att-href="'/daily-data/excel/%s' % (unic_code)"
+               style="color: brown;background-color: black;"
                class="btn btn-success mt-3">
                 Download Excel
             </a>

@@ -321,3 +321,7 @@
 
 
 /* Keep your existing styles for dashboard wrapper, cards, selects, buttons, messages */
+element.style {
+    color: brown;
+    background-color: black;
+}
