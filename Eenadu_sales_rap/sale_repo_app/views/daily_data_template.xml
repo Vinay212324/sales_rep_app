@@ -21,7 +21,6 @@
 
             <!-- Download Excel -->
             <a t-att-href="'/daily-data/excel/%s' % (unic_code)"
-               style="color: brown;background-color: black;"
                class="btn btn-success mt-3">
                 Download Excel
             </a>
