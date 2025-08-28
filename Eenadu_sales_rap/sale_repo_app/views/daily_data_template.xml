@@ -1,6 +1,6 @@
 <odoo>
     <template id="daily_data_template" name="Daily Data Page">
-        <div class="container mt-5" style="background-color:red;">
+        <div class="container mt-5">
             <h2>Daily Data Information</h2>
             <table class="table table-bordered">
                 <tr>
