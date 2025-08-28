@@ -7,6 +7,7 @@ import json
 import uuid
 import hmac
 import hashlib
+import requests
 import time
 from datetime import date
 import logging
