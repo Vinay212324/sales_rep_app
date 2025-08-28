@@ -6,6 +6,13 @@ import random
 import requests
 import logging
 from datetime import date
+from odoo import models, fields
+import requests
+import logging
+from datetime import date
+
+_logger = logging.getLogger(__name__)
+
 
 class PhoneVerificationOTP(models.Model):
     _name = 'verification.otp'
@@ -29,6 +36,11 @@ class PhoneVerificationOTP(models.Model):
         print(unit_set)
         for res in unit_set:
             unit_name = res
+            count = request.env['customer.form'].sudo().search_count(
+                [('unit_name', '=', unit_name), ('date', '=', date.today())])
+            if count==0:
+                continue
+            
             message_history = request.env['message.history'].create({
                 'unit_name': unit_name,
                 'date': date.today()
@@ -83,7 +95,7 @@ class PhoneVerificationOTP(models.Model):
                     res[str(i)] = {'status': 'success', 'message': 'OTP sent successfully'}
 
                 for i in total_agencies_filled_custon_forms_today:
-                    unit_name = user.unit_name
+
                     print(unit_name)
 
                     message_history = request.env['message.history'].create({
