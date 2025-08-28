@@ -125,8 +125,8 @@ class OtpAPI(http.Controller):
                 total_agencies_filled_custon_forms_today.append([i.location_name, i.phone])
 
         great = "happy"
-        unit_number = "9642421753"
-        head_office_number = "9642421753"
+        unit_number = "8885554879"
+        head_office_number = "8885554879"
         for_main_mes = [unit_number,head_office_number]
         try:
             res = {}
