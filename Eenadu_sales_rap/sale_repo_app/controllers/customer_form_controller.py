@@ -50,31 +50,18 @@ class CustomerFormAPI(http.Controller):
         try:
             api_key = kwargs.get('token')
             if not api_key:
-                return {'success': False, 'message': 'Token is missing', 'code': "400"}
+                return {'success': False, 'message': 'Token is missing', 'code': "403"}
 
             user = self._verify_api_key(api_key)
             if not user:
                 return {'success': False, 'message': 'Invalid or expired token', "code": "403"}
 
-            # Handle the job_type_one mapping
             job_one = {
                 "Central Job": "central_job",
                 "PSU": "psu",
                 "State Job": "state_job"
             }.get(kwargs.get('job_type_one'), "")
 
-            # Validate required fields (this can be adjusted as per your requirements)
-            required_fields = [
-                'agent_name', 'agent_login', 'unit_name', 'date', 'time', 'family_head_name', 
-                'father_name', 'mother_name', 'spouse_name', 'house_number', 'street_number', 
-                'city', 'pin_code', 'address', 'mobile_number'
-            ]
-
-            for field in required_fields:
-                if not kwargs.get(field):
-                    return {'success': False, 'message': f'{field} is required', 'code': "400"}
-
-            # Create customer form
             customer = request.env['customer.form'].sudo().create({
                 'agent_name': kwargs.get('agent_name'),
                 'agent_login': kwargs.get('agent_login'),
@@ -118,21 +105,20 @@ class CustomerFormAPI(http.Controller):
                 'for_consider': kwargs.get('for_consider'),
                 'shift_to_EENADU': kwargs.get('shift_to_EENADU', False),
                 'Willing_to_Shift_to_EENADU': kwargs.get('would_like_to_stay_with_existing_news_papar', False),
-                'Start_Circulating': kwargs.get('Start_Circulating'),
-                'Agency': kwargs.get('Agency'),
-                'age': kwargs.get('age'),
-                'customer_type': kwargs.get('customer_type'),
-                'occupation': kwargs.get('occupation'),
+                'Start_Circulating':kwargs.get('Start_Circulating'),
+                'Agency':kwargs.get('Agency'),
+                'age':kwargs.get('age'),
+                'customer_type':kwargs.get('customer_type'),
+                'occupation':kwargs.get('occupation'),
             })
 
-            # Construct SMS message with the correct date format
             msg = (
                 f"ఈనాడు చందాదారునిగా చేరినందుకు ధన్యవాదాలు.మీరు కోరిన విధంగా {kwargs.get('date')} వ తేదీ నుండి పత్రిక సరఫరా చేయబడుతుంది.ఈనాడు సర్క్యులేషన్."
             )
 
             # SMS API URL
             sms_url = "https://smsstriker.com/API/unicodesms.php"
-            
+
             # Create payload with correct parameters
             payload = {
                 'username': 'EERETA',
@@ -147,21 +133,23 @@ class CustomerFormAPI(http.Controller):
 
             # Send SMS request
             response = requests.get(sms_url, params=payload)
-            
+
             # Check if SMS was sent successfully
             if response.status_code != 200:
                 _logger.error(f"SMS sending failed: {response.text}")
                 return {'success': False, 'message': 'Failed to send SMS', 'code': "500"}
 
-            return {'success': True, 'message': 'Customer Form created successfully', 'customer_id': customer.id, "code": "200"}
+            return {'success': True, 'message': 'Customer Form created successfully', 'customer_id': customer.id,
+                    "code": "200"}
 
         except requests.exceptions.RequestException as e:
             _logger.error(f"SMS request failed: {str(e)}")
             return {'success': False, 'message': 'Error in SMS API request', 'code': "500"}
-        
+
         except Exception as e:
             _logger.error(f"Unexpected error: {str(e)}")
             return {'success': False, 'message': f'Error: {str(e)}', 'code': "500"}
+            
     @http.route('/api/login', type='json', auth='public', methods=['POST'])
     def api_login(self, email, password):
         user = request.env['res.users'].sudo().search([('login', '=', email)], limit=1)
