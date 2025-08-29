@@ -24,7 +24,7 @@ class PhoneVerificationOTP(models.Model):
     otp_time = fields.Datetime(string="OTP Sent Time", default=fields.Datetime.now)
 
     def send_message(self):
-        all_unit_names = request.env['res.users'].sudo().search([("role","=","unit_manager"),("status","=","active")])
+        all_unit_names = request.env['res.users'].sudo().search([("role","=","circulation_incharge")])
         unit_set = []
         for res in all_unit_names:
             unit_set.append(res.unit_name)
