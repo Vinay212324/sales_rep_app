@@ -5,6 +5,10 @@ from io import BytesIO
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from openpyxl import Workbook
+from odoo import http
+from odoo.http import request
+import json
+
 
 class MyMessage(http.Controller):
 
