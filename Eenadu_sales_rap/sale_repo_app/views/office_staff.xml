@@ -45,8 +45,8 @@
                             <field name="pan_photo"/>
                         </group>
                     </group>
-                    <div class="center-button" style="text-align: center;">
-                            <group style="display: flex; align-items: center; justify-content: center;">
+                    <div style="display: flex; justify-content: flex-end; width: 100%;">
+                        <group>
                             <button name="create_record" type="object"
                                     class="btn btn-primary green-button"
                                     attrs="{'invisible': [('id', '!=', False)]}">

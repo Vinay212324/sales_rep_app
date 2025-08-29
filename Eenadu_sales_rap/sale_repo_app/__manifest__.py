@@ -18,7 +18,7 @@
         "views/unit_name_views.xml",
         "views/dashboard_action.xml",
         "views/circulation_incharge_views.xml",
-        "views/office_staff.xml",
+        # "views/office_staff.xml",
         "views/unit_names_views.xml",
         #"views/manager_dashboard_action.xml",
         # "views/user_dashboard.xml",
