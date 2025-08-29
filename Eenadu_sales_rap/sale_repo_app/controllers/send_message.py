@@ -150,7 +150,7 @@ class MyMessage(http.Controller):
         total_agencies = request.env['pin.location'].sudo().search([('unit_name', '=', unit_name)])
 
         total_agencies_filled_custon_forms_today = []
-
+        print(total_agencies)
         for i in total_agencies:
             print(i.location_name, "vinay ", date, unit_name, date)
             count = request.env['customer.form'].sudo().search_count(
@@ -162,7 +162,7 @@ class MyMessage(http.Controller):
                 total_agencies_filled_custon_forms_today.append([customer_form])
 
         print(total_agencies_filled_custon_forms_today, "happy")
-        for i in total_agencies_filled_custon_forms_today:
+        for i in total_agencies_filled_custon_forms_today[0]:
             for j in i:
 
                 ws.append([j.Agency,j.date,j.family_head_name,j.age,j.house_number,j.street_number,j.city,j.pin_code,j.address,j.location_address,j.location_url,j.Start_Circulating,j.mobile_number,j.agent_name,date,j.time,j.customer_type,j.current_newspaper])
@@ -313,7 +313,6 @@ class MyMessage(http.Controller):
         unit_name = record.unit_name
         date = record.date
 
-        total_agencies = [record.agency]
 
         total_agencies_filled_custon_forms_today = []
 
