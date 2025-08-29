@@ -98,11 +98,6 @@ class MyMessage(http.Controller):
         for i in total_agencies_filled_custon_forms_today[0][1]:
             pass
 
-
-
-
-
-
         buffer = BytesIO()
         day="happy"
         city="okok"
@@ -135,42 +130,60 @@ class MyMessage(http.Controller):
         wb = Workbook()
         ws = wb.active
         ws.title = "Daily Data"
-        ws.append(["Agency","date","Customer Name","age","house-number","street-number","city","pin-code","address","location-address","location-url","Start-Circulating","mobile-number","Staff Name","date","time","customer-type","current-newspaper"])
+        ws.append([
+            "Agency", "date", "Customer Name", "age", "house-number", "street-number", "city", "pin-code",
+            "address", "location-address", "location-url", "Start-Circulating", "mobile-number",
+            "Staff Name", "date", "time", "customer-type", "current-newspaper"
+        ])
 
-
-
-
-        print("vinnnnnnnnnnnn")
+        # Get record
         record = request.env['message.history'].sudo().search([('unic_code', '=', unic_code)], limit=1)
         if not record:
             return "No data found"
+
         unit_name = record.unit_name
         date = record.date
 
+        # Get agencies
         total_agencies = request.env['pin.location'].sudo().search([('unit_name', '=', unit_name)])
 
+        # Collect customer forms
         total_agencies_filled_custon_forms_today = []
-        print(total_agencies)
         for i in total_agencies:
-            print(i.location_name, "vinay ", date, unit_name, date)
-            count = request.env['customer.form'].sudo().search_count(
-                [('unit_name', '=', unit_name), ('date', '=', date), ('Agency', '=', i.location_name)])
-            print(count)
-            if count >= 1:
-                customer_form = request.env['customer.form'].sudo().search(
-                    [('unit_name', '=', unit_name), ('date', '=', date), ('Agency', '=', i.location_name)])
-                total_agencies_filled_custon_forms_today.append([customer_form])
+            customer_forms = request.env['customer.form'].sudo().search([
+                ('unit_name', '=', unit_name),
+                ('date', '=', date),
+                ('Agency', '=', i.location_name)
+            ])
+            if customer_forms:
+                # ⚡ append individual records instead of a recordset
+                for rec in customer_forms:
+                    total_agencies_filled_custon_forms_today.append(rec)
 
-        print(total_agencies_filled_custon_forms_today, "happy")
-        for i in total_agencies_filled_custon_forms_today[0]:
-            for j in i:
+        # Write into Excel
+        for j in total_agencies_filled_custon_forms_today:
+            ws.append([
+                j.Agency,
+                j.date,
+                j.family_head_name,
+                j.age,
+                j.house_number,
+                j.street_number,
+                j.city,
+                j.pin_code,
+                j.address,
+                j.location_address,
+                j.location_url,
+                j.Start_Circulating,
+                j.mobile_number,
+                j.agent_name,
+                j.date,  # or `date` from message.history?
+                j.time,
+                j.customer_type,
+                j.current_newspaper
+            ])
 
-                ws.append([j.Agency,j.date,j.family_head_name,j.age,j.house_number,j.street_number,j.city,j.pin_code,j.address,j.location_address,j.location_url,j.Start_Circulating,j.mobile_number,j.agent_name,date,j.time,j.customer_type,j.current_newspaper])
-
-
-
-        # ws.append([day, city, name])
-
+        # Save Excel
         wb.save(buffer)
         buffer.seek(0)
 
@@ -181,6 +194,15 @@ class MyMessage(http.Controller):
                 ('Content-Disposition', 'attachment; filename="daily_data.xlsx"')
             ]
         )
+
+
+
+
+
+
+
+
+
 
 
 
@@ -302,38 +324,44 @@ class MyMessage(http.Controller):
         wb = Workbook()
         ws = wb.active
         ws.title = "Daily Data"
-        ws.append(["Agency", "date", "Customer Name", "age", "house-number", "street-number", "city", "pin-code",
-                   "address", "location-address", "location-url", "Start-Circulating", "mobile-number"])
+        ws.append([
+            "Agency", "date", "Customer Name", "age", "house-number", "street-number",
+            "city", "pin-code", "address", "location-address", "location-url",
+            "Start-Circulating", "mobile-number"
+        ])
 
-
-        print("vinnnnnnnnnnnn")
         record = request.env['message.history'].sudo().search([('unic_code', '=', unic_code)], limit=1)
         if not record:
             return "No data found"
+
         unit_name = record.unit_name
         date = record.date
 
+        # ✅ Directly search all forms for this agency
+        customer_forms = request.env['customer.form'].sudo().search([
+            ('unit_name', '=', unit_name),
+            ('date', '=', date),
+            ('Agency', '=', record.agency)
+        ])
 
-        total_agencies_filled_custon_forms_today = []
+        for j in customer_forms:
+            ws.append([
+                j.Agency,
+                j.date,
+                j.family_head_name,
+                j.age,
+                j.house_number,
+                j.street_number,
+                j.city,
+                j.pin_code,
+                j.address,
+                j.location_address,
+                j.location_url,
+                j.Start_Circulating,
+                j.mobile_number
+            ])
 
-
-        count = request.env['customer.form'].sudo().search_count(
-            [('unit_name', '=', unit_name), ('date', '=', date), ('Agency', '=', record.agency)])
-        print(count)
-        if count >= 1:
-            customer_form = request.env['customer.form'].sudo().search(
-                [('unit_name', '=', unit_name), ('date', '=', date), ('Agency', '=',record.agency)])
-            total_agencies_filled_custon_forms_today.append([customer_form])
-
-        print(total_agencies_filled_custon_forms_today, "happy")
-        for i in total_agencies_filled_custon_forms_today[0]:
-            for j in i:
-                ws.append(
-                    [j.Agency, j.date, j.family_head_name, j.age, j.house_number, j.street_number, j.city, j.pin_code,
-                     j.address, j.location_address, j.location_url, j.Start_Circulating, j.mobile_number])
-
-        # ws.append([day, city, name])
-
+        # Save workbook
         wb.save(buffer)
         buffer.seek(0)
 
@@ -344,6 +372,10 @@ class MyMessage(http.Controller):
                 ('Content-Disposition', 'attachment; filename="daily_data.xlsx"')
             ]
         )
+
+
+
+
 
     @http.route('/api/message/history', type='http', auth='public', methods=['GET'], csrf=False)
     def get_message_history(self, **post):
