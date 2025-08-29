@@ -135,7 +135,7 @@ class MyMessage(http.Controller):
         wb = Workbook()
         ws = wb.active
         ws.title = "Daily Data"
-        ws.append(["staff","date","family-head-name","age","house-number","street-number","city","pin-code","address","location-address","location-url","Start-Circulating","mobile-number","agent_name","date","time","customer-type","current-newspaper"])
+        ws.append(["Agency","date","Customer Name","age","house-number","street-number","city","pin-code","address","location-address","location-url","Start-Circulating","mobile-number","Staff Name","date","time","customer-type","current-newspaper"])
 
 
 
@@ -302,7 +302,7 @@ class MyMessage(http.Controller):
         wb = Workbook()
         ws = wb.active
         ws.title = "Daily Data"
-        ws.append(["staff", "date", "family-head-name", "age", "house-number", "street-number", "city", "pin-code",
+        ws.append(["Agency", "date", "Customer Name", "age", "house-number", "street-number", "city", "pin-code",
                    "address", "location-address", "location-url", "Start-Circulating", "mobile-number"])
 
 
