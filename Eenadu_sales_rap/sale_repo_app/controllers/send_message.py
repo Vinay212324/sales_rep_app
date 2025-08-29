@@ -326,7 +326,7 @@ class MyMessage(http.Controller):
             total_agencies_filled_custon_forms_today.append([customer_form])
 
         print(total_agencies_filled_custon_forms_today, "happy")
-        for i in total_agencies_filled_custon_forms_today:
+        for i in total_agencies_filled_custon_forms_today[0]:
             for j in i:
                 ws.append(
                     [j.Agency, j.date, j.family_head_name, j.age, j.house_number, j.street_number, j.city, j.pin_code,
