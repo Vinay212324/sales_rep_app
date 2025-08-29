@@ -48,7 +48,7 @@ class CustomerForm(models.Model):
             'tag': 'display_notification',
             'params': {
                 'title': "Success!",
-                'message': "Record created successfully.",
+                'message': "User created successfully.",
                 'type': 'success',
                 'sticky': False,
             }

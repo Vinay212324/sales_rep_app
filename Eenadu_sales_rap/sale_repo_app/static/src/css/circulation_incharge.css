@@ -1,5 +1,17 @@
 .center-button {
     text-align: center;
+    justify-content: center;
+
+}
+
+.rounded-button {
+    border-radius: 8px;
+    box-shadow: 5px 8px 10px green;
+}
+
+.round-button {
+    border-radius: 10px;
+    box-shadow: 5px 8px 10px blue;
 }
 
 .green-button {

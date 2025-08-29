@@ -42,17 +42,23 @@
               sequence="17"
               groups="sale_repo_app.admin_group,sale_repo_app.circulation_head_group,sale_repo_app.region_head_group,sale_repo_app.unit_manager_group,sale_repo_app.segment_incharge_group,sale_repo_app.circulation_incharge_group,sale_repo_app.office_staff_group"/>
 
+    <menuitem id="create_users_id"
+              name="Create new User"
+              parent="for_users"
+              action="action_res_users_create"
+              sequence="1"/>
+
     <menuitem id="active_users_id"
-              name="In-Active Users"
+              name="Waiting Users"
               parent="for_users"
               action="action_res_users_inactive"
-              sequence="10"/>
+              sequence="2"/>
 
     <menuitem id="unactive_users_id"
-              name="Active Users"
+              name="Approved Users"
               parent="for_users"
               action="action_res_users_heirt"
-              sequence="20"/>
+              sequence="3"/>
 
     <menuitem id="menu_verification_otp_root"
               name="OTP Management"

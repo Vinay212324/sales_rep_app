@@ -24,6 +24,23 @@ class CustomerForm(models.Model):
             customer_form_model = self.env['customer.form'].sudo()
             record.customer_form_count = customer_form_model.search_count([])
 
+    def action_save_and_notify(self):
+        """
+        Saves the record and displays a success notification.
+        """
+        self.ensure_one()
+
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': "Success!",
+                'message': "Staff created successfully.",
+                'type': 'success',
+                'sticky': False,
+            }
+        }
+
     def view_all_customer_form(self):
         self.ensure_one()
         self.show_buttons = True
@@ -70,58 +87,42 @@ class CustomerForm(models.Model):
             'context': {'edit': 0,'create': 0},
         }
 
-
     def create_office_staff(self):
         """
-        Opens the customer form view from the sale_repo_app module.
+        Opens the specific custom form view for creating office staff.
         """
-        return {
-            'type': 'ir.actions.act_window',
-            'name': _('Create Office Staff'),
-            'res_model': 'office.staff',  # Replace with the correct model name if different
-            'view_mode': 'form',
-            'domain': [],  # Add any domain filtering here if needed
-        }
+        self.ensure_one()
+        # Reference the new action record you created
+        action = self.env.ref('sale_repo_app.action_create_office_staff_custom_form').read()[0]
+        return action
 
     def approved_staff_list(self):
         """
         Opens a list view of all staff records with the 'approved' state.
         """
-        return {
-            'type': 'ir.actions.act_window',
-            'name': _('Approved Staff List'),
-            'res_model': 'office.staff',
-            'view_mode': 'tree,form',
-            'domain': [('state', '=', 'approved')],
-            'context': {'edit': 0,'create': 0},
-        }
+        self.ensure_one()
+        # Reference the new action record you created
+        action = self.env.ref('sale_repo_app.action_approved_staff_list').read()[0]
+        return action
 
     def waiting_for_approval_staff_list(self):
         """
         Opens a list view of all staff records with the 'approved' state.
         """
 
-        return {
-            'type': 'ir.actions.act_window',
-            'name': _('Waiting For Approval Staff List'),
-            'res_model': 'office.staff',
-            'view_mode': 'tree,form',
-            'domain': [('state', '=', 'waiting')],
-            'context': {'edit': 0, 'create': 0},
-        }
+        self.ensure_one()
+        # Reference the new action record you created
+        action = self.env.ref('sale_repo_app.action_waiting_for_approve_staff_list').read()[0]
+        return action
 
     def view_all_staff_record(self):
         """
         Opens the customer form view from the sale_repo_app module.
         """
-        return {
-            'type': 'ir.actions.act_window',
-            'name': _('All Office Staff Records'),
-            'res_model': 'office.staff',  # Replace with the correct model name if different
-            'view_mode': 'tree,form',
-            'domain': [],  # Add any domain filtering here if needed
-            'context': {'edit': 0, 'create': 0},
-        }
+        self.ensure_one()
+        # Reference the new action record you created
+        action = self.env.ref('sale_repo_app.action_res_users_view0').read()[0]
+        return action
 
 
 
