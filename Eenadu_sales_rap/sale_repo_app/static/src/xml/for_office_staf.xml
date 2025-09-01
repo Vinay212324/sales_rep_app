@@ -1,8 +1,100 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
-<t t-name="sale_repo_app.office_staff_dashboard_template" owl="1">
-    <div class="container-fluid" style="max-height: 85vh; overflow-y: auto; padding-right: 15px;">
-        <h1>hello world</h1>
+  <t t-name="sale_repo_app.office_staff_dashboard_template" owl="1">
+    <div class="container-fluid" style="max-height: 85vh; overflow-y: auto;">
+
+      <!-- Header -->
+      <div class="d-flex justify-content-between align-items-center p-3 border-bottom">
+        <div>
+          <h5 class="m-0">Welcome <t t-esc="props.username"/></h5>
+          <small>Unitname : <t t-esc="props.unitname"/></small>
+        </div>
+        <i class="fa fa-user fa-2x"></i>
+      </div>
+
+      <h3 class="text-center mt-3 mb-4">Office Staff Dashboard</h3>
+
+      <!-- Buttons -->
+      <div class="d-flex flex-column align-items-center gap-3">
+        <button class="w-75 btn bg-white shadow-sm rounded-3 text-start py-3 px-3 d-flex align-items-center"
+                t-on-click="toggleViewStaff">
+          <i class="fa fa-clipboard fa-lg me-3 text-dark"></i>
+          <span class="flex-grow-1">
+            <t t-if="!state.isViewingStaff">View Created Staff</t>
+            <t t-if="state.isViewingStaff">Hide Staff</t>
+          </span>
+          <i class="fa fa-chevron-right text-muted"></i>
+        </button>
+
+        <button class="w-50 btn btn-dark rounded-3 py-3 d-flex align-items-center justify-content-center"
+                t-on-click="toggleCreate">
+          <i class="fa fa-user-plus me-2"></i>
+          <span>
+            <t t-if="!state.isCreatingStaff">Create Staff</t>
+            <t t-if="state.isCreatingStaff">Cancel</t>
+          </span>
+        </button>
+      </div>
+
+      <!-- Create Staff Form -->
+      <t t-if="state.isCreatingStaff">
+        <form t-on-submit="submitStaff" class="mt-4 mb-4 px-3">
+          <div class="mb-3">
+            <label for="name" class="form-label">Name</label>
+            <input id="name" type="text" class="form-control" t-model="state.staffData.name" required="1"/>
+          </div>
+          <div class="mb-3">
+            <label for="unit" class="form-label">Unit</label>
+            <input id="unit" type="text" class="form-control" t-model="state.staffData.unit" required="1"/>
+          </div>
+          <div class="mb-3">
+            <label for="email" class="form-label">Email</label>
+            <input id="email" type="email" class="form-control" t-model="state.staffData.email" required="1"/>
+          </div>
+          <div class="mb-3">
+            <label for="phone" class="form-label">Phone</label>
+            <input id="phone" type="text" class="form-control" t-model="state.staffData.phone" required="1"/>
+          </div>
+          <div class="mb-3">
+            <label for="user_id" class="form-label">User ID</label>
+            <input id="user_id" type="text" class="form-control" t-model="state.staffData.user_id" required="1"/>
+          </div>
+          <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            <input id="password" type="password" class="form-control" t-model="state.staffData.password" required="1"/>
+          </div>
+          <div class="mb-3">
+            <label for="adhaar" class="form-label">Adhaar</label>
+            <input id="adhaar" type="text" class="form-control" t-model="state.staffData.adhaar" required="1"/>
+          </div>
+          <div class="mb-3">
+            <label for="address" class="form-label">Address</label>
+            <textarea id="address" class="form-control" t-model="state.staffData.address" rows="3" required="1"></textarea>
+          </div>
+          <button type="submit" class="btn btn-dark w-100 py-2 d-flex align-items-center justify-content-center">
+            <i class="fa fa-user-plus me-2"></i>
+            Create User
+          </button>
+        </form>
+      </t>
+
+      <!-- Staff List -->
+      <t t-if="state.isViewingStaff">
+        <h4 class="px-3 mt-4">Created Staff</h4>
+        <div class="list-group px-3">
+          <t t-foreach="state.staffList" t-as="staff" t-key="staff.id">
+            <div class="list-group-item">
+              <strong><t t-esc="staff.name"/></strong><br/>
+              <small>
+                Unit: <t t-esc="staff.unit_name"/>, Email: <t t-esc="staff.email"/>, Phone: <t t-esc="staff.phone"/>, User ID: <t t-esc="staff.id"/><br/>
+                Adhaar: <t t-esc="staff.aadhar_number"/><br/>
+                Status: <t t-esc="staff.status"/>
+              </small>
+            </div>
+          </t>
+        </div>
+      </t>
+
     </div>
-</t>
+  </t>
 </templates>
