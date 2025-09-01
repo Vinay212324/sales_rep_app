@@ -123,7 +123,16 @@ export class SalesDashboardDesktop extends Component {
         }
     }
 
-    toggleWork() {
+    startWork() {
+        this.state.workStarted = !this.state.workStarted;
+        // Optional: perform actions when work starts or stops
+        if (this.state.workStarted) {
+            console.log("Work started");
+        } else {
+            console.log("Work stopped");
+        }
+    }
+    endWork() {
         this.state.workStarted = !this.state.workStarted;
         // Optional: perform actions when work starts or stops
         if (this.state.workStarted) {

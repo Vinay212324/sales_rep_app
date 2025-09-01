@@ -16,15 +16,23 @@ class Users(models.Model):
          ('circulation_incharge', 'circulation incharge'),
          ('region_head', 'region head'),
          ('circulation_head', 'circulation head'),('admin','admin')],
-        string="Role", required=True, default="agent"
+        string="Role", required=True, default="Office_staff"
     )
     unit_name_ids = fields.One2many('unit.name','unit_name_id')
     status = fields.Selection(
-        [('un_activ', 'un active'),
-         ('active', 'Active'),
+        [('un_activ', 'Waiting For Approve'),
+         ('active', 'Approved'),
       ],
         string="Role", required=True, default="un_activ"
     )
+
+    def waiting_for_approve(self):
+        self.ensure_one()
+        self.status = 'un_activ'
+
+    def approved_staff(self):
+        self.ensure_one()
+        self.status = 'active'
 
     pin_location_ids = fields.Many2many('pin.location','user_id')
     present_pin_id = fields.Many2one("pin.location")
@@ -48,6 +56,23 @@ class Users(models.Model):
         current_user_in_group = self.env.user.has_group('sale_repo_app.circulation_incharge_group')
         for rec in self:
             rec.edit_boll = current_user_in_group
+
+    def create_record(self):
+        """
+        Saves the record automatically and returns a success notification.
+        """
+        self.ensure_one()
+
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': "Success!",
+                'message': "User created successfully.",
+                'type': 'success',
+                'sticky': False,
+            }
+        }
 
     def generate_token(self):
         """ Generate a unique API token and set an expiration time. """

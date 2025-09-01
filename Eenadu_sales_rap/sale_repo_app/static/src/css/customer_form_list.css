@@ -209,7 +209,7 @@
   }
 }
 .change-agency-btn {
-    width: 180px;
+    width: 205px;
     padding: 11px 28px;
     background: #3085d6;
     color: #fff;
@@ -267,7 +267,7 @@
 .start-work-button {
   position: fixed;
   bottom: 14%;
-  right: 4%;
+  right: 5%;
   width: 160px;
   height: 60px;
   border-radius: 20px;
@@ -290,7 +290,7 @@
 .stop-work-button {
   position: fixed;
   bottom: 14%;
-  right: 4%;
+  right: 5%;
   width: 160px;
   height: 60px;
   border-radius: 20px;
@@ -317,6 +317,7 @@
     background-color: #007bff;
     color: white;
     margin-top: 6%;
+    border: none;
 }
 
 

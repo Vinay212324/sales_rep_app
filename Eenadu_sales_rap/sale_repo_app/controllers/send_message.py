@@ -8,7 +8,9 @@ from openpyxl import Workbook
 from odoo import http
 from odoo.http import request
 import json
+import logging
 
+_logger = logging.getLogger(__name__)
 
 class MyMessage(http.Controller):
 
@@ -377,13 +379,8 @@ class MyMessage(http.Controller):
             ]
         )
 
-
-
-
-
-    @http.route('/api/message/history', type='http', auth='public', methods=['GET'], csrf=False)
+    @http.route('/api/message/history', type='json', auth='public', methods=['POST'], csrf=False)
     def get_message_history(self, **post):
-
         token = post.get('token')
         if not token:
             return {'success': False, 'message': 'Token is required', 'code': 403}
@@ -392,34 +389,23 @@ class MyMessage(http.Controller):
         if not user:
             return {'success': False, 'message': 'Invalid or expired token', 'code': 403}
 
-
         try:
-            # Fetch all records
             records = request.env['message.history'].sudo().search([])
+            data = [{
+                "id": rec.id,
+                "unit_name": rec.unit_name or None,
+                "agency": rec.agency or None,
+                "date": str(rec.date) if rec.date else None,
+                "unic_code": rec.unic_code or None,
+                "time": str(rec.time) if rec.time else None,
+            } for rec in records]
 
-            # Convert records to dictionary format
-            data = []
-            for rec in records:
-                data.append({
-                    "id": rec.id,
-                    "unit_name": rec.unit_name,
-                    "agency": rec.agency,
-                    "date": str(rec.date) if rec.date else None,
-                    "unic_code": rec.unic_code,
-                    "time": str(rec.time) if rec.time else None,
-                })
-
-            # Return JSON response
-            return request.make_response(
-                json.dumps({"status": "success", "data": data}, ensure_ascii=False),
-                headers=[('Content-Type', 'application/json')]
-            )
+            return {"status": "success", "data": data}
 
         except Exception as e:
-            return request.make_response(
-                json.dumps({"status": "error", "message": str(e)}),
-                headers=[('Content-Type', 'application/json')]
-            )
+            _logger.error("Error fetching message history: %s", e)
+            return {"status": "error", "message": str(e)}
+
 
     # @http.route('/api/circulation_send_mes', type='json', auth='public', methods=['POST'], csrf=False, cors="*")
     # def getting_users(self, **kw):
