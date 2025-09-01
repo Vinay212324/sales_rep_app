@@ -8,7 +8,6 @@
     "data": [
         "security/access_group.xml",
         "security/ir.model.access.csv",
-        "data/cron_jobs.xml",
         "security/for_record_rules.xml",
         "views/customer_form_views.xml",
         "views/fromto_rootmap_views.xml",
@@ -28,7 +27,6 @@
         'views/work_session_views.xml',
         "views/sales_repo_menu.xml",
         'views/daily_data_template.xml',
-        'views/agency_template.xml',
 
     ],
     "assets": {
