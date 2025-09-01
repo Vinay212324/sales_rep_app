@@ -1,0 +1,58 @@
+.center-button {
+    text-align: center;
+    justify-content: center;
+
+}
+
+.rounded-button {
+    border-radius: 8px;
+    box-shadow: 5px 8px 10px green;
+}
+
+.round-button {
+    border-radius: 10px;
+    box-shadow: 5px 8px 10px blue;
+}
+
+.green-button {
+    background-color: #28a745;
+    border-color: #28a745;
+    color: white;
+}
+
+.position{
+    position:absolute;
+}
+
+/* Container for the count box and buttons */
+.history-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Centers items horizontally */
+    margin-top: 20px;
+}
+
+/* Container for the buttons themselves */
+.history-buttons {
+    display: flex;
+    justify-content: center; /* Centers the buttons horizontally */
+    gap: 10px; /* Adds space between the two buttons */
+    margin-top: 15px; /* Adds space between the count box and buttons */
+}
+
+/* Existing styles for .customer-count-box */
+.customer-count-box {
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    padding: 5px 10px;
+    min-width: 100px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font:bold;
+}
+
+.customer-count-box label {
+    font-weight: bold;
+    margin-bottom: 5px;
+}

@@ -1,7 +1,7 @@
 {
     "name": "Sales REPO",
     "version": "1.0",
-    "depends": ["base", "web", "web_tour","website"],
+    "depends": ["base", "web", "web_tour"],
     "author": "Your Name",
     "category": "Custom",
     "summary": "Manage user hierarchy with OWL authentication",
@@ -17,6 +17,8 @@
         'views/verification_otp_views.xml',
         "views/unit_name_views.xml",
         "views/dashboard_action.xml",
+        "views/circulation_incharge_views.xml",
+        # "views/office_staff.xml",
         "views/unit_names_views.xml",
         #"views/manager_dashboard_action.xml",
         # "views/user_dashboard.xml",
@@ -26,18 +28,16 @@
         "views/hide_app_menu.xml",
         'views/work_session_views.xml',
         "views/sales_repo_menu.xml",
-        'views/daily_data_template.xml',
 
     ],
     "assets": {
         "web.assets_backend": [
             "sale_repo_app/static/src/css/agent_dashboard.css",
             "sale_repo_app/static/src/css/customer_form_list.css",
+            "sale_repo_app/static/src/css/circulation_incharge.css",
             "sale_repo_app/static/src/js/dash.js",
             "sale_repo_app/static/src/js/customer_analytics_dashboard.js",
             "sale_repo_app/static/src/js/form_filling.js",
-            "sale_repo_app/static/src/xml/for_office_staf.xml",
-            "sale_repo_app/static/src/js/office_staff.js",
             "sale_repo_app/static/src/xml/dashboard_template.xml",
             "sale_repo_app/static/src/xml/customer_form_filling_file.xml",
             "sale_repo_app/static/src/xml/customer_analytics_dashboard_template.xml",
@@ -55,6 +55,5 @@
         ]
     },
     "installable": True,
-    "application": True,
-    'license': 'LGPL-3',
+    "application": True
 }
