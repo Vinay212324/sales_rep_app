@@ -15,6 +15,7 @@ export class SalesOfficeStaff extends Component {
             error: null,
             isCreatingStaff: false,
             isViewingStaff: false,
+            searchTerm: "",           // <-- Add this line
             staffData: {
                 name: "",
                 unit: "",
@@ -23,28 +24,45 @@ export class SalesOfficeStaff extends Component {
                 user_id: "",
                 password: "",
                 adhaar: "",
-                address: "",
             },
+            login_info: [],
             staffList: [],
         });
 
         onWillStart(async () => {
+            try{
+                const res = await this.rpc("/user_info", { params: {} });
+                if (res && res.status === 200 && res.user_info) {
+                    this.state.login_info = res.user_info;
+                    this.state.staffData.unit = res.user_info.unit_name;
+                }
+            }catch (error) {
+                this.state.error = error.message || "RPC Error";
+            }
             try {
-                console.log("🎯 onWillStart triggered");
                 const res = await this.rpc("/get_created_staff", { params: {} });
-                console.log("API Response:", res);
-
                 if (res && res.status === 200 && res.users) {
                     this.state.staffList = res.users;
-                    console.log("✅ Staff loaded:", this.state.staffList);
                 }
             } catch (error) {
-                console.error("RPC Error:", error);
                 this.state.error = error.message || "RPC Error";
             } finally {
                 this.state.loading = false;
             }
         });
+    }
+
+    // Filtered staff list
+    get filteredStaffList() {
+        const term = this.state.searchTerm.trim().toLowerCase();
+        if (!term) return this.state.staffList;
+        return this.state.staffList.filter((staff) =>
+            staff.name?.toLowerCase().includes(term) ||
+            staff.email?.toLowerCase().includes(term) ||
+            staff.unit_name?.toLowerCase().includes(term) ||
+            staff.phone?.toLowerCase().includes(term) ||
+            staff.aadhar_number?.toLowerCase().includes(term)
+        );
     }
 
     toggleCreate = () => {
@@ -69,7 +87,6 @@ export class SalesOfficeStaff extends Component {
             user_id: "",
             password: "",
             adhaar: "",
-            address: "",
         };
     }
 

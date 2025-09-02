@@ -1,6 +1,7 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 
 sal,sale,base.model_res_users,base.group_user,1,1,1,1
+sal,sale,model_unit_name,base.group_user,1,1,1,1
 
 
 access_res_users_unit_manager,access.res.users.unit_manager,base.model_res_users,unit_manager_group,1,1,1,1
@@ -39,3 +40,4 @@ access_verification_otp,access.verification.otp,model_verification_otp,,1,1,1,1
 
 access_unit_names,access.unit.names,model_unit_names,base.group_user,1,1,1,1
 access_history,access_history_mes,model_message_history,base.group_user,1,1,1,1
+circulation_incharge_view,circulation_incharge.view,model_circulation_incharge_view,,1,1,1,1
