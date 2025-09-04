@@ -43,13 +43,28 @@ class Users(models.Model):
     phone = fields.Char(string="phone")
     user_id = fields.Integer(string="User ID")
     unit_name = fields.Char(string="Unit Name")
-    # create_uid = fields.Integer(string="create_uid ID")
+    create_uid = fields.Many2one(string="Created By",readonly=0)
     api_token = fields.Char(string="API Token", readonly=True)
     token_expiry = fields.Datetime(string="Token Expiry")
     aadhar_base64 = fields.Binary(string="Aadhar image")
     Pan_base64 = fields.Binary(string="Pan image")
     target = fields.Char(string="Target")
     edit_boll = fields.Boolean(string="Edit Allowed", compute="_compute_sale_user_readonly", store=False)
+    # created_by = fields.Many2one('res.users', string="Created By", related="create_uid", store=True, readonly=False)
+
+    created_by = fields.Many2one(
+        'res.users',
+        string="Created By",
+        related="create_uid",
+        store=True,
+        readonly=False,  # make it editable
+        inverse="_inverse_created_by"
+    )
+
+    def _inverse_created_by(self):
+        for rec in self:
+            if rec.created_by:
+                rec.write({'create_uid': rec.created_by.id})
 
     @api.depends_context('uid')
     def _compute_sale_user_readonly(self):

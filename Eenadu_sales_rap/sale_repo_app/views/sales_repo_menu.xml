@@ -78,6 +78,12 @@
               action="action_unit_name"
               sequence="19"
               groups="sale_repo_app.admin_group"/>
+    <menuitem id="menu_attendance"
+              name="Attendance"
+              parent="menu_sales_rep_main"
+              action="action_work_session"
+              sequence="19"
+              groups="sale_repo_app.admin_group"/>
 
     <!-- Menu -->
     <menuitem id="menu_unit_root" name="Unit Management" parent="menu_sales_rep_main" />

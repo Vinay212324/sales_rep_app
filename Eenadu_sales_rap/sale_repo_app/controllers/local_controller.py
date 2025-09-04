@@ -87,3 +87,22 @@ class localApi(http.Controller):
         except Exception as e:
             _logger.error("Staff Creation Error: %s", e)
             return {'error': 'Internal Server Error', 'message': str(e), 'code': 500}
+
+    @http.route('/get_staff_details', type='json', auth='user')
+    def get_staff_details(self, id):
+        user = request.env['res.users'].sudo().browse(int(id))
+        if not user.exists():
+            return {"status": 404, "message": "User not found"}
+
+        return {
+            "status": 200,
+            "user": {
+                "id": user.id,
+                "name": user.name,
+                "email": user.email,
+                "phone": user.phone,
+                "aadhar_number": user.aadhar_number,
+                "unit_name": user.unit_id.name if user.unit_id else "",
+                "status": user.active and "Active" or "Inactive",
+            }
+        }

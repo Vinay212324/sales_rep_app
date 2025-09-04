@@ -110,7 +110,7 @@
 
             <xpath expr="//field[@name='login']" position="after">
                 <group string="Custom Information">
-                    <field name="role"/>
+                    <field name="role" readonly="1"/>
                     <field name="target" attrs="{'invisible': [('role', '!=', 'agent')]}"/>
                     <!--                    <field name="status"/>-->
                     <field name="unit_name"

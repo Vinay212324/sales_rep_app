@@ -1,0 +1,12 @@
+<templates xml:space="preserve">
+  <t t-name="sale_repo_app.search_dashboard_template" owl="1">
+    <div class="container-fluid" style="max-height: 85vh; overflow-y: auto;">
+        <sheet>
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 40px; padding: 20px; background-color: #f5f7fa; border-radius: 10px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);">
+                <h1>Search Dashboard</h1>
+                <p>Message from Store: <t t-esc="store.message"/></p>
+            </div>
+        </sheet>
+    </div>
+  </t>
+</templates>

@@ -1,3 +1,42 @@
+/** @odoo-module **/
+
+import { reactive } from "@odoo/owl";
+
+// Shared store
+export const sharedStore = reactive({
+    message: "",
+    triggerFunction: false,
+    sharedData: {}, // Added for sharing structured data
+});
+
+console.log("dashboard.js loaded"); // Debugging
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 //document.addEventListener("DOMContentLoaded", function () {
 //                    async function tokenValid() {
 //                        xonsole.log("viinnnayy2123122333");
