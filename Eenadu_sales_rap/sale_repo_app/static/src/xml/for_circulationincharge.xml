@@ -50,7 +50,7 @@
 
             <div class="list-group">
               <t t-foreach="filteredStaffList" t-as="staff" t-key="staff.id">
-                <div t-if="staff.status===state.status" class="list-group-item" style="margin:5px;cursor:pointer;" t-on-click="() => this.loadStaffDetails(staff.login)">
+                <div t-if="staff.status===state.status" class="list-group-item" style="margin:5px;cursor:pointer;" t-on-click="() => this.loadStaffDetails(staff.login,staff.name)">
                   <strong><t t-esc="staff.name"/></strong><br/>
                   <small>
                     Unit: <t t-esc="staff.unit_name"/>, Email: <t t-esc="staff.email"/>, Phone: <t t-esc="staff.phone"/>, User ID: <t t-esc="staff.id"/><br/>
@@ -60,6 +60,22 @@
                 </div>
               </t>
             </div>
+          </div>
+
+          <div t-if="state.number_of_resources and state.status==='active' and state.attend_customer">
+              <div t-on-click="today_attendance" class="btn d-flex btn-light btn-lg border m-3 p-2">
+                <p>Staff Today's Attendance</p>
+              </div>
+              <div t-on-click="openStaffList" class="btn d-flex btn-light btn-lg border m-3 p-2">
+                <p>Staff Total Attendance</p>
+              </div>
+              <div t-on-click="openStaffList" class="btn d-flex btn-light btn-lg border m-3 p-2">
+                <p>Today customer forms</p>
+              </div>
+              <div t-on-click="openStaffList" class="btn d-flex btn-light btn-lg border m-3 p-2">
+                <p>Total customer forms</p>
+              </div>
+
           </div>
 
 
