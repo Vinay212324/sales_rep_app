@@ -13,6 +13,17 @@ class localApi(http.Controller):
             user_id = user.id
             users = request.env['res.users'].sudo().search([('create_uid', '=', user_id)])
             user_list = []
+            agencies = request.env['pin.location'].sudo().search([('unit_name', '=', user.unit_name)])
+            ags = []
+            for agency in agencies:
+                ags.append({
+                    "id": agency.id,
+                    "code":agency.code,
+                    "location_name":agency.location_name,
+                    "name":agency.name,
+                    "phone":agency.phone,
+                    "unit_name":agency.unit_name,
+                })
 
             for user in users:
                 user_list.append({
@@ -30,7 +41,7 @@ class localApi(http.Controller):
                     'status': user.status,
                 })
 
-            return {'status': 200, 'users': user_list}
+            return {'status': 200, 'users': user_list, 'agencies':ags}
 
         except Exception as e:
             return {'error': 'Internal Server Error', 'message': str(e), 'code': 500}
