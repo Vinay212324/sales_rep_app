@@ -46,6 +46,34 @@ class localApi(http.Controller):
         except Exception as e:
             return {'error': 'Internal Server Error', 'message': str(e), 'code': 500}
 
+    @http.route("/local/update/status", type="json", methods=['POST'], csrf=False, cors="*")
+    def _update_status(self, **params):
+
+
+        user_id = params.get("user_id")
+        print(user_id)
+        if not user_id:
+            return {'error': 'User ID is required', "code": "403"}
+
+        try:
+            user_id = int(user_id)
+        except ValueError:
+            return {'error': 'Invalid User ID', "code": "403"}
+
+        user = request.env['res.users'].sudo().browse(user_id)
+        if not user.exists():
+            return {'error': 'User not found', "code": "403"}
+        if params.get("status") not in ["active", "un_activ"]:
+            return {'error': 'status is missing'}
+
+        user.write({
+            'status': params.get("status"),
+        })
+        if user.status == params.get("status"):
+            return {"success": "True", "user_id": user.id, "code": "200"}
+        else:
+            return {"success": "False", "code": "403"}
+
     @http.route('/create_staff', type='json', auth='user', methods=['POST'], csrf=False, cors="*")
     def create_staff(self, **kwargs):
         print("vinay21212121aaaaaaaaaaaa")

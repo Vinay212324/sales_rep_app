@@ -71,13 +71,19 @@
                   </small>
                 </div>
 
-                <div t-if="staff.status===state.status and state.number_of_resources and !state.approved_staff and state.staff_waiting_for_approval" class="list-group-item" style="margin:5px;cursor:pointer;" t-on-click="() => this.loadStaffUnactive(staff.login,staff.id,staff.name)">
+                <div t-if="staff.status===state.status and state.number_of_resources and !state.approved_staff and state.staff_waiting_for_approval" class="list-group-item" style="margin:5px;">
                   <strong><t t-esc="staff.name"/></strong><br/>
-                  <small>
-                    Unit: <t t-esc="staff.unit_name"/>, Email: <t t-esc="staff.email"/>, Phone: <t t-esc="staff.phone"/>, User ID: <t t-esc="staff.id"/><br/>
-                    Aadhaar: <t t-esc="staff.aadhar_number"/><br/>
-                    Status: <t t-esc="staff.status"/>
-                  </small>
+                    <div>
+                        <small>
+                        Unit: <t t-esc="staff.unit_name"/>, Email: <t t-esc="staff.email"/>, Phone: <t t-esc="staff.phone"/>, User ID: <t t-esc="staff.id"/><br/>
+                        Aadhaar: <t t-esc="staff.aadhar_number"/><br/>
+                        Status: Inactive
+                      </small>
+                        <button class="btn btn-primary ml-5 mr-5" t-on-click="() => this.loadStaffUnactive(staff.login,staff.id,staff.name)">
+                            Activate
+                        </button>
+
+                    </div>
                 </div>
               </t>
             </div>

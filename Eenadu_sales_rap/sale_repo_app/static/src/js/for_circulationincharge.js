@@ -40,11 +40,11 @@ export class SalesCirculationIncharge extends Component {
 
         onWillStart(async () => {
             try {
-                const res = await this.rpc("/get_created_staff", { params: {} });
+                const res = await this.rpc("/get_created_staff", {});
                 if (res && res.status === 200 && res.users) {
                     this.state.staffList = res.users;
                 }
-                if(res && res.agenciesList){
+                if(res && res.agencies){
                     this.state.agenciesList = res.agencies;
                 }
 
@@ -224,25 +224,7 @@ export class SalesCirculationIncharge extends Component {
             this.state.user_id = user_id;
             console.log("Loading details for user_id:", user_id);
             console.log(user_id);
-//            const domain = [["user_id", "=", user_id]]; // Filter by user_id for work.session
-//            const context = {
-//                default_user_id: user_id, // Set default value for user_id field
-//            };
-//
-//
-//            await this.actionService.doAction({
-//                type: "ir.actions.act_window",
-//                name: "Work Sessions",
-//                res_model: "work.session", // Changed to work.session
-//                view_mode: "tree,form", // Specify both tree and form views
-//                views: [
-//                    [false, "tree"], // Use default tree view
-//                    [false, "form"], // Use default form view
-//                ],
-//                target: "current",
-//                domain: domain, // Apply the domain filter
-//                context: context, // Apply context for constraints
-//            });
+
         } catch (error) {
             console.error("Error fetching staff details:", error);
         }
@@ -280,22 +262,37 @@ export class SalesCirculationIncharge extends Component {
             this.state.name = name;
             this.state.user_id = user_id;
 
-            // ✅ Directly open your custom form view
-            await this.actionService.doAction({
-                type: "ir.actions.act_window",
-                name: "Waiting User",
-                res_model: "sale_repo_app.base.res.users",
-                view_mode: "form",
-                views: [[false, "form"]],   // default form view
-                target: "current",
-                res_id: user_id,
-                context: { default_user_id: user_id },
-            });
+            // ✅ Activate staff (status = "active")
+            try {
+                const res = await this.rpc("/local/update/status", { "user_id": user_id, "status": "active" });
+                if (res && res.success === "True") {
+                    console.log("Staff activated successfully:", res);
+                } else {
+                    console.warn("Activation failed:", res);
+                }
+            } catch (error) {
+                this.state.error = error.message || "RPC Error";
+            }
 
+            // ✅ Refresh staff list
+            try {
+                const res = await this.rpc("/get_created_staff", {});
+                if (res && res.status === 200 && res.users) {
+                    this.state.staffList = res.users;
+                }
+                if (res && res.agencies) {
+                    this.state.agenciesList = res.agencies;
+                }
+            } catch (error) {
+                this.state.error = error.message || "RPC Error";
+            } finally {
+                this.state.loading = false;
+            }
         } catch (error) {
             console.error("Error fetching staff details:", error);
         }
     }
+
 
 
 
@@ -307,3 +304,40 @@ registry.category("actions").add(
     "sale_repo_app.circulation_incharge_dashboard",
     SalesCirculationIncharge
 );
+
+
+
+            // ✅ Directly open your custom form view
+//            await this.actionService.doAction({
+//                type: "ir.actions.act_window",
+//                name: "Waiting User",
+//                res_model: "sale_repo_app.base.res.users",
+//                view_mode: "form",
+//                views: [[false, "form"]],   // default form view
+//                target: "current",
+//                res_id: user_id,
+//                context: { default_user_id: user_id },
+//            });
+
+
+
+
+//            const domain = [["user_id", "=", user_id]]; // Filter by user_id for work.session
+//            const context = {
+//                default_user_id: user_id, // Set default value for user_id field
+//            };
+//
+//
+//            await this.actionService.doAction({
+//                type: "ir.actions.act_window",
+//                name: "Work Sessions",
+//                res_model: "work.session", // Changed to work.session
+//                view_mode: "tree,form", // Specify both tree and form views
+//                views: [
+//                    [false, "tree"], // Use default tree view
+//                    [false, "form"], // Use default form view
+//                ],
+//                target: "current",
+//                domain: domain, // Apply the domain filter
+//                context: context, // Apply context for constraints
+//            });
