@@ -1,7 +1,7 @@
 <odoo>
     <!-- Main Menu -->
     <menuitem id="menu_sales_rep_main" name="Sales Reps" sequence="10"
-              groups="sale_repo_app.admin_group,sale_repo_app.circulation_head_group,sale_repo_app.region_head_group,sale_repo_app.unit_manager_group,sale_repo_app.segment_incharge_group,sale_repo_app.circulation_incharge_group,sale_repo_app.office_staff_group"/>
+              groups="sale_repo_app.admin_group"/>
 
 <!--    <menuitem id="menu_root_map"-->
 <!--              name="Route Maps"-->

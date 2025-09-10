@@ -136,7 +136,7 @@
     <menuitem id="menu_circulation_incharge_view"
               name="Circulation Incharge View"
               action="action_circulation_incharge_view"
-              groups="sale_repo_app.circulation_incharge_group"/>
+              groups="sale_repo_app.admin_group"/>
 
 
 </odoo>
