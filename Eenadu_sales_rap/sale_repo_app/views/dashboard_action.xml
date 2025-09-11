@@ -24,6 +24,17 @@
         <field name="tag">sale_repo_app.circulation_incharge_dashboard</field>
     </record>
 
+    <record id="action_unit_manager_dashboard" model="ir.actions.client">
+        <field name="name">Unit Manager</field>
+        <field name="tag">sale_repo_app.unit_manager_dashboard</field>
+    </record>
+
+
+    <menuitem id="menu_unit_manager"
+              name="Unit Manager"
+              action="action_unit_manager_dashboard"
+              groups="sale_repo_app.unit_manager_group"
+              sequence="4"/>
 
     <menuitem id="menu_circulation_incharge"
               name="Circulation incharge"

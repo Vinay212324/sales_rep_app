@@ -1,0 +1,138 @@
+<templates xml:space="preserve">
+  <t t-name="sale_repo_app.unit_manager_dashboard_template" owl="1">
+
+    <div class="container-fluid" style="max-height: 85vh; overflow-y: auto;">
+      <div>
+          <div>
+            <div class="d-flex flex-column align-items-center gap-4 p-4 bg-light rounded shadow">
+
+              <div t-on-click="openStaffList" class="btn btn-light btn-lg w-75 border">
+                <h4>Number of Resources</h4>
+                <hr/>
+                <p>Staff Name:</p>
+              </div>
+
+              <div t-on-click="Open_agencies_List" class="btn btn-light btn-lg w-75 border mt-3">
+                <h4>View All Customer Forms</h4>
+                <hr/>
+                <p>Customer Forms:</p>
+              </div>
+<!--              <div class="d-flex">-->
+<!--                  <div t-on-click="office_staff_creation" class="btn d-flex btn-light btn-lg border m-3 p-2">-->
+<!--                    <p>Create Officestaff</p>-->
+<!--                  </div>-->
+
+<!--                  <div t-on-click="openStaffList_only" class="btn d-flex btn-light btn-lg border m-3 p-2">-->
+<!--                    <p>Approved Staff</p>-->
+<!--                  </div>-->
+
+<!--                  <div class="btn d-flex btn-light btn-lg border m-3 p-2" t-on-click="user_unactive">-->
+<!--                    <p>Staff Waiting for Approval</p>-->
+<!--                  </div>-->
+<!--              </div>-->
+
+
+            </div>
+          </div>
+
+
+
+
+          <!-- Staff list view -->
+          <div t-if="state.number_of_resources" class="p-3">
+
+            <h4 class="mt-2" t-if="state.status==='active'">Approved Staff List</h4>
+            <h4 class="mt-2" t-if="state.status==='un_activ'">Waiting for Approval Staff List</h4>
+
+            <div class="mb-3">
+              <input type="text" class="form-control" placeholder="Search staff..." t-model="state.searchTerm"/>
+            </div>
+
+            <div t-if="state.loading" class="text-muted">Loading staff...</div>
+            <div t-if="state.error" class="text-danger"><t t-esc="state.error"/></div>
+
+            <div class="list-group">
+              <t t-foreach="filteredStaffList" t-as="staff" t-key="staff.id">
+                <div t-if="staff.status===state.status and state.number_of_resources and !state.approved_staff and !state.staff_waiting_for_approval" class="list-group-item" style="margin:5px;cursor:pointer;" t-on-click="() => this.loadStaffDetails(staff.login,staff.id,staff.name)">
+                  <strong><t t-esc="staff.name"/></strong><br/>
+                  <small>
+                    Unit: <t t-esc="staff.unit_name"/>, Email: <t t-esc="staff.email"/>, Phone: <t t-esc="staff.phone"/>, User ID: <t t-esc="staff.id"/><br/>
+                    Aadhaar: <t t-esc="staff.aadhar_number"/><br/>
+                    Status: <t t-esc="staff.status"/>
+                  </small>
+                </div>
+
+                <div t-if="staff.status===state.status and state.number_of_resources and state.approved_staff and !state.staff_waiting_for_approval" class="list-group-item" style="margin:5px;cursor:pointer;">
+                  <strong><t t-esc="staff.name"/></strong><br/>
+                  <small>
+                    Unit: <t t-esc="staff.unit_name"/>, Email: <t t-esc="staff.email"/>, Phone: <t t-esc="staff.phone"/>, User ID: <t t-esc="staff.id"/><br/>
+                    Aadhaar: <t t-esc="staff.aadhar_number"/><br/>
+                    Status: <t t-esc="staff.status"/>
+                  </small>
+                </div>
+
+                <div t-if="staff.status===state.status and state.number_of_resources and !state.approved_staff and state.staff_waiting_for_approval" class="list-group-item" style="margin:5px;">
+                  <strong><t t-esc="staff.name"/></strong><br/>
+                    <div>
+                        <small>
+                        Unit: <t t-esc="staff.unit_name"/>, Email: <t t-esc="staff.email"/>, Phone: <t t-esc="staff.phone"/>, User ID: <t t-esc="staff.id"/><br/>
+                        Aadhaar: <t t-esc="staff.aadhar_number"/><br/>
+                        Status: Inactive
+                      </small>
+                        <button class="btn btn-primary ml-5 mr-5" t-on-click="() => this.loadStaffUnactive(staff.login,staff.id,staff.name)">
+                            Activate
+                        </button>
+
+                    </div>
+                </div>
+              </t>
+            </div>
+          </div>
+
+          <div t-if="state.view_all_customer_forms" class="p-3">
+
+            <h4 class="mt-2" >Approved Staff List</h4>
+
+            <div class="mb-3">
+              <input type="text" class="form-control" placeholder="Search agency..." t-model="state.searchAge"/>
+            </div>
+
+            <div t-if="state.loading" class="text-muted">Loading staff...</div>
+            <div t-if="state.error" class="text-danger"><t t-esc="state.error"/></div>
+
+            <div class="list-group">
+              <t t-foreach="filteredAgenciesList" t-as="staff" t-key="staff.id">
+                <div t-if="staff.status===state.status" class="list-group-item" style="margin:5px;cursor:pointer;" t-on-click="() => this.loadStaffDetails(staff.login,staff.id)">
+                  <strong><t t-esc="staff.name"/></strong><br/>
+                  <small>
+                    code: <t t-esc="staff.code"/>, location name: <t t-esc="staff.location_name"/>, Phone: <t t-esc="staff.phone"/><br/>
+                    Phone: <t t-esc="staff.phone"/><br/>
+                    Unit name: <t t-esc="staff.unit_name"/>
+                  </small>
+                </div>
+              </t>
+            </div>
+          </div>
+
+          <div t-if="!state.number_of_resources and state.status==='active' and state.attend_customer">
+              <div t-on-click="today_attendance" class="btn d-flex btn-light btn-lg border m-3 p-2">
+                <p>Staff Today's Attendance</p>
+              </div>
+
+
+              <div t-on-click="totalCustomerForms" class="btn d-flex btn-light btn-lg border m-3 p-2">
+                <p>Total customer forms</p>
+              </div>
+
+          </div>
+
+
+          <div>
+
+          </div>
+      </div>
+      <!-- Dashboard view -->
+
+    </div>
+  </t>
+</templates>
