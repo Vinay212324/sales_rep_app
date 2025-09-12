@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+  <t t-name="sale_repo_app.regional_head_dashboard_template" owl="1">
+
+    <div class="dashboard-wrapper container-fluid"  style="max-height: 85vh; overflow-y: auto; padding-right: 15px;">
+       <h1>okokokokok</h1>
+    </div>
+  </t>
+</templates>

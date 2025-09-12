@@ -42,6 +42,8 @@
             "sale_repo_app/static/src/js/serch_users.js",
             "sale_repo_app/static/src/js/dashboard.js",
             "sale_repo_app/static/src/js/unit_manager_dash_board.js",
+            "sale_repo_app/static/src/js/regional_head.js",
+            "sale_repo_app/static/src/xml/regional_head.xml",
             "sale_repo_app/static/src/xml/unit_manager_dash_board.xml",
             "sale_repo_app/static/src/xml/for_office_staf.xml",
             "sale_repo_app/static/src/xml/serch_users.xml",

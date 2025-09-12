@@ -29,6 +29,17 @@
         <field name="tag">sale_repo_app.unit_manager_dashboard</field>
     </record>
 
+    <record id="action_regional_head_dashboard" model="ir.actions.client">
+        <field name="name">Regional Head</field>
+        <field name="tag">sale_repo_app.regional_head_dashboard</field>
+    </record>
+
+
+    <menuitem id="menu_regional_head"
+              name="Regional Head"
+              action="action_regional_head_dashboard"
+              groups="sale_repo_app.region_head_group"
+              sequence="4"/>
 
     <menuitem id="menu_unit_manager"
               name="Unit Manager"
