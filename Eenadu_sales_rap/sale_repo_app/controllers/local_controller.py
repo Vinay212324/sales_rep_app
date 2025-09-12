@@ -11,10 +11,13 @@ class localApi(http.Controller):
         try:
             user = request.env.user
             user_id = user.id
-            users = request.env['res.users'].sudo().search([('create_uid', '=', user_id)])
+            unit_name = user.unit_name
+            users = request.env['res.users'].sudo().search([('unit_name', '=', unit_name),('role','=','agent'),('status','=','active')])
             user_list = []
             agencies = request.env['pin.location'].sudo().search([('unit_name', '=', user.unit_name)])
             ags = []
+            count = request.env['pin.location'].sudo().search_count([('unit_name', '=', user.unit_name)])
+            cu_count = request.env['customer.form'].sudo().search_count([('unit_name', '=', user.unit_name)])
             for agency in agencies:
                 ags.append({
                     "id": agency.id,
@@ -41,7 +44,7 @@ class localApi(http.Controller):
                     'status': user.status,
                 })
 
-            return {'status': 200, 'users': user_list, 'agencies':ags}
+            return {'status': 200, 'users': user_list,'count':count,'cu_count': cu_count, 'agencies':ags}
 
         except Exception as e:
             return {'error': 'Internal Server Error', 'message': str(e), 'code': 500}

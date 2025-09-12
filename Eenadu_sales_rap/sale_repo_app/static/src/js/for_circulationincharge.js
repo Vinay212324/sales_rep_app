@@ -12,30 +12,32 @@ export class SalesCirculationIncharge extends Component {
         action: { type: Object, optional: true },
         actionId: { type: Number, optional: true },
         className: { type: String, optional: true },
-        globalState: { type: Object, optional: true },   // ✅ add this
+        globalState: { type: Object, optional: true },
     };
 
     setup() {
         this.actionService = useService("action");
-        this.rpc = useService("rpc");  // ✅ inject rpc service
+        this.rpc = useService("rpc");
 
         this.state = useState({
-            name:"",
-            user_id:"",
-            login:"",
-            status:"active",
+            name: "",
+            user_id: "",
+            login: "",
+            status: "active",
             number_of_resources: false,
-            attend_customer:false,
-            view_all_customer_forms:false,
-            approved_staff:false,
-            staff_waiting_for_approval:false,
+            attend_customer: false,
+            view_all_customer_forms: false,
+            approved_staff: false,
+            staff_waiting_for_approval: false,
             searchTerm: "",
             searchAge: "",
             selectedStaff: null,
             staffList: [],
-            agenciesList:[],
+            agenciesList: [],
             loading: true,
             error: null,
+            count:"",
+            cu_count:"",
         });
 
         onWillStart(async () => {
@@ -44,9 +46,11 @@ export class SalesCirculationIncharge extends Component {
                 if (res && res.status === 200 && res.users) {
                     this.state.staffList = res.users;
                 }
-                if(res && res.agencies){
+                if (res && res.agencies) {
                     this.state.agenciesList = res.agencies;
                 }
+                this.state.count = res.count || 0;
+                this.state.cu_count = res.cu_count || 0;
 
             } catch (error) {
                 this.state.error = error.message || "RPC Error";
@@ -69,11 +73,19 @@ export class SalesCirculationIncharge extends Component {
         this.state.staff_waiting_for_approval = false;
         this.state.status = "active";
     }
+    filteredAgenciesList_open() {
+        this.state.number_of_resources = false;
+        this.state.attend_customer = false;
+        this.state.view_all_customer_forms = true;
+        this.state.approved_staff = false;
+        this.state.staff_waiting_for_approval = false;
+        this.state.status = "active";
+    }
     openStaffList_only() {
         this.state.number_of_resources = true;
         this.state.attend_customer = false;
         this.state.view_all_customer_forms = false;
-        this.state.approved_staff = true;
+        this.state.approved_staff = false;
         this.state.staff_waiting_for_approval = false;
         this.state.status = "active";
     }
@@ -86,18 +98,8 @@ export class SalesCirculationIncharge extends Component {
         this.state.status = "un_activ";
     }
 
-
     office_staff_creation() {
         this.actionService.doAction("sale_repo_app.action_create_office_staff_custom_form");
-
-//        this.actionService.doAction({
-//            type: "ir.actions.act_window",
-//            name: "Customer Forms",
-//            res_model: "customer.form",
-//            view_mode: "tree,form",
-//            domain: [["user_id", "=", staffId]],
-//            target: "current",
-//        });
     }
 
     get filteredStaffList() {
@@ -105,9 +107,7 @@ export class SalesCirculationIncharge extends Component {
         if (!term) {
             return this.state.staffList;
         }
-
         return this.state.staffList.filter((staff) => {
-            // Safely normalize every field
             const name = (staff.name ?? "").toString().toLowerCase();
             const email = (staff.email ?? "").toString().toLowerCase();
             const unit = (staff.unit_name ?? "").toString().toLowerCase();
@@ -115,8 +115,6 @@ export class SalesCirculationIncharge extends Component {
             const aadhar = (staff.aadhar_number ?? "").toString().toLowerCase();
             const id = (staff.id ?? "").toString().toLowerCase();
             const status = (staff.status ?? "").toString().toLowerCase();
-
-            // Check across ALL fields
             return (
                 name.includes(term) ||
                 email.includes(term) ||
@@ -128,19 +126,18 @@ export class SalesCirculationIncharge extends Component {
             );
         });
     }
+
     get filteredAgenciesList() {
         const term = (this.state.searchAge || "").trim().toLowerCase();
         if (!term) {
             return this.state.agenciesList;
         }
-
         return this.state.agenciesList.filter((agency) => {
             const code = (agency.code ?? "").toString().toLowerCase();
             const location_name = (agency.location_name ?? "").toString().toLowerCase();
             const name = (agency.name ?? "").toString().toLowerCase();
             const phone = (agency.phone ?? "").toString().toLowerCase();
             const unit_name = (agency.unit_name ?? "").toString().toLowerCase();
-
             return (
                 code.includes(term) ||
                 location_name.includes(term) ||
@@ -151,118 +148,117 @@ export class SalesCirculationIncharge extends Component {
         });
     }
 
-
-    async today_attendance() { // Changed from 'login' to 'user_id' to match work.session context
-        console.log("happy boy vinay");
+    async today_attendance() {
         try {
-            console.log(this.state.login,this.state.name,this.state.user_id,"vinay");
             this.state.attend_customer = true;
             this.state.number_of_resources = true;
-
-            const domain = [["user_id", "=", this.state.user_id]]; // Filter by user_id for work.session
-            const context = {
-                default_user_id: this.state.user_id, // Set default value for user_id field
-            };
-
+            const domain = [["user_id", "=", this.state.user_id]];
+            const context = { default_user_id: this.state.user_id };
             await this.actionService.doAction({
                 type: "ir.actions.act_window",
                 name: "Work Sessions",
-                res_model: "work.session", // Changed to work.session
-                view_mode: "tree,form", // Specify both tree and form views
+                res_model: "work.session",
+                view_mode: "tree,form",
                 views: [
-                    [false, "tree"], // Use default tree view
-                    [false, "form"], // Use default form view
+                    [false, "tree"],
+                    [false, "form"],
                 ],
                 target: "current",
-                domain: domain, // Apply the domain filter
-                context: context, // Apply context for constraints
+                domain: domain,
+                context: context,
             });
         } catch (error) {
             console.error("Error fetching staff details:", error);
         }
     }
-    async totalCustomerForms() { // Changed from 'login' to 'user_id' to match work.session context
-        console.log("happy boy vinay");
+
+    async totalCustomerForms() {
         try {
-            console.log(this.state.login,this.state.name,this.state.user_id,"vinay");
             this.state.attend_customer = true;
             this.state.number_of_resources = true;
-
-            const domain = [["agent_login", "=", this.state.login]]; // Filter by user_id for work.session
-            const context = {
-                default_user_id: this.state.user_id, // Set default value for user_id field
-            };
-
+            const domain = [["agent_login", "=", this.state.login]];
+            const context = { default_user_id: this.state.user_id };
             await this.actionService.doAction({
                 type: "ir.actions.act_window",
                 name: "Customer Form",
-                res_model: "customer.form", // Changed to work.session
-                view_mode: "kanban,form", // Specify both tree and form views
+                res_model: "customer.form",
+                view_mode: "kanban,form",
                 views: [
-                    [false, "kanban"], // Use default tree view
-                    [false, "form"], // Use default form view
+                    [false, "kanban"],
+                    [false, "form"],
                 ],
                 target: "current",
-                domain: domain, // Apply the domain filter
-                context: context, // Apply context for constraints
+                domain: domain,
+                context: context,
             });
         } catch (error) {
             console.error("Error fetching staff details:", error);
         }
     }
-    async loadStaffDetails(login,user_id,name) {
-        try {
 
+    async loadStaffDetails(login, user_id, name) {
+        try {
             this.state.number_of_resources = false;
             this.state.attend_customer = true;
             this.state.view_all_customer_forms = false;
             this.state.approved_staff = false;
             this.state.staff_waiting_for_approval = false;
-
             this.state.login = login;
             this.state.name = name;
             this.state.user_id = user_id;
             console.log("Loading details for user_id:", user_id);
-            console.log(user_id);
-
         } catch (error) {
             console.error("Error fetching staff details:", error);
         }
     }
 
-
-    async Open_agencies_List(login,user_id,name) {
+    async Open_agencies_List(phone, id, name) {
         try {
-
             this.state.number_of_resources = false;
             this.state.attend_customer = false;
             this.state.view_all_customer_forms = true;
             this.state.approved_staff = false;
             this.state.staff_waiting_for_approval = false;
-
-            this.state.login = login;
+            this.state.login = phone;
             this.state.name = name;
-            this.state.user_id = user_id;
-            console.log("Loading details for user_id:", user_id);
-            console.log(user_id);
+            this.state.user_id = id;
+            console.log("Loading details for agency id:", id);
+        } catch (error) {
+            console.error("Error fetching agency details:", error);
+        }
+        try {
+            this.state.attend_customer = true;
+            this.state.number_of_resources = true;
+            const domain = [["Agency", "=", name]];
+            const context = { default_Agency: name };
+            await this.actionService.doAction({
+                type: "ir.actions.act_window",
+                name: "Customer Form",
+                res_model: "customer.form",
+                view_mode: "kanban,form",
+                views: [
+                    [false, "kanban"],
+                    [false, "form"],
+                ],
+                target: "current",
+                domain: domain,
+                context: context,
+            });
         } catch (error) {
             console.error("Error fetching staff details:", error);
         }
     }
+
     async loadStaffUnactive(login, user_id, name) {
-        console.log(login, user_id, name, "vinayyy");
         try {
             this.state.number_of_resources = true;
             this.state.attend_customer = false;
             this.state.view_all_customer_forms = false;
             this.state.approved_staff = false;
             this.state.staff_waiting_for_approval = true;
-
             this.state.login = login;
             this.state.name = name;
             this.state.user_id = user_id;
-
-            // ✅ Activate staff (status = "active")
             try {
                 const res = await this.rpc("/local/update/status", { "user_id": user_id, "status": "active" });
                 if (res && res.success === "True") {
@@ -273,8 +269,6 @@ export class SalesCirculationIncharge extends Component {
             } catch (error) {
                 this.state.error = error.message || "RPC Error";
             }
-
-            // ✅ Refresh staff list
             try {
                 const res = await this.rpc("/get_created_staff", {});
                 if (res && res.status === 200 && res.users) {
@@ -292,18 +286,12 @@ export class SalesCirculationIncharge extends Component {
             console.error("Error fetching staff details:", error);
         }
     }
-
-
-
-
 }
-
-
-
 registry.category("actions").add(
     "sale_repo_app.circulation_incharge_dashboard",
     SalesCirculationIncharge
 );
+
 
 
 

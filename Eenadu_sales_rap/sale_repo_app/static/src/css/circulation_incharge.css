@@ -56,3 +56,19 @@
     font-weight: bold;
     margin-bottom: 5px;
 }
+.button_st{
+    border-radius:20px;
+    shadow:100px;
+    text-align:center;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+    transition: box-shadow 0.3s ease;
+
+}
+.for-position{
+    position:fixed;
+    width:100%;
+    justify-content:center;
+}

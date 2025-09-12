@@ -36,6 +36,12 @@
               groups="sale_repo_app.unit_manager_group"
               sequence="4"/>
 
+    <menuitem id="menu_segment_incharge"
+              name="Segment Incharge"
+              action="action_unit_manager_dashboard"
+              groups="sale_repo_app.segment_incharge_group"
+              sequence="4"/>
+
     <menuitem id="menu_circulation_incharge"
               name="Circulation incharge"
               action="action_circulation_incharge_dashboard"
