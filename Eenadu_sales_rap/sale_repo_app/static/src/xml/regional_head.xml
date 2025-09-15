@@ -1,9 +1,50 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
+  <!-- Regional Head Dashboard Template -->
   <t t-name="sale_repo_app.regional_head_dashboard_template" owl="1">
-
-    <div class="dashboard-wrapper container-fluid"  style="max-height: 85vh; overflow-y: auto; padding-right: 15px;">
-       <h1>okokokokok</h1>
+      <h1 class="mt-2">Regional Head Dashboard</h1>
+      <hr/>
+    <div class="dashboard-wrapper container-fluid" style="max-height: 85vh; overflow-y: auto; padding-right: 15px;">
+      <!-- Dashboard View -->
+      <t t-if="state.currentView === 'dashboard'">
+        <t t-if="state.loading">
+          <p>Loading units...</p>
+        </t>
+        <t t-elif="state.error">
+          <p class="text-danger">Error: <t t-esc="state.error" /></p>
+        </t>
+        <t t-elif="state.unit_names.length === 0">
+          <p>No units available.</p>
+        </t>
+        <t t-else="">
+          <t t-foreach="state.unit_names" t-as="unit" t-key="unit_index">
+            <div class="list-group-item" style="margin:5px; cursor:pointer; display: inline-block; padding: 8px 12px; white-space: nowrap; height:36px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);" t-on-click="() => this.navigateToUnit(unit)">
+              <i class="fa fa-building" style="margin-right: 8px;"></i>
+              Unit Name: <strong><t t-esc="unit" /></strong><br/>
+            </div>
+          </t>
+        </t>
+      </t>
+      <!-- Unit Detail View -->
+      <t t-if="state.currentView === 'unit_detail'">
+        <h3>Unit Details</h3>
+        <hr/>
+        <div class="container-fluid" style="padding: 15px;">
+          <t t-if="state.selected_unit">
+            <h4>Unit: <strong><t t-esc="state.selected_unit" /></strong></h4>
+            <p><strong>User:</strong> <t t-esc="state.user_info.name || 'Unknown'" /></p>
+            <p><strong>Email:</strong> <t t-esc="state.user_info.email || 'No email'" /></p>
+            <p><strong>Phone:</strong> <t t-esc="state.user_info.phone || 'No phone'" /></p>
+            <p><strong>Aadhar Number:</strong> <t t-esc="state.user_info.aadhar_number || 'Not provided'" /></p>
+            <p><strong>Status:</strong> <t t-esc="state.user_info.status || 'Unknown'" /></p>
+            <!-- Additional unit-specific details can be added via another RPC call -->
+            <button class="btn btn-primary mt-3" t-on-click="goBack">Back to Dashboard</button>
+          </t>
+          <t t-else="">
+            <p>No unit selected.</p>
+          </t>
+        </div>
+      </t>
     </div>
   </t>
 </templates>

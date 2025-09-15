@@ -148,3 +148,91 @@ class localApi(http.Controller):
                 "status": user.active and "Active" or "Inactive",
             }
         }
+
+
+
+
+    #for re head
+    @http.route('/get_units_details', type='json', auth='user',methods=['POST'])
+    def get_units_details(self):
+        print("vin212312111")
+        user = user = request.env.user
+        if not user.exists():
+            return {"status": 404, "message": "User not found"}
+        unit_names=[]
+        for i in user.unit_name_ids:
+            unit_names.append(i.name)
+
+        return {
+            "status": 200,
+            "user": {
+                "id": user.id,
+                "name": user.name,
+                "email": user.email,
+                "phone": user.phone,
+                "aadhar_number": user.aadhar_number,
+                "status": user.active and "Active" or "Inactive",
+                "unit_name_ids":unit_names,
+            }
+        }
+
+    @http.route('/get_unit_information_users', type='json', auth='user', methods=['POST'])
+    def get_unit_information(self, **params):
+        unit_name = params.get('unit')
+        print("Unit Name:", unit_name)
+
+        users = request.env['res.users'].sudo().search([('unit_name', '=', unit_name)])
+
+        if not users:
+            return {"status": 404, "message": "User not found"}
+
+        user_names = {
+            "circulation_incharge": [],
+            "segment_incharge": [],
+            "unit_manager":[]
+        }
+
+        for user in users:
+            if user.role == "circulation_incharge":
+                user_names["circulation_incharge"].append({
+                    "id": user.id,
+                    "name": user.name,
+                    "role": "Circulation Incharge",
+                    "email": user.email,
+                    "phone": user.phone,
+                    "aadhar_number": user.aadhar_number,
+                    "status": "Active" if user.active else "Inactive",
+                })
+            elif user.role == "segment_incharge":
+                user_names["segment_incharge"].append({
+                    "id": user.id,
+                    "name": user.name,
+                    "role": "Segment Incharge",
+                    "email": user.email,
+                    "phone": user.phone,
+                    "aadhar_number": user.aadhar_number,
+                    "status": "Active" if user.active else "Inactive",
+                })
+            elif user.role == "unit_manager":
+                user_names["unit_manager"].append({
+                    "id": user.id,
+                    "name": user.name,
+                    "role": "Unit Manager",
+                    "email": user.email,
+                    "phone": user.phone,
+                    "aadhar_number": user.aadhar_number,
+                    "status": "Active" if user.active else "Inactive",
+                })
+            elif user.role == "Office_staff":
+                user_names["Office_staff"].append({
+                    "id": user.id,
+                    "name": user.name,
+                    "role": "Office Staff",
+                    "email": user.email,
+                    "phone": user.phone,
+                    "aadhar_number": user.aadhar_number,
+                    "status": "Active" if user.active else "Inactive",
+                })
+
+        return user_names
+
