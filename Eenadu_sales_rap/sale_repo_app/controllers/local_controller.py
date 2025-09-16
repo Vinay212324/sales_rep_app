@@ -189,7 +189,9 @@ class localApi(http.Controller):
         user_names = {
             "circulation_incharge": [],
             "segment_incharge": [],
-            "unit_manager":[]
+            "unit_manager":[],
+            "Office_staff":[],
+            "agent":[],
         }
 
         for user in users:
@@ -228,6 +230,16 @@ class localApi(http.Controller):
                     "id": user.id,
                     "name": user.name,
                     "role": "Office Staff",
+                    "email": user.email,
+                    "phone": user.phone,
+                    "aadhar_number": user.aadhar_number,
+                    "status": "Active" if user.active else "Inactive",
+                })
+            elif user.role == "agent":
+                user_names["agent"].append({
+                    "id": user.id,
+                    "name": user.name,
+                    "role": "promoters",
                     "email": user.email,
                     "phone": user.phone,
                     "aadhar_number": user.aadhar_number,

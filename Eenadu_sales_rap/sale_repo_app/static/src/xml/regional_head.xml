@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
-  <!-- Regional Head Dashboard Template -->
   <t t-name="sale_repo_app.regional_head_dashboard_template" owl="1">
       <h1 class="mt-2">Regional Head Dashboard</h1>
       <hr/>
@@ -32,12 +31,171 @@
         <div class="container-fluid" style="padding: 15px;">
           <t t-if="state.selected_unit">
             <h4>Unit: <strong><t t-esc="state.selected_unit" /></strong></h4>
-            <p><strong>User:</strong> <t t-esc="state.user_info.name || 'Unknown'" /></p>
-            <p><strong>Email:</strong> <t t-esc="state.user_info.email || 'No email'" /></p>
-            <p><strong>Phone:</strong> <t t-esc="state.user_info.phone || 'No phone'" /></p>
-            <p><strong>Aadhar Number:</strong> <t t-esc="state.user_info.aadhar_number || 'Not provided'" /></p>
-            <p><strong>Status:</strong> <t t-esc="state.user_info.status || 'Unknown'" /></p>
-            <!-- Additional unit-specific details can be added via another RPC call -->
+            <t t-if="state.loading">
+              <p>Loading unit details...</p>
+            </t>
+            <t t-elif="state.error">
+              <p class="text-danger">Error: <t t-esc="state.error" /></p>
+            </t>
+            <t t-elif="!state.unit_details">
+              <p>No unit details available.</p>
+            </t>
+            <t t-else="">
+              <!-- Circulation Incharge -->
+              <h5>Circulation Incharge</h5>
+              <t t-if="state.unit_details.circulation_incharge.length === 0">
+                <p>No Circulation Incharge assigned.</p>
+              </t>
+              <t t-else="">
+                <table class="table table-bordered">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Email</th>
+                      <th>Phone</th>
+                      <th>Aadhar Number</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <t t-foreach="state.unit_details.circulation_incharge" t-as="user" t-key="user.id">
+                      <tr>
+                        <td><t t-esc="user.name || 'Unknown'" /></td>
+                        <td><t t-esc="user.email || 'No email'" /></td>
+                        <td><t t-esc="user.phone || 'No phone'" /></td>
+                        <td><t t-esc="user.aadhar_number || 'Not provided'" /></td>
+                        <td><t t-esc="user.status || 'Unknown'" /></td>
+                      </tr>
+                    </t>
+                  </tbody>
+                </table>
+              </t>
+              <!-- Segment Incharge -->
+              <h5>Segment Incharge</h5>
+              <t t-if="state.unit_details.segment_incharge.length === 0">
+                <p>No Segment Incharge assigned.</p>
+              </t>
+              <t t-else="">
+                <table class="table table-bordered">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Email</th>
+                      <th>Phone</th>
+                      <th>Aadhar Number</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <t t-foreach="state.unit_details.segment_incharge" t-as="user" t-key="user.id">
+                      <tr>
+                        <td><t t-esc="user.name || 'Unknown'" /></td>
+                        <td><t t-esc="user.email || 'No email'" /></td>
+                        <td><t t-esc="user.phone || 'No phone'" /></td>
+                        <td><t t-esc="user.aadhar_number || 'Not provided'" /></td>
+                        <td><t t-esc="user.status || 'Unknown'" /></td>
+                      </tr>
+                    </t>
+                  </tbody>
+                </table>
+              </t>
+              <!-- Unit Manager -->
+              <h5>Unit Manager</h5>
+              <t t-if="state.unit_details.unit_manager.length === 0">
+                <p>No Unit Manager assigned.</p>
+              </t>
+              <t t-else="">
+                <table class="table table-bordered">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Email</th>
+                      <th>Phone</th>
+                      <th>Aadhar Number</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <t t-foreach="state.unit_details.unit_manager" t-as="user" t-key="user.id">
+                      <tr>
+                        <td><t t-esc="user.name || 'Unknown'" /></td>
+                        <td><t t-esc="user.email || 'No email'" /></td>
+                        <td><t t-esc="user.phone || 'No phone'" /></td>
+                        <td><t t-esc="user.aadhar_number || 'Not provided'" /></td>
+                        <td><t t-esc="user.status || 'Unknown'" /></td>
+                      </tr>
+                    </t>
+                  </tbody>
+                </table>
+              </t>
+              <!-- Office Staff -->
+              <h5>Office Staff</h5>
+              <t t-if="state.unit_details.Office_staff.length === 0">
+                <p>No Office Staff assigned.</p>
+              </t>
+              <t t-else="">
+                <table class="table table-bordered">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Email</th>
+                      <th>Phone</th>
+                      <th>Aadhar Number</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <t t-foreach="state.unit_details.Office_staff" t-as="user" t-key="user.id">
+                      <tr>
+                        <td><t t-esc="user.name || 'Unknown'" /></td>
+                        <td><t t-esc="user.email || 'No email'" /></td>
+                        <td><t t-esc="user.phone || 'No phone'" /></td>
+                        <td><t t-esc="user.aadhar_number || 'Not provided'" /></td>
+                        <td><t t-esc="user.status || 'Unknown'" /></td>
+                      </tr>
+                    </t>
+                  </tbody>
+                </table>
+              </t>
+              <!-- Agents -->
+              <h5>Agents</h5>
+              <t t-if="state.unit_details.agent.length === 0">
+                <p>No Agents assigned.</p>
+              </t>
+              <t t-else="">
+                <table class="table table-bordered">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Email</th>
+                      <th>Phone</th>
+                      <th>Aadhar Number</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <t t-foreach="state.unit_details.agent" t-as="user" t-key="user.id">
+                        <tr t-on-click="() => this.selectUser(user.id)"
+                            style="cursor: pointer;">
+                            <td><t t-esc="user.name || 'Unknown'" /></td>
+                            <td><t t-esc="user.email || 'No email'" /></td>
+                            <td><t t-esc="user.phone || 'No phone'" /></td>
+                            <td><t t-esc="user.aadhar_number || 'Not provided'" /></td>
+                            <td><t t-esc="user.status || 'Unknown'" /></td>
+                        </tr>
+                        <div t-if="state.selectedUserId === user.id">
+                          <div t-on-click="() => this.today_attendance(user.id)" class="btn d-flex btn-light btn-lg border m-3 p-2">
+                            <p>Staff Attendance</p>
+                          </div>
+                          <div t-on-click="() => this.totalCustomerForms(user.email,user.id)" class="btn d-flex btn-light btn-lg border m-3 p-2">
+                            <p>Total customer forms</p>
+                          </div>
+                        </div>
+                    </t>
+                  </tbody>
+                </table>
+              </t>
+            </t>
             <button class="btn btn-primary mt-3" t-on-click="goBack">Back to Dashboard</button>
           </t>
           <t t-else="">
