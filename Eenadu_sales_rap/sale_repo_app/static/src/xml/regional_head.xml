@@ -26,9 +26,9 @@
       </t>
       <!-- Unit Detail View -->
       <t t-if="state.currentView === 'unit_detail'">
-        <h3>Unit Details</h3>
-        <hr/>
         <div class="container-fluid" style="padding: 15px;">
+            <button t-on-click="reg_head_cu_form">Total Customer Forms</button>
+            <hr/>
           <t t-if="state.selected_unit">
             <h4>Unit: <strong><t t-esc="state.selected_unit" /></strong></h4>
             <t t-if="state.loading">

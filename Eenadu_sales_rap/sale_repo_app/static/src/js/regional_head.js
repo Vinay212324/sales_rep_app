@@ -128,6 +128,9 @@ export class RegionalHeadDashboard extends Component {
             console.error("Error fetching staff details:", error);
         }
     }
+    reg_head_cu_form() {
+        this.actionService.doAction("sale_repo_app.action_customer_form");
+    }
 
 
     goBack() {
