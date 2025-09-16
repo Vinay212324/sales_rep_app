@@ -46,3 +46,4 @@ circulation_incharge_view,circulation_incharge.view,model_circulation_incharge_v
 access_customer_form_circulation_incharge,access.customer.form_circulation_incharge,model_customer_form,circulation_incharge_group,1,1,1,1
 
 reg_head,for_reg_head,model_customer_form,,1,1,1,1
+reg_head_W,for_reg_head_W,model_users_wizard,,1,1,1,1

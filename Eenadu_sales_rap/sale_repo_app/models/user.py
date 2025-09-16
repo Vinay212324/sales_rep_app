@@ -162,8 +162,114 @@ class Users(models.Model):
             if new_group:
                 self.groups_id = [(4, new_group.id)]
 
+    @api.model
+    def fields_get(self, allfields=None, attributes=None):
+        fields_res = super().fields_get(allfields=allfields, attributes=attributes)
+        if 'role' in fields_res:
+            if not (self.env.user.has_group('sale_repo_app.region_head_group') or
+                    self.env.user.has_group('sale_repo_app.circulation_head_group')):
+                fields_res['role']['readonly'] = True
+        return fields_res
+
+    @api.model
+    def fields_view_get(self, view_id=None, view_type='form', toolbar=False, submenu=False):
+        res = super().fields_view_get(view_id=view_id, view_type=view_type,
+                                      toolbar=toolbar, submenu=submenu)
+
+        if view_type == 'form':
+            doc = etree.XML(res['arch'])
+            role_field = doc.xpath("//field[@name='role']")
+            if role_field:
+                # Example: only show 'role' if current user is region_head or circulation_head
+                if not self.env.user.has_group('sale_repo_app.region_head_group') and \
+                        not self.env.user.has_group('sale_repo_app.circulation_head_group'):
+                    for node in role_field:
+                        node.set('modifiers', '{"invisible": true}')
+                        node.set('readonly', "1")
+
+            res['arch'] = etree.tostring(doc, encoding='unicode')
+        return res
+
 class unit_names(models.Model):
     _name = 'unit.name'
 
     name = fields.Char(string="Name")
     unit_name_id = fields.Many2one('res.users')
+
+
+
+
+from odoo import models, fields, _
+
+class UsersWizard(models.TransientModel):
+    _name = "users.wizard"
+    _description = "Users Wizard"
+
+    # For creating a new res.users
+    name = fields.Char(string="Name", required=True)
+    login = fields.Char(string="Login", required=True)
+    password = fields.Char(string="Password", required=True)
+
+    # Custom fields
+    role = fields.Selection(
+        [
+            ('agent', 'Staff'),
+            ('Office_staff', 'Office staff'),
+            ('unit_manager', 'Unit manager'),
+            ('segment_incharge', 'Segment incharge'),
+            ('circulation_incharge', 'Circulation incharge'),
+            ('region_head', 'Region head'),
+        ],
+        string="Role",
+        required=True,
+    )
+    status = fields.Selection(
+        [('un_activ', 'Waiting For Approve'),
+         ('active', 'Approved')],
+        string="Status",
+        default="un_activ",
+        required=True,
+    )
+    unit_name_id = fields.Many2one('unit.name', string="Unit Name")
+    aadhar_number = fields.Char(string="Aadhar")
+    pan_number = fields.Char(string="PAN")
+    phone = fields.Char(string="Phone")
+    state = fields.Char(string="State")
+
+    def action_create_user(self):
+        self.ensure_one()
+
+        vals = {
+            'name': self.name,
+            'login': self.login,
+            'password': self.password,
+            'role': self.role,
+            'status': self.status,
+            'unit_name': self.unit_name_id.name if self.unit_name_id else False,
+            'aadhar_number': self.aadhar_number,
+            'pan_number': self.pan_number,
+            'phone': self.phone,
+            'state': self.state,
+        }
+
+        # Create the user with sudo
+        user = self.env['res.users'].sudo().create(vals)
+
+        # Show a success notification
+        self.env.cr.commit()  # ensure transaction commit before redirect
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': "Success",
+                'message': f"User {user.name} created successfully!",
+                'type': 'success',
+                'sticky': False,
+            }
+        }, {
+            # Redirect back to Users tree view
+            'type': 'ir.actions.act_window',
+            'res_model': 'res.users',
+            'view_mode': 'tree,form',
+            'target': 'current',
+        }

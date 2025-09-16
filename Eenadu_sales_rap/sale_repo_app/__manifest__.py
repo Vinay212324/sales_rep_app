@@ -9,6 +9,7 @@
         "security/access_group.xml",
         "security/ir.model.access.csv",
         "security/for_record_rules.xml",
+        "views/transient_wizard.xml",
         "views/customer_form_views.xml",
         "views/fromto_rootmap_views.xml",
         "views/root_map_views.xml",

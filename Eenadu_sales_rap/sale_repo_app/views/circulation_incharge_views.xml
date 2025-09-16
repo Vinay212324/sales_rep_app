@@ -85,6 +85,14 @@
         <field name="target">current</field>
     </record>
 
+    <record id="action_user_creation_form" model="ir.actions.act_window">
+        <field name="name">Create New Office Staff</field>
+        <field name="res_model">res.users</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_users_form_inherit_custom"/>
+        <field name="target">current</field>
+    </record>
+
     <record id="action_res_users_view0" model="ir.actions.act_window">
         <field name="name">All Users</field>
         <field name="res_model">res.users</field>

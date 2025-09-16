@@ -1,0 +1,43 @@
+<odoo>
+    <!-- Wizard Form View -->
+    <record id="view_users_wizard_form" model="ir.ui.view">
+        <field name="name">users.wizard.form</field>
+        <field name="model">users.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Create User Wizard">
+                <group>
+                    <field name="name"/>
+                    <field name="login"/>
+                    <field name="password" password="True"/>
+                </group>
+                <group>
+                    <field name="role"/>
+                    <field name="status"/>
+                    <field name="unit_name_id"/>
+                    <field name="aadhar_number"/>
+                    <field name="pan_number"/>
+                    <field name="phone"/>
+                    <field name="state"/>
+                </group>
+                <footer>
+                    <button string="Create User"
+                            type="object"
+                            name="action_create_user"
+                            class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action to open wizard -->
+    <record id="action_users_wizard" model="ir.actions.act_window">
+        <field name="name">Create User</field>
+        <field name="res_model">users.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_users_wizard_form"/>
+        <field name="target">new</field>
+    </record>
+
+
+</odoo>

@@ -131,6 +131,9 @@ export class RegionalHeadDashboard extends Component {
     reg_head_cu_form() {
         this.actionService.doAction("sale_repo_app.action_customer_form");
     }
+    user_creation() {
+        this.actionService.doAction("sale_repo_app.action_users_wizard");
+    }
 
 
     goBack() {

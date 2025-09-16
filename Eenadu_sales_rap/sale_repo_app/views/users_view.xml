@@ -110,7 +110,12 @@
 
             <xpath expr="//field[@name='login']" position="after">
                 <group string="Custom Information">
-                    <field name="role" readonly="1"/>
+                    <field name="role" widget="selection" selection="[('agent','Staff'),
+                   ('Office_staff','Office staff'),
+                   ('unit_manager','Unit manager'),
+                   ('segment_incharge','Segment incharge'),
+                   ('circulation_incharge','Circulation incharge'),
+                   ('region_head','Region head')]"/>
                     <field name="target" attrs="{'invisible': [('role', '!=', 'agent')]}"/>
                     <!--                    <field name="status"/>-->
                     <field name="unit_name"

@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
   <t t-name="sale_repo_app.regional_head_dashboard_template" owl="1">
-      <h1 class="mt-2">Regional Head Dashboard</h1>
+      <div class="d-flex flex-row">
+          <h1 class="mt-2">Regional Head Dashboard</h1>   <button t-on-click="user_creation" style="margin:5px;margin-left:20px; cursor:pointer; display: inline-block; padding: 8px 12px; white-space: nowrap; height:36px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);">creat user</button>
+      </div>
       <hr/>
     <div class="dashboard-wrapper container-fluid" style="max-height: 85vh; overflow-y: auto; padding-right: 15px;">
       <!-- Dashboard View -->
