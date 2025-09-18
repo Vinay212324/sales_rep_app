@@ -29,8 +29,12 @@ class SelfieController(http.Controller):
 
             session = request.env['work.session'].sudo().create({
                 'user_id': user.id,
-                'start_time': utc_now,
+                'start_time': False,
                 'start_selfie': selfie_base64.encode('utf-8'),
+            })
+
+            session.write({
+                'start_time': utc_now,
             })
 
             # Convert to IST for response
