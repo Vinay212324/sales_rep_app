@@ -120,11 +120,16 @@ class SelfieController(http.Controller):
             ])
 
             selfie_sessions = []
+            from datetime import timedelta
+
             for session in sessions:
+                start_time = session.start_time + timedelta(hours=5, minutes=30) if session.start_time else None
+                end_time = session.end_time + timedelta(hours=5, minutes=30) if session.end_time else None
+
                 selfie_sessions.append({
                     'session_id': session.id,
-                    'start_time': str(session.start_time),
-                    'end_time': str(session.end_time) if session.end_time else None,
+                    'start_time': str(start_time) if start_time else None,
+                    'end_time': str(end_time) if end_time else None,
                     'start_selfie': f"data:image/png;base64,{session.start_selfie.decode('utf-8')}" if session.start_selfie else None,
                     'end_selfie': f"data:image/png;base64,{session.end_selfie.decode('utf-8')}" if session.end_selfie else None,
                 })
