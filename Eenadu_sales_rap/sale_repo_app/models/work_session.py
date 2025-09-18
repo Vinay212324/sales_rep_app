@@ -1,6 +1,5 @@
+from odoo import api, models, fields
 from datetime import datetime
-from odoo import api, SUPERUSER_ID
-from odoo import models, fields, api
 import pytz
 
 class WorkSession(models.Model):
@@ -24,28 +23,6 @@ class WorkSession(models.Model):
         compute="_compute_duration",
         store=True
     )
-
-    # Convert start/end time into IST before saving
-    @api.model
-    def create(self, vals):
-        ist = pytz.timezone('Asia/Kolkata')
-        if vals.get('start_time'):
-            dt = fields.Datetime.from_string(vals['start_time'])
-            vals['start_time'] = fields.Datetime.to_string(dt.astimezone(ist))
-        if vals.get('end_time'):
-            dt = fields.Datetime.from_string(vals['end_time'])
-            vals['end_time'] = fields.Datetime.to_string(dt.astimezone(ist))
-        return super().create(vals)
-
-    def write(self, vals):
-        ist = pytz.timezone('Asia/Kolkata')
-        if vals.get('start_time'):
-            dt = fields.Datetime.from_string(vals['start_time'])
-            vals['start_time'] = fields.Datetime.to_string(dt.astimezone(ist))
-        if vals.get('end_time'):
-            dt = fields.Datetime.from_string(vals['end_time'])
-            vals['end_time'] = fields.Datetime.to_string(dt.astimezone(ist))
-        return super().write(vals)
 
     @api.depends('start_time', 'end_time')
     def _compute_duration(self):

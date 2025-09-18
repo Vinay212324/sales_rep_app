@@ -24,18 +24,24 @@ class SelfieController(http.Controller):
             if not user:
                 return {'success': False, 'message': 'Invalid or expired token', 'code': 403}
 
-            ist_now = pytz.utc.localize(datetime.utcnow()).astimezone(pytz.timezone('Asia/Kolkata')).replace(tzinfo=None)
+            # Use UTC time for storage (Odoo standard)
+            utc_now = datetime.utcnow()
 
             session = request.env['work.session'].sudo().create({
                 'user_id': user.id,
-                'start_time': ist_now,
+                'start_time': utc_now,
                 'start_selfie': selfie_base64.encode('utf-8'),
             })
+
+            # Convert to IST for response
+            ist = pytz.timezone('Asia/Kolkata')
+            ist_start_time = pytz.utc.localize(utc_now).astimezone(ist).strftime('%Y-%m-%d %H:%M:%S')
 
             return {
                 'success': True,
                 'message': 'Start selfie saved successfully',
                 'session_id': session.id,
+                'start_time_ist': ist_start_time,
                 'code': 200
             }
 
@@ -65,17 +71,23 @@ class SelfieController(http.Controller):
             if not session:
                 return {'success': False, 'message': 'No active session found', 'code': 404}
 
-            ist_now = pytz.utc.localize(datetime.utcnow()).astimezone(pytz.timezone('Asia/Kolkata')).replace(tzinfo=None)
+            # Use UTC time for storage
+            utc_now = datetime.utcnow()
 
             session.write({
-                'end_time': ist_now,
+                'end_time': utc_now,
                 'end_selfie': selfie_base64.encode('utf-8')
             })
+
+            # Convert to IST for response
+            ist = pytz.timezone('Asia/Kolkata')
+            ist_end_time = pytz.utc.localize(utc_now).astimezone(ist).strftime('%Y-%m-%d %H:%M:%S')
 
             return {
                 'success': True,
                 'message': 'End selfie saved successfully',
                 'session_id': session.id,
+                'end_time_ist': ist_end_time,
                 'code': 200
             }
 
