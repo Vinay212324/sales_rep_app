@@ -1,6 +1,6 @@
 from odoo import models, fields, api
 from datetime import datetime
-
+from odoo import api, SUPERUSER_ID
 class WorkSession(models.Model):
     _name = 'work.session'
     _description = 'Work Session with Selfies'
@@ -32,3 +32,10 @@ class WorkSession(models.Model):
                 rec.duration = delta.total_seconds() / 3600.0
             else:
                 rec.duration = 0.0
+
+
+
+    def set_default_timezone(cr, registry):
+        env = api.Environment(cr, SUPERUSER_ID, {})
+        users = env['res.users'].search([('tz', '=', False)])  # users with no timezone set
+        users.write({'tz': 'Asia/Kolkata'})
