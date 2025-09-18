@@ -53,3 +53,24 @@ class WorkSessionController(http.Controller):
                 count += 1
 
         return f"✅ {count} Work Session records converted to IST."
+
+    @http.route('/revert_sessions_to_utc', type='http', auth='user')
+    def revert_sessions_to_utc(self, **kwargs):
+        ist = pytz.timezone("Asia/Kolkata")
+        sessions = request.env['work.session'].sudo().search([])
+        count = 0
+
+        for rec in sessions:
+            updated_vals = {}
+            if rec.start_time:
+                # Treat stored value as naive UTC but actually it's IST → convert back to UTC
+                dt = rec.start_time.replace(tzinfo=ist).astimezone(pytz.UTC).replace(tzinfo=None)
+                updated_vals['start_time'] = dt
+            if rec.end_time:
+                dt = rec.end_time.replace(tzinfo=ist).astimezone(pytz.UTC).replace(tzinfo=None)
+                updated_vals['end_time'] = dt
+            if updated_vals:
+                rec.write(updated_vals)
+                count += 1
+
+        return f"♻️ {count} Work Session records reverted back to UTC."
