@@ -25,3 +25,31 @@ class StaffController(http.Controller):
             }
         except Exception as e:
             return {'error': str(e)}
+
+
+
+from odoo import http
+from odoo.http import request
+import pytz
+
+class WorkSessionController(http.Controller):
+
+    @http.route('/convert_sessions_to_ist', type='http', auth='user')
+    def convert_sessions_to_ist(self, **kwargs):
+        ist = pytz.timezone("Asia/Kolkata")
+        sessions = request.env['work.session'].sudo().search([])
+        count = 0
+
+        for rec in sessions:
+            updated_vals = {}
+            if rec.start_time:
+                dt = rec.start_time.replace(tzinfo=pytz.UTC).astimezone(ist).replace(tzinfo=None)
+                updated_vals['start_time'] = dt
+            if rec.end_time:
+                dt = rec.end_time.replace(tzinfo=pytz.UTC).astimezone(ist).replace(tzinfo=None)
+                updated_vals['end_time'] = dt
+            if updated_vals:
+                rec.write(updated_vals)
+                count += 1
+
+        return f"✅ {count} Work Session records converted to IST."
