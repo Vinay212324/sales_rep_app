@@ -106,6 +106,7 @@
                             <field name="latitude"/>
                             <field name="longitude"/>
                             <field name="location_address"/>
+                            <field name="Agency"/>
                             <field name="location_url" widget="url"/>
                         </group>
                     </group>
