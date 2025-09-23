@@ -13,7 +13,7 @@ class CustomerForm(models.Model):
     root_name = fields.Char(string="Root Map")
     agent_login = fields.Char(string="Agent login")
     unit_name = fields.Char(string="Unit name")
-    date = fields.Date(string='Today Date', default=fields.Date.context_today)
+    date = fields.Date(string='Form Filled Date', default=fields.Date.context_today)
     time = fields.Char( string='Current Time', default=lambda self: datetime.now().strftime('%H:%M') )
 
     # Family Details
