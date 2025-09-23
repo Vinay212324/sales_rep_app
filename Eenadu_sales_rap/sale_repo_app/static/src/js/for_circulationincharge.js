@@ -229,8 +229,8 @@ export class SalesCirculationIncharge extends Component {
         try {
             this.state.attend_customer = true;
             this.state.number_of_resources = true;
-            const domain = [["Agency", "=", name]];
-            const context = { default_Agency: name };
+            const domain = [["Agency", "=", this.state.name]];
+            const context = { default_Agency: this.state.name };
             await this.actionService.doAction({
                 type: "ir.actions.act_window",
                 name: "Customer Form",

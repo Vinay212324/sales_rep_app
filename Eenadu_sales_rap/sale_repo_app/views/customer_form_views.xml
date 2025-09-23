@@ -124,7 +124,7 @@
                 <field name="unit_name"/>
                 <field name="date"/>
                 <filter name="one_day_filter"
-                        string="Today"
+                        string="Today Customer Forms"
                         domain="[('date', '=', context_today())]"/>
             </search>
         </field>
