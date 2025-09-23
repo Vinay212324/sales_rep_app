@@ -222,14 +222,9 @@ export class SalesCirculationIncharge extends Component {
             this.state.login = phone;
             this.state.name = name;
             this.state.user_id = id;
-            console.log("Loading details for agency id:", id);
-        } catch (error) {
-            console.error("Error fetching agency details:", error);
-        }
-        try {
-            this.state.attend_customer = true;
-            this.state.number_of_resources = true;
-            const domain = [["Agency", "=", this.state.name]];
+            console.log("Loading details for agency id:", id, "name:", name);
+
+            const domain = [["Agency", "ilike", this.state.name]];
             const context = { default_Agency: this.state.name };
             await this.actionService.doAction({
                 type: "ir.actions.act_window",
@@ -244,8 +239,14 @@ export class SalesCirculationIncharge extends Component {
                 domain: domain,
                 context: context,
             });
+            this.state.attend_customer = true;
+            this.state.number_of_resources = true;
         } catch (error) {
-            console.error("Error fetching staff details:", error);
+            console.error("Error in Open_agencies_List:", error);
+            this.env.services.notification.add("Failed to load customer forms: " + (error.message || "Unknown error"), {
+                type: "danger",
+                title: "Error",
+            });
         }
     }
 
