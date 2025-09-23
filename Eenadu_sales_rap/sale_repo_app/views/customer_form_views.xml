@@ -61,11 +61,11 @@
 
                         <group string="Family Details">
                             <field name="family_head_name"/>
-                            <field name="father_name"/>
-                            <field name="mother_name"/>
-                            <field name="spouse_name"/>
+                            <field name="age"/>
+<!--                            <field name="father_name"/>-->
+<!--                            <field name="mother_name"/>-->
+<!--                            <field name="spouse_name"/>-->
                         </group>
-
                         <group string="Address">
                             <field name="house_number"/>
                             <field name="street_number"/>
@@ -75,32 +75,34 @@
                             <field name="mobile_number"/>
                         </group>
 
-                        <group string="Newspaper">
-                            <field name="eenadu_newspaper"/>
-                            <field name="feedback_to_improve_eenadu_paper"/>
-                            <field name="read_newspaper"/>
+                        <group string="Newspaper Details">
+<!--                            <field name="eenadu_newspaper"/>-->
+<!--                            <field name="feedback_to_improve_eenadu_paper"/>-->
+<!--                            <field name="read_newspaper"/>-->
                             <field name="current_newspaper"/>
-                            <field name="reason_for_not_taking_eenadu_newsPaper"/>
-                            <field name="reason_not_reading"/>
-                            <field name="free_offer_15_days"/>
-                            <field name="reason_not_taking_offer"/>
+                            <field name="Start_Circulating"/>
+<!--                            <field name="reason_for_not_taking_eenadu_newsPaper"/>-->
+<!--                            <field name="reason_not_reading"/>-->
+<!--                            <field name="free_offer_15_days"/>-->
+<!--                            <field name="reason_not_taking_offer"/>-->
                         </group>
 
                         <group string="Employment">
                             <field name="employed"/>
-                            <field name="job_type"/>
-                            <field name="job_type_one"/>
-                            <field name="job_profession"/>
-                            <field name="job_designation"/>
-                            <field name="job_working_state"/>
-                            <field name="job_working_location"/>
-                            <field name="job_location_landmark"/>
-                            <field name="company_name"/>
+<!--                            <field name="job_type"/>-->
+<!--                            <field name="job_type_one"/>-->
+<!--                            <field name="job_profession"/>-->
+<!--                            <field name="job_designation"/>-->
+<!--                            <field name="job_working_state"/>-->
+<!--                            <field name="job_working_location"/>-->
+<!--                            <field name="job_location_landmark"/>-->
+<!--                            <field name="company_name"/>-->
                             <field name="profession"/>
-                            <field name="job_designation_one"/>
+<!--                            <field name="job_designation_one"/>-->
                         </group>
 
                         <group string="Geo Location">
+                            <field name="face_base64" widget="image" class="oe_avatar"/>
                             <field name="latitude"/>
                             <field name="longitude"/>
                             <field name="location_address"/>
