@@ -85,7 +85,7 @@ export class SalesCirculationIncharge extends Component {
         this.state.number_of_resources = true;
         this.state.attend_customer = false;
         this.state.view_all_customer_forms = false;
-        this.state.approved_staff = false;
+        this.state.approved_staff = true;
         this.state.staff_waiting_for_approval = false;
         this.state.status = "active";
     }

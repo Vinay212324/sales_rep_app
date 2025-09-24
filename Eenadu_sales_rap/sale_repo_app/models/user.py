@@ -3,7 +3,10 @@ from datetime import datetime, timedelta
 import secrets
 from odoo.exceptions import AccessDenied, ValidationError
 from odoo.fields import Many2one
-
+import base64
+from io import BytesIO
+from openpyxl import Workbook
+from openpyxl.styles import Alignment, Font
 
 class Users(models.Model):
     _inherit = 'res.users'
@@ -206,9 +209,9 @@ class UsersWizard(models.TransientModel):
     _description = "Users Wizard"
 
     # For creating a new res.users
-    name = fields.Char(string="Name", required=True)
-    login = fields.Char(string="Login", required=True)
-    password = fields.Char(string="Password", required=True)
+    name = fields.Char(string="Name")
+    login = fields.Char(string="Login")
+    password = fields.Char(string="Password")
 
     # Custom fields
     role = fields.Selection(
@@ -221,7 +224,6 @@ class UsersWizard(models.TransientModel):
             ('region_head', 'Region head'),
         ],
         string="Role",
-        required=True,
     )
     status = fields.Selection(
         [('un_activ', 'Waiting For Approve'),
@@ -235,6 +237,13 @@ class UsersWizard(models.TransientModel):
     pan_number = fields.Char(string="PAN")
     phone = fields.Char(string="Phone")
     state = fields.Char(string="State")
+
+    #for Customerforms xl report
+    start_date = fields.Date(string="Start Date")
+    end_date = fields.Date(string="End Date")
+    dummy_file = fields.Binary("Excel File", readonly=True, attachment=True)
+    dummy_file_name = fields.Char("File Name")
+
 
     def action_create_user(self):
         self.ensure_one()
@@ -272,4 +281,61 @@ class UsersWizard(models.TransientModel):
             'res_model': 'res.users',
             'view_mode': 'tree,form',
             'target': 'current',
+        }
+    # for xl report
+    def download_xl_report(self):
+        for_Dates = "From " + str(self.start_date)+' To '+  str(self.end_date)
+
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Staff Analysis"
+        ws["A1"].value = "SN"
+        ws["B1"].value = "UNIT NAME"
+        ws.merge_cells("C1:G1")
+        main_heading_cell = ws["C1"]
+        main_heading_cell.value = for_Dates
+        ws.merge_cells("C2:G2")
+        main_heading_cell = ws["C2"]
+        main_heading_cell.value = "PROMOTERES"
+
+
+
+        # Merge cells for main heading (C1:D1 in your case)
+
+        # ws.merge_cells("C1:D1")
+        # main_heading_cell = ws["C1"]
+        # main_heading_cell.value = "main heading"
+        # main_heading_cell.alignment = Alignment(horizontal="center", vertical="center")
+        # main_heading_cell.font = Font(bold=True, size=14)
+
+        # Add sub-headings in row 2
+        ws["C3"].value = "Heading 1"
+        ws["D3"].value = "Heading 2"
+        ws["E3"].value = "Heading 1"
+        ws["F3"].value = "Heading 2"
+        ws["G3"].value = "Heading 2"
+        # ws["C3"].font = Font(bold=True)
+        # ws["D3"].font = Font(bold=True)
+
+        # # Adjust column width
+        # ws.column_dimensions["C"].width = 20
+        # ws.column_dimensions["D"].width = 20
+
+        # Save to memory
+        file_stream = BytesIO()
+        wb.save(file_stream)
+        file_stream.seek(0)
+
+        # Save into wizard field
+        file_data = base64.b64encode(file_stream.read())
+        self.write({
+            'dummy_file': file_data,
+            'dummy_file_name': "staff_analysis.xlsx"
+           })
+
+        # Return download action
+        return {
+            'type': 'ir.actions.act_url',
+            'url': f"/web/content/?model=users.wizard&id={self.id}&field=dummy_file&filename_field=dummy_file_name&download=true",
+            'target': 'new',  # ensures download in new tab, not replacing current one
         }

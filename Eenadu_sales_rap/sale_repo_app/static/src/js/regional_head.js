@@ -134,6 +134,9 @@ export class RegionalHeadDashboard extends Component {
     user_creation() {
         this.actionService.doAction("sale_repo_app.action_users_wizard");
     }
+    excel_report() {
+        this.actionService.doAction("sale_repo_app.action_users_wizard_excel");
+    }
 
 
     goBack() {
