@@ -364,7 +364,7 @@ class UsersWizard(models.TransientModel):
 
             first_count = sum(1 for f in forms if f.Start_Circulating and f.Start_Circulating[-2:] == "01")
             sport_count = sum(1 for f in forms if f.Start_Circulating and f.Start_Circulating[-2:] != "01")
-            aug = stats["total_forms"]/stats["unique_users"]
+            aug = stats["total_forms"] / stats["unique_users"] if stats["unique_users"] else 0
             for j in range(1, 8):
                 col_letter = chr(64 + j)
                 cell = f"{col_letter}{num}"
