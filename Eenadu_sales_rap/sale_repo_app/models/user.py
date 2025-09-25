@@ -295,7 +295,8 @@ class UsersWizard(models.TransientModel):
 
 
     def download_xl_report(self):
-        for_Dates = str(self.start_date) if str(self.start_date) else "" + '  --  ' + str(self.end_date) if str(self.end_date) else ""
+        for_Dates = (str(self.start_date) if self.start_date else "") + " -- " + (str(self.end_date) if self.end_date else "")
+
 
         wb = Workbook()
         ws = wb.active
