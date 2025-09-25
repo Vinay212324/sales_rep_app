@@ -5,8 +5,12 @@ from odoo.exceptions import AccessDenied, ValidationError
 from odoo.fields import Many2one
 import base64
 from io import BytesIO
+from odoo.http import request
 from openpyxl import Workbook
 from openpyxl.styles import Alignment, Font
+
+from odoo.tools import round
+
 
 class Users(models.Model):
     _inherit = 'res.users'
@@ -283,45 +287,108 @@ class UsersWizard(models.TransientModel):
             'target': 'current',
         }
     # for xl report
+    from openpyxl import Workbook
+    from openpyxl.styles import Alignment, Font
+    from io import BytesIO
+    import base64
+
+
+
     def download_xl_report(self):
-        for_Dates = "From " + str(self.start_date)+' To '+  str(self.end_date)
+        for_Dates = str(self.start_date) if str(self.start_date) else "" + '  --  ' + str(self.end_date) if str(self.end_date) else ""
 
         wb = Workbook()
         ws = wb.active
         ws.title = "Staff Analysis"
+
+        # First row headings
         ws["A1"].value = "SN"
         ws["B1"].value = "UNIT NAME"
+
+        # Merge for date range heading
         ws.merge_cells("C1:G1")
         main_heading_cell = ws["C1"]
         main_heading_cell.value = for_Dates
+        main_heading_cell.alignment = Alignment(horizontal="center", vertical="center")
+        main_heading_cell.font = Font(bold=True, size=12)
+
+        # Merge for "PROMOTERES"
         ws.merge_cells("C2:G2")
         main_heading_cell = ws["C2"]
         main_heading_cell.value = "PROMOTERES"
+        main_heading_cell.alignment = Alignment(horizontal="center", vertical="center")
+        main_heading_cell.font = Font(bold=True, size=11)
+
+        # Sub-headings in row 3
+        ws["C3"].value = "MAN"
+        ws["D3"].value = "CPS"
+        ws["E3"].value = "SPOT"
+        ws["F3"].value = "1st"
+        ws["G3"].value = "AVG"
+
+        # Make headers bold + bigger + centered
+        header_cells = ["A1", "B1", "C3", "D3", "E3", "F3", "G3"]
+        for cell_ref in header_cells:
+            cell = ws[cell_ref]
+            cell.font = Font(bold=True, size=12)
+            cell.alignment = Alignment(horizontal="center", vertical="center")
+
+        # Set column widths
+        ws.column_dimensions["A"].width = 8
+        ws.column_dimensions["B"].width = 20
+        for col in ["C", "D", "E", "F", "G"]:
+            ws.column_dimensions[col].width = 12
+
+        # Center align ALL cells (headers + data)
+        for row in ws.iter_rows(min_row=1, max_row=ws.max_row,
+                                min_col=1, max_col=ws.max_column):
+            for cell in row:
+                cell.alignment = Alignment(horizontal="center", vertical="center")
+
+        user = user = request.env.user
+        if not user.exists():
+            return {"status": 404, "message": "User not found"}
+        unit_names = []
+        for i in user.unit_name_ids:
+            unit_names.append(i.name)
+
+        for i in range(1,len(unit_names)+1):
+            num = 3 + i
+            # inside your loop
+            stats = self.env['customer.form'].get_customer_stats(
+                start_date=self.start_date,
+                end_date=self.end_date,
+                unit_name=unit_names[i - 1]
+            )
+            forms = stats["forms"]  # actual recordset
+
+            first_count = sum(1 for f in forms if f.Start_Circulating and f.Start_Circulating[-2:] == "01")
+            sport_count = sum(1 for f in forms if f.Start_Circulating and f.Start_Circulating[-2:] != "01")
+            aug = stats["total_forms"]/stats["unique_users"]
+            for j in range(1, 8):
+                col_letter = chr(64 + j)
+                cell = f"{col_letter}{num}"
+                if j == 1:
+                    ws[cell].value = str(i)  # SN
+                elif j == 2:
+                    ws[cell].value = unit_names[i - 1]  # Unit Name
+                elif j == 3:
+                    ws[cell].value = stats["unique_users"]  # Unique Users
+                elif j == 4:
+                    ws[cell].value = stats["total_forms"]  # Total Forms
+                elif j == 5:
+                    ws[cell].value = sport_count
+                if j == 6:
+                    ws[cell].value = first_count
+                if j == 7:
+                    ws[cell].value = float(f"{float(aug):.2f}") if aug not in (None, "") else 0.0
 
 
 
-        # Merge cells for main heading (C1:D1 in your case)
 
-        # ws.merge_cells("C1:D1")
-        # main_heading_cell = ws["C1"]
-        # main_heading_cell.value = "main heading"
-        # main_heading_cell.alignment = Alignment(horizontal="center", vertical="center")
-        # main_heading_cell.font = Font(bold=True, size=14)
 
-        # Add sub-headings in row 2
-        ws["C3"].value = "Heading 1"
-        ws["D3"].value = "Heading 2"
-        ws["E3"].value = "Heading 1"
-        ws["F3"].value = "Heading 2"
-        ws["G3"].value = "Heading 2"
-        # ws["C3"].font = Font(bold=True)
-        # ws["D3"].font = Font(bold=True)
 
-        # # Adjust column width
-        # ws.column_dimensions["C"].width = 20
-        # ws.column_dimensions["D"].width = 20
-
-        # Save to memory
+                    # Save to memory
         file_stream = BytesIO()
         wb.save(file_stream)
         file_stream.seek(0)
@@ -331,11 +398,11 @@ class UsersWizard(models.TransientModel):
         self.write({
             'dummy_file': file_data,
             'dummy_file_name': "staff_analysis.xlsx"
-           })
+        })
 
         # Return download action
         return {
             'type': 'ir.actions.act_url',
             'url': f"/web/content/?model=users.wizard&id={self.id}&field=dummy_file&filename_field=dummy_file_name&download=true",
-            'target': 'new',  # ensures download in new tab, not replacing current one
+            'target': 'new',  # ensures download in new tab
         }

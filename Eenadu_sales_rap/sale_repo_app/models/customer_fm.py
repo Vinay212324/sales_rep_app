@@ -182,3 +182,44 @@ class CustomerForm(models.Model):
             res['longitude'] = lon
             res['location_url'] = f"https://www.google.com/maps?q={lat},{lon}"
         return res
+
+
+    @api.model
+    def get_customer_stats(self, start_date=False, end_date=False, unit_name=False):
+        """
+        Returns a dictionary containing:
+            - total_forms: total number of customer.form records
+            - unique_users: number of unique agent_login values
+            - forms: the actual recordset (to use in another model/report)
+        Filtered by date range and/or unit.
+        """
+
+        domain = []
+
+        # Date filter logic
+        if start_date and end_date:
+            domain += [('date', '>=', start_date), ('date', '<=', end_date)]
+        elif start_date:  # only start_date → single day
+            domain.append(('date', '=', start_date))
+        elif end_date:  # only end_date → single day
+            domain.append(('date', '=', end_date))
+
+        # Unit filter
+        if unit_name:
+            domain.append(('unit_name', '=', unit_name))
+
+        # Search records
+        forms = self.search(domain)
+
+        # Count total forms
+        total_forms = len(forms)
+
+        # Count unique agent_logins
+        unique_users = len(set(forms.mapped('agent_login')))
+
+        # Return as dictionary including recordset for use in other models
+        return {
+            "total_forms": total_forms,
+            "unique_users": unique_users,
+            "forms": forms,  # the recordset
+        }

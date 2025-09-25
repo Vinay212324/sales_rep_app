@@ -155,7 +155,6 @@ class localApi(http.Controller):
     #for re head
     @http.route('/get_units_details', type='json', auth='user',methods=['POST'])
     def get_units_details(self):
-        print("vin212312111")
         user = user = request.env.user
         if not user.exists():
             return {"status": 404, "message": "User not found"}
