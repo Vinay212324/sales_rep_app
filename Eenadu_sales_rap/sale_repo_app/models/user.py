@@ -3,6 +3,8 @@ from datetime import datetime, timedelta
 import secrets
 from odoo.exceptions import AccessDenied, ValidationError
 from odoo.fields import Many2one
+from openpyxl.utils import get_column_letter
+from openpyxl.styles import Alignment, Font
 import base64
 from io import BytesIO
 from odoo.http import request
@@ -247,6 +249,7 @@ class UsersWizard(models.TransientModel):
     end_date = fields.Date(string="End Date")
     dummy_file = fields.Binary("Excel File", readonly=True, attachment=True)
     dummy_file_name = fields.Char("File Name")
+    unit_selection = fields.Selection([("HYD","HYD"),("warangal","warangal"),("All","All UNITS")])
 
 
     def action_create_user(self):
@@ -406,4 +409,179 @@ class UsersWizard(models.TransientModel):
             'type': 'ir.actions.act_url',
             'url': f"/web/content/?model=users.wizard&id={self.id}&field=dummy_file&filename_field=dummy_file_name&download=true",
             'target': 'new',  # ensures download in new tab
+        }
+
+    def _get_daily_attendance(self, start_date, end_date, unit_name=None):
+        """
+        Returns a dict:
+        {
+            user_id: {
+                date: {'attendance': 'P/Logged in' or 'A/Not Logged', 'copies': int},
+                'total': int,
+                'total_copies': int,
+                'forms_count': int
+            }
+        }
+        """
+        users_domain = [("role", "=", "agent")]
+        if unit_name and unit_name != "ALL UNITS":
+            users_domain.append(("unit_name", "=", unit_name))
+
+        users = self.env['res.users'].search(users_domain)
+        sessions = self.env['work.session'].search([
+            ('start_time', '>=', start_date),
+            ('end_time', '<=', end_date),
+        ])
+        forms = self.env['customer.form'].search([  # <-- replace with your actual model for forms/copies
+            ('date', '>=', start_date),
+            ('date', '<=', end_date),
+        ])
+
+        result = {}
+        date_range = [start_date + timedelta(days=i) for i in range((end_date - start_date).days + 1)]
+
+        for user in users:
+            result[user.id] = {}
+            total_attendance = 0
+            total_copies = 0
+
+            for d in date_range:
+                # Attendance check
+                day_sessions = sessions.filtered(
+                    lambda s: s.user_id == user and s.start_time.date() == d
+                )
+                attendance_val = "P/Logged in" if day_sessions else "A/Not Logged"
+                if day_sessions:
+                    total_attendance += 1
+
+                # Copies count (forms filled that day)
+                day_forms = forms.filtered(lambda f: f.agent_login == user.login and f.date == d)
+                copies_val = len(day_forms)  # or f.copies if you have quantity field
+                total_copies += copies_val
+
+                result[user.id][d] = {
+                    "attendance": attendance_val,
+                    "copies": copies_val,
+                }
+
+            result[user.id]['total'] = total_attendance
+            result[user.id]['total_copies'] = total_copies
+            result[user.id]['forms_count'] = total_copies  # keep same for clarity
+
+        return result
+
+    def download_attendance_report(self):
+        start_date = self.start_date
+        end_date = self.end_date
+        unit_name = self.unit_selection  # assuming you store Unit Selection here
+
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Promoters Attendance"
+
+        # --- Header row ---
+        ws["A1"].value = "S.No"
+        ws["B1"].value = "Name"
+        ws.column_dimensions["B"].width = 18
+
+        date_range = [start_date + timedelta(days=i)
+                      for i in range((end_date - start_date).days + 1)]
+
+        col = 3  # start column for dates
+        for d in date_range:
+            left_col = col
+            right_col = col + 1
+
+            # Merge date cells
+            ws.merge_cells(start_row=1, start_column=left_col, end_row=1, end_column=right_col)
+
+            # Date header
+            top_cell = ws.cell(row=1, column=left_col)
+            top_cell.value = d.strftime("%d-%m-%Y")
+            top_cell.alignment = Alignment(horizontal="center", vertical="center")
+            top_cell.font = Font(bold=True, size=10)
+
+            # Sub-headers
+            in_cell = ws.cell(row=2, column=left_col)
+            out_cell = ws.cell(row=2, column=right_col)
+            in_cell.value = "Attendance"
+            out_cell.value = "Copies"
+            for c in (in_cell, out_cell):
+                c.alignment = Alignment(horizontal="center", vertical="center")
+                c.font = Font(bold=True, size=9)
+
+            # Column widths
+            ws.column_dimensions[get_column_letter(left_col)].width = 12
+            ws.column_dimensions[get_column_letter(right_col)].width = 12
+
+            col += 2
+
+        # --- Totals ---
+        ws.merge_cells(start_row=1, start_column=col, end_row=1, end_column=col + 1)
+        ws.cell(row=1, column=col).value = "Total Count"
+        ws.cell(row=1, column=col).alignment = Alignment(horizontal="center", vertical="center")
+        ws.cell(row=1, column=col).font = Font(bold=True, size=10)
+        ws.column_dimensions[get_column_letter(col)].width = 16
+        ws.column_dimensions[get_column_letter(col + 1)].width = 16
+
+        in_cell = ws.cell(row=2, column=col)
+        out_cell = ws.cell(row=2, column=col + 1)
+        in_cell.value = "Total Attendance"
+        out_cell.value = "Total Copies"
+
+        # --- UNIT ---
+        unit_col = col + 2
+        ws.cell(row=1, column=unit_col).value = "UNIT"
+        ws.cell(row=1, column=unit_col).alignment = Alignment(horizontal="center", vertical="center")
+        ws.column_dimensions[get_column_letter(unit_col)].width = 14
+
+        # --- Forms Count ---
+        forms_col = unit_col + 1
+        ws.cell(row=1, column=forms_col).value = "Forms Count"
+        ws.cell(row=1, column=forms_col).alignment = Alignment(horizontal="center", vertical="center")
+        ws.column_dimensions[get_column_letter(forms_col)].width = 16
+
+        for c in (in_cell, out_cell):
+            c.alignment = Alignment(horizontal="center", vertical="center")
+            c.font = Font(bold=True, size=9)
+
+        # --- Attendance data ---
+        data = self._get_daily_attendance(start_date, end_date, unit_name)
+        users_domain = [("role", "=", "agent")]
+        if unit_name and unit_name != "ALL UNITS":
+            users_domain.append(("unit_name", "=", unit_name))
+        users = self.env['res.users'].search(users_domain)
+
+        row = 3
+        for idx, user in enumerate(users, start=1):
+            ws.cell(row=row, column=1).value = idx
+            ws.cell(row=row, column=2).value = user.name
+
+            col_ptr = 3
+            for d in date_range:
+                ws.cell(row=row, column=col_ptr).value = data[user.id][d]["attendance"]  # Attendance
+                ws.cell(row=row, column=col_ptr + 1).value = data[user.id][d]["copies"]  # Copies
+                col_ptr += 2
+
+            ws.cell(row=row, column=col_ptr).value = data[user.id]['total']
+            ws.cell(row=row, column=col_ptr + 1).value = data[user.id]['total_copies']
+            ws.cell(row=row, column=unit_col).value = user.unit_name or ""
+            ws.cell(row=row, column=forms_col).value = data[user.id]['forms_count']
+
+            row += 1
+
+        # --- Save file ---
+        file_stream = BytesIO()
+        wb.save(file_stream)
+        file_stream.seek(0)
+        file_data = base64.b64encode(file_stream.read())
+
+        self.write({
+            'dummy_file': file_data,
+            'dummy_file_name': "attendance_report.xlsx"
+        })
+        return {
+            'type': 'ir.actions.act_url',
+            'url': f"/web/content/?model=users.wizard&id={self.id}&field=dummy_file&filename_field=dummy_file_name&download=true",
+            'target': 'new',
         }

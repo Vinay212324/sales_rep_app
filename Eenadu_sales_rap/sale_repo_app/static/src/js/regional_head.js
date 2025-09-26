@@ -137,6 +137,9 @@ export class RegionalHeadDashboard extends Component {
     excel_report() {
         this.actionService.doAction("sale_repo_app.action_users_wizard_excel");
     }
+    attendance_excel_report() {
+        this.actionService.doAction("sale_repo_app.action_attendance_report_users_wizard_excel");
+    }
 
 
     goBack() {

@@ -53,10 +53,43 @@
                 </group>
 
                 <footer>
-                    <button string="Create User"
-                            type="object"
-                            name="action_create_user"
-                            class="btn-primary"/>
+<!--                    <button string="Create User"-->
+<!--                            type="object"-->
+<!--                            name="action_create_user"-->
+<!--                            class="btn-primary"/>-->
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+
+    <record id="view_users_attendance_wizard_form_excel" model="ir.ui.view">
+        <field name="name">users.wizard.form</field>
+        <field name="model">users.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Create User Wizard">
+                <group>
+                    <group>
+                    <field name="start_date"/>
+                    <field name="end_date"/>
+                    <field name="unit_selection"/>
+<!--                    <field name="dummy_file"/>-->
+
+                    </group>
+                    <group>
+                     <button string="Download Attendance Report" type="object"
+                            name="download_attendance_report"
+                            class="btn-secondary" />
+                    </group>
+
+                </group>
+
+                <footer>
+<!--                    <button string="Create User"-->
+<!--                            type="object"-->
+<!--                            name="action_create_user"-->
+<!--                            class="btn-primary"/>-->
                     <button string="Cancel" class="btn-secondary" special="cancel"/>
                 </footer>
             </form>
@@ -78,6 +111,15 @@
         <field name="res_model">users.wizard</field>
         <field name="view_mode">form</field>
         <field name="view_id" ref="view_users_wizard_form_excel"/>
+        <field name="target">new</field>
+    </record>
+
+
+    <record id="action_attendance_report_users_wizard_excel" model="ir.actions.act_window">
+        <field name="name">Excel Report</field>
+        <field name="res_model">users.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_users_attendance_wizard_form_excel"/>
         <field name="target">new</field>
     </record>
 
