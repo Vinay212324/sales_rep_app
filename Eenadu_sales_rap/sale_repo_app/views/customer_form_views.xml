@@ -123,9 +123,58 @@
                 <field name="agent_name"/>
                 <field name="unit_name"/>
                 <field name="date"/>
+                <field name="city"/>
+                <field name="agent_login"/>
+                <field name="family_head_name"/>
+                <field name="Agency"/>
+
+                <!-- Today Filter -->
                 <filter name="one_day_filter"
                         string="Today Customer Forms"
                         domain="[('date', '=', context_today())]"/>
+
+                <!-- Unit Filter -->
+                <filter name="unit_filter"
+                        string="Unit"
+                        domain="[]"
+                        context="{'group_by':'unit_name'}"/>
+
+                <!-- Date Group -->
+                <filter name="date_group"
+                        string="Date"
+                        domain="[]"
+                        context="{'group_by':'date'}"/>
+
+                <!-- City Filter -->
+                <filter name="city_filter"
+                        string="City"
+                        domain="[]"
+                        context="{'group_by':'city'}"/>
+
+                <!-- Agent Login Filter -->
+                <filter name="agent_login_filter"
+                        string="Agent Login"
+                        domain="[]"
+                        context="{'group_by':'agent_login'}"/>
+
+                <!-- Family Head Filter -->
+<!--                <filter name="family_head_filter"-->
+<!--                        string="Family Head"-->
+<!--                        domain="[]"-->
+<!--                        context="{'group_by':'family_head_name'}"/>-->
+
+                <!-- Agency Filter -->
+                <filter name="agency_filter"
+                        string="Agency"
+                        domain="[]"
+                        context="{'group_by':'Agency'}"/>
+
+
+                <!-- Spot / First Filter -->
+<!--                <filter name="spot_first_filter"-->
+<!--                        string="Spot / First"-->
+<!--                        domain="[]"-->
+<!--                        context="{'group_by':'spot_or_first'}"/>-->
             </search>
         </field>
     </record>

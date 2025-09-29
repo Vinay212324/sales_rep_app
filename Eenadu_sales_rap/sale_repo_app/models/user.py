@@ -6,6 +6,7 @@ from odoo.fields import Many2one
 from openpyxl.utils import get_column_letter
 from openpyxl.styles import Alignment, Font
 import base64
+from odoo.exceptions import UserError
 from io import BytesIO
 from odoo.http import request
 from openpyxl import Workbook
@@ -477,7 +478,8 @@ class UsersWizard(models.TransientModel):
         start_date = self.start_date
         end_date = self.end_date
         unit_name = self.unit_selection  # assuming you store Unit Selection here
-
+        if not start_date or not end_date or not unit_name:
+            raise UserError("PLEASE FILL ALL FIELDS")
         wb = Workbook()
         ws = wb.active
         ws.title = "Promoters Attendance"
