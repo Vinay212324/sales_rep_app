@@ -29,6 +29,7 @@
                 <div class="button_st pt-3 btn d-flex btn-light btn-lg border m-3 p-2" t-on-click="user_unactive">
                   <p>Staff Waiting for Approval</p>
                 </div>
+
             </div>
           </div>
         </div>
@@ -59,7 +60,10 @@
                   <p>Staff Waiting for Approval</p>
                 </div>
             </div>
+
           </div>
+            <button t-on-click="excel_report" style="margin:5px;margin-left:20px; cursor:pointer; display: inline-block; padding: 8px 12px; white-space: nowrap; height:36px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);">Report of Customer Forms in EXCEL Format</button>
+            <button t-on-click="attendance_excel_report" style="margin:5px;margin-left:20px; cursor:pointer; display: inline-block; padding: 8px 12px; white-space: nowrap; height:36px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);">ATTENDANCE</button>
         </div>
 
         <!-- Staff list view -->

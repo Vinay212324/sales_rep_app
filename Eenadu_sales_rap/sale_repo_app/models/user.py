@@ -350,12 +350,15 @@ class UsersWizard(models.TransientModel):
                 cell.alignment = Alignment(horizontal="center", vertical="center")
 
         user = user = request.env.user
-        if not user.exists():
-            return {"status": 404, "message": "User not found"}
         unit_names = []
-        for i in user.unit_name_ids:
-            unit_names.append(i.name)
+        if user.role in ["region_head","circulation_head"]:
+            if not user.exists():
+                return {"status": 404, "message": "User not found"}
 
+            for i in user.unit_name_ids:
+                unit_names.append(i.name)
+        else:
+            unit_names.append(user.unit_name)
         for i in range(1,len(unit_names)+1):
             num = 3 + i
             # inside your loop

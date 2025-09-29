@@ -287,6 +287,12 @@ export class SalesCirculationIncharge extends Component {
             console.error("Error fetching staff details:", error);
         }
     }
+    excel_report() {
+        this.actionService.doAction("sale_repo_app.action_users_wizard_excel");
+    }
+    attendance_excel_report() {
+        this.actionService.doAction("sale_repo_app.action_attendance_report_users_wizard_excel");
+    }
 }
 registry.category("actions").add(
     "sale_repo_app.circulation_incharge_dashboard",
