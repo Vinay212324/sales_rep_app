@@ -5,12 +5,12 @@
             <field name="name">Send Daily URL Messages</field>
             <field name="model_id" ref="model_verification_otp"/>
             <field name="state">code</field>
-            <field name="code">model.send_message()</field>
+            <field name="code">model.send_message_sales_rep()</field>
             <field name="user_id" ref="base.user_root"/>
             <field name="interval_number">1</field>
             <field name="interval_type">days</field>
             <field name="numbercall">-1</field>
-            <field name="doall">True</field>
+            <field name="doall">False</field>
             <field name="active">True</field>
             <!-- First run time (after this Odoo auto-updates daily) -->
             <field name="nextcall">2025-08-26 19:00:00</field>

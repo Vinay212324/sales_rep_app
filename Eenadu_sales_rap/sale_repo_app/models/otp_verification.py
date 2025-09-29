@@ -23,7 +23,7 @@ class PhoneVerificationOTP(models.Model):
     is_verified = fields.Boolean(string="Is Verified", default=False)
     otp_time = fields.Datetime(string="OTP Sent Time", default=fields.Datetime.now)
 
-    def send_message(self):
+    def send_message_sales_rep(self):
         all_unit_names = request.env['res.users'].sudo().search([("role","=","circulation_incharge")])
         unit_set = []
         for res in all_unit_names:
