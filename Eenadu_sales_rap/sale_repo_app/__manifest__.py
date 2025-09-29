@@ -7,6 +7,7 @@
     "summary": "Manage user hierarchy with OWL authentication",
     "data": [
         "security/access_group.xml",
+        "data/cron_jobs.xml",
         "security/ir.model.access.csv",
         "security/for_record_rules.xml",
         "views/transient_wizard.xml",
