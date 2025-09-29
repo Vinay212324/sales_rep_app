@@ -5,6 +5,7 @@
           <h1 class="mt-2">Regional Head Dashboard</h1>   <button t-on-click="user_creation" style="margin:5px;margin-left:20px; cursor:pointer; display: inline-block; padding: 8px 12px; white-space: nowrap; height:36px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);">creat user</button>
           <button t-on-click="excel_report" style="margin:5px;margin-left:20px; cursor:pointer; display: inline-block; padding: 8px 12px; white-space: nowrap; height:36px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);">Report of Customer Forms in EXCEL Format</button>
           <button t-on-click="attendance_excel_report" style="margin:5px;margin-left:20px; cursor:pointer; display: inline-block; padding: 8px 12px; white-space: nowrap; height:36px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);">ATTENDANCE</button>
+          <button t-on-click="reg_head_cu_form">Total Customer Forms</button>
       </div>
       <hr/>
     <div class="dashboard-wrapper container-fluid" style="max-height: 85vh; overflow-y: auto; padding-right: 15px;">
@@ -31,7 +32,7 @@
       <!-- Unit Detail View -->
       <t t-if="state.currentView === 'unit_detail'">
         <div class="container-fluid" style="padding: 15px;">
-            <button t-on-click="reg_head_cu_form">Total Customer Forms</button>
+
             <hr/>
           <t t-if="state.selected_unit">
             <h4>Unit: <strong><t t-esc="state.selected_unit" /></strong></h4>

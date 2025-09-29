@@ -293,6 +293,9 @@ export class SalesCirculationIncharge extends Component {
     attendance_excel_report() {
         this.actionService.doAction("sale_repo_app.action_attendance_report_users_wizard_excel");
     }
+    reg_head_cu_form() {
+        this.actionService.doAction("sale_repo_app.action_customer_form");
+    }
 }
 registry.category("actions").add(
     "sale_repo_app.circulation_incharge_dashboard",
