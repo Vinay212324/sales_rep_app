@@ -19,18 +19,22 @@ export class SalesCirculationIncharge extends Component {
         this.actionService = useService("action");
         this.rpc = useService("rpc");
 
+        // Load persisted state from localStorage
+        const savedState = localStorage.getItem('circulation_dashboard_state');
+        const persisted = savedState ? JSON.parse(savedState) : {};
+
         this.state = useState({
-            name: "",
-            user_id: "",
-            login: "",
-            status: "active",
-            number_of_resources: false,
-            attend_customer: false,
-            view_all_customer_forms: false,
-            approved_staff: false,
-            staff_waiting_for_approval: false,
-            searchTerm: "",
-            searchAge: "",
+            name: persisted.name || "",
+            user_id: persisted.user_id || "",
+            login: persisted.login || "",
+            status: persisted.status || "active",
+            number_of_resources: persisted.number_of_resources || false,
+            attend_customer: persisted.attend_customer || false,
+            view_all_customer_forms: persisted.view_all_customer_forms || false,
+            approved_staff: persisted.approved_staff || false,
+            staff_waiting_for_approval: persisted.staff_waiting_for_approval || false,
+            searchTerm: persisted.searchTerm || "",
+            searchAge: persisted.searchAge || "",
             selectedStaff: null,
             staffList: [],
             agenciesList: [],
@@ -70,6 +74,23 @@ export class SalesCirculationIncharge extends Component {
         });
     }
 
+    saveState() {
+        const stateToSave = {
+            name: this.state.name,
+            user_id: this.state.user_id,
+            login: this.state.login,
+            status: this.state.status,
+            number_of_resources: this.state.number_of_resources,
+            attend_customer: this.state.attend_customer,
+            view_all_customer_forms: this.state.view_all_customer_forms,
+            approved_staff: this.state.approved_staff,
+            staff_waiting_for_approval: this.state.staff_waiting_for_approval,
+            searchTerm: this.state.searchTerm,
+            searchAge: this.state.searchAge,
+        };
+        localStorage.setItem('circulation_dashboard_state', JSON.stringify(stateToSave));
+    }
+
     sendMessage() {
         sharedStore.message = "Hello from Circulation Incharge!";
         sharedStore.triggerFunction = !sharedStore.triggerFunction;
@@ -82,6 +103,10 @@ export class SalesCirculationIncharge extends Component {
         this.state.approved_staff = false;
         this.state.staff_waiting_for_approval = false;
         this.state.status = "active";
+        this.state.name = "";
+        this.state.user_id = "";
+        this.state.login = "";
+        this.saveState();
     }
     filteredAgenciesList_open() {
         this.state.number_of_resources = false;
@@ -90,6 +115,10 @@ export class SalesCirculationIncharge extends Component {
         this.state.approved_staff = false;
         this.state.staff_waiting_for_approval = false;
         this.state.status = "active";
+        this.state.name = "";
+        this.state.user_id = "";
+        this.state.login = "";
+        this.saveState();
     }
     openStaffList_only() {
         this.state.number_of_resources = true;
@@ -98,6 +127,10 @@ export class SalesCirculationIncharge extends Component {
         this.state.approved_staff = true;
         this.state.staff_waiting_for_approval = false;
         this.state.status = "active";
+        this.state.name = "";
+        this.state.user_id = "";
+        this.state.login = "";
+        this.saveState();
     }
     user_unactive() {
         this.state.number_of_resources = true;
@@ -108,6 +141,10 @@ export class SalesCirculationIncharge extends Component {
         this.state.status = "un_activ";
         this.state.searchTerm = ""; // Clear search term to show all unapproved staff
         this.state.error = null; // Reset error state
+        this.state.name = "";
+        this.state.user_id = "";
+        this.state.login = "";
+        this.saveState();
     }
 
     office_staff_creation() {
@@ -163,8 +200,6 @@ export class SalesCirculationIncharge extends Component {
 
     async today_attendance() {
         try {
-            this.state.attend_customer = true;
-            this.state.number_of_resources = true;
             const domain = [["user_id", "=", this.state.user_id]];
             const context = { default_user_id: this.state.user_id };
             await this.actionService.doAction({
@@ -187,8 +222,6 @@ export class SalesCirculationIncharge extends Component {
 
     async totalCustomerForms() {
         try {
-            this.state.attend_customer = true;
-            this.state.number_of_resources = true;
             const domain = [["agent_login", "=", this.state.login]];
             const context = { default_user_id: this.state.user_id };
             await this.actionService.doAction({
@@ -216,10 +249,12 @@ export class SalesCirculationIncharge extends Component {
             this.state.view_all_customer_forms = false;
             this.state.approved_staff = false;
             this.state.staff_waiting_for_approval = false;
+            this.state.status = "active";
             this.state.login = login;
             this.state.name = name;
             this.state.user_id = user_id;
             console.log("Loading details for user_id:", user_id);
+            this.saveState();
         } catch (error) {
             console.error("Error fetching staff details:", error);
         }
@@ -232,6 +267,7 @@ export class SalesCirculationIncharge extends Component {
             this.state.view_all_customer_forms = true;
             this.state.approved_staff = false;
             this.state.staff_waiting_for_approval = false;
+            this.state.status = "active";
             this.state.login = phone;
             this.state.name = name;
             this.state.user_id = id;
@@ -252,8 +288,8 @@ export class SalesCirculationIncharge extends Component {
                 domain: domain,
                 context: context,
             });
-            this.state.attend_customer = true;
-            this.state.number_of_resources = true;
+            // Removed conflicting state changes; rely on persistence
+            this.saveState();
         } catch (error) {
             console.error("Error in Open_agencies_List:", error);
             this.env.services.notification.add("Failed to load customer forms: " + (error.message || "Unknown error"), {
@@ -302,6 +338,7 @@ export class SalesCirculationIncharge extends Component {
             });
         } finally {
             this.state.loading = false;
+            this.saveState();
         }
     }
     excel_report() {

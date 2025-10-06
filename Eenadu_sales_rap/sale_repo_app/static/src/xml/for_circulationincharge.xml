@@ -50,13 +50,15 @@
           <button t-on-click="excel_report"
                   class="btn btn-outline-primary"
                   style="flex: 1 1 calc(25% - 12px); min-width: 180px; min-height: 100px; display: flex; align-items: center; justify-content: center; text-align: center;">
-            Report of Customer Forms (Excel)
+            <i class="fa fa-file-excel-o me-2" style="font-size: 1.5rem;"></i>
+            Customer Forms Filled Work Report
           </button>
 
           <!-- 7 -->
           <button t-on-click="attendance_excel_report"
                   class="btn btn-outline-secondary"
                   style="flex: 1 1 calc(25% - 12px); min-width: 180px; min-height: 100px; display: flex; align-items: center; justify-content: center; text-align: center;">
+            <i class="fa fa-calendar me-2" style="font-size: 1.5rem;"></i>
             Attendance Report
           </button>
 
@@ -76,7 +78,7 @@
           </h4>
 
           <div class="mb-3" style="max-width: 300px;">
-            <input type="text" class="form-control" placeholder="Search staff..." t-model="state.searchTerm"/>
+            <input type="text" class="form-control" placeholder="Search staff..." t-model="state.searchTerm" t-on-input="saveState"/>
           </div>
 
           <div t-if="state.loading" class="text-muted">Loading staff...</div>
@@ -91,7 +93,7 @@
                 <small>
                   Unit: <t t-esc="staff.unit_name"/><br/>
                   Email: <t t-esc="staff.email"/>, Phone: <t t-esc="staff.phone"/><br/>
-<!--                  Status: <t t-esc="staff.status"/>-->
+                  Status: <t t-esc="staff.status"/>
                 </small>
                 <t t-if="staff.status === 'un_activ'">
                   <button t-on-click="(ev) => { ev.stopPropagation(); this.loadStaffUnactive(staff.login, staff.id, staff.name); }"
@@ -110,7 +112,7 @@
           <h4 class="mb-3">Agencies</h4>
 
           <div class="mb-3" style="max-width: 300px;">
-            <input type="text" class="form-control" placeholder="Search agency..." t-model="state.searchAge"/>
+            <input type="text" class="form-control" placeholder="Search agency..." t-model="state.searchAge" t-on-input="saveState"/>
           </div>
 
           <div t-if="state.loading" class="text-muted">Loading agencies...</div>
@@ -133,18 +135,21 @@
 
         </div>
 
-        <!-- 🧾 Attendance / Total Customer Forms -->
-        <div t-if="!state.number_of_resources and state.status==='active' and state.attend_customer">
-          <div t-on-click="today_attendance"
-               class="btn btn-light btn-lg border me-2"
-               style="display: inline-flex; align-items: center; justify-content: center; padding: 0.5rem 1rem;">
-            <div>Staff Attendance</div>
-          </div>
+        <!-- 🧾 Staff Details Section: Attendance / Total Customer Forms -->
+        <div t-if="!state.number_of_resources and state.status==='active' and state.attend_customer" class="mb-4">
+          <h4 class="mb-3">Staff Details for <t t-esc="state.name"/></h4>
+          <div class="d-flex gap-3">
+            <div t-on-click="today_attendance"
+                 class="btn btn-light btn-lg border"
+                 style="display: inline-flex; align-items: center; justify-content: center; padding: 0.5rem 1rem; flex: 1;">
+              <div>Staff Attendance</div>
+            </div>
 
-          <div t-on-click="totalCustomerForms"
-               class="btn btn-light btn-lg border"
-               style="display: inline-flex; align-items: center; justify-content: center; padding: 0.5rem 1rem;">
-            <div>Total Customer Forms</div>
+            <div t-on-click="totalCustomerForms"
+                 class="btn btn-light btn-lg border"
+                 style="display: inline-flex; align-items: center; justify-content: center; padding: 0.5rem 1rem; flex: 1;">
+              <div>Total Customer Forms</div>
+            </div>
           </div>
         </div>
 
