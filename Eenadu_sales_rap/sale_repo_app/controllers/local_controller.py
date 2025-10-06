@@ -12,11 +12,16 @@ class localApi(http.Controller):
             user = request.env.user
             user_id = user.id
             unit_name = user.unit_name
-            users = request.env['res.users'].sudo().search([('unit_name', '=', unit_name),('role','=','agent'),('status','=','active')])
+            users = request.env['res.users'].sudo().search([
+                ('unit_name', '=', unit_name),
+                ('role', '=', 'agent'),
+                ('status', 'in', ['active', 'un_activ'])
+            ])
+
             user_list = []
             agencies = request.env['pin.location'].sudo().search([('unit_name', '=', user.unit_name)])
             ags = []
-            count = request.env['pin.location'].sudo().search_count([('unit_name', '=', user.unit_name)])
+            count = request.env['res.users'].sudo().search_count([('unit_name', '=', user.unit_name),('role','=','agent'),('status','=','active')])
             cu_count = request.env['customer.form'].sudo().search_count([('unit_name', '=', user.unit_name)])
             for agency in agencies:
                 ags.append({
@@ -44,7 +49,7 @@ class localApi(http.Controller):
                     'status': user.status,
                 })
 
-            return {'status': 200, 'users': user_list,'count':count,'cu_count': cu_count, 'agencies':ags}
+            return {'status': 200, 'users': user_list,'count':count,'cu_count': cu_count, 'agencies':ags, 'unit_name': unit_name}
 
         except Exception as e:
             return {'error': 'Internal Server Error', 'message': str(e), 'code': 500}
@@ -73,9 +78,9 @@ class localApi(http.Controller):
             'status': params.get("status"),
         })
         if user.status == params.get("status"):
-            return {"success": "True", "user_id": user.id, "code": "200"}
+            return {"success": True, "user_id": user.id, "code": "200"}
         else:
-            return {"success": "False", "code": "403"}
+            return {"success": False, "code": "403"}
 
     @http.route('/create_staff', type='json', auth='user', methods=['POST'], csrf=False, cors="*")
     def create_staff(self, **kwargs):
@@ -246,4 +251,3 @@ class localApi(http.Controller):
                 })
 
         return user_names
-

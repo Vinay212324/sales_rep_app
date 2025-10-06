@@ -9,6 +9,7 @@ import base64
 from odoo.exceptions import UserError
 from io import BytesIO
 from odoo.http import request
+import re
 from openpyxl import Workbook
 from openpyxl.styles import Alignment, Font
 
@@ -70,6 +71,40 @@ class Users(models.Model):
         readonly=False,  # make it editable
         inverse="_inverse_created_by"
     )
+
+    @api.constrains('aadhar_number')
+    def _check_aadhar_number(self):
+        for user in self:
+            if user.aadhar_number and not re.fullmatch(r'\d{12}', user.aadhar_number):
+                raise ValidationError(_("Aadhar number must be exactly 12 digits and numeric only."))
+
+    @api.constrains('phone')
+    def _check_phone_number(self):
+        for user in self:
+            if user.phone and not re.fullmatch(r'\d{10}', user.phone):
+                raise ValidationError(_("Phone number must be exactly 10 digits and numeric only."))
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            creating_user = self.env.user
+
+            # 🛡️ Ensure password is either a string or not set
+            password = vals.get('password')
+            if isinstance(password, bool):  # e.g., True/False - INVALID
+                raise ValidationError(_("Invalid password value. Must be a string."))
+
+            # Auto-assign unit_name from creator
+            if creating_user.unit_name and not vals.get('unit_name'):
+                vals['unit_name'] = creating_user.unit_name
+
+        users = super().create(vals_list)
+
+        # Assign role-based groups
+        for user in users:
+            user._update_user_group_by_role()
+
+        return users
 
     def _inverse_created_by(self):
         for rec in self:
@@ -252,6 +287,11 @@ class UsersWizard(models.TransientModel):
     dummy_file_name = fields.Char("File Name")
     unit_selection = fields.Selection([("HYD","HYD"),("warangal","warangal"),("All","All UNITS")])
 
+    @api.constrains('aadhar_number')
+    def _check_aadhar_number(self):
+        for user in self:
+            if user.aadhar_number and not re.fullmatch(r'\d{12}', user.aadhar_number):
+                raise ValidationError("Aadhar number must be exactly 12 digits and numeric only.")
 
     def action_create_user(self):
         self.ensure_one()

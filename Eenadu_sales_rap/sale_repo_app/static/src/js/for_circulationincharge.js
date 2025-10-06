@@ -38,22 +38,32 @@ export class SalesCirculationIncharge extends Component {
             error: null,
             count:"",
             cu_count:"",
+            unit_name: "",
         });
 
         onWillStart(async () => {
             try {
+                this.state.loading = true;
                 const res = await this.rpc("/get_created_staff", {});
-                if (res && res.status === 200 && res.users) {
-                    this.state.staffList = res.users;
+                if (res && res.status === 200) {
+                    this.state.staffList = res.users || [];
+                    this.state.agenciesList = res.agencies || [];
+                    this.state.count = res.count || 0;
+                    this.state.cu_count = res.cu_count || 0;
+                    this.state.unit_name = res.unit_name || "";
+                } else {
+                    this.state.error = res.error || "Failed to load staff data.";
+                    this.env.services.notification.add(this.state.error, {
+                        type: "danger",
+                        title: "Error",
+                    });
                 }
-                if (res && res.agencies) {
-                    this.state.agenciesList = res.agencies;
-                }
-                this.state.count = res.count || 0;
-                this.state.cu_count = res.cu_count || 0;
-
             } catch (error) {
-                this.state.error = error.message || "RPC Error";
+                this.state.error = error.message || "Failed to load staff data.";
+                this.env.services.notification.add(this.state.error, {
+                    type: "danger",
+                    title: "Error",
+                });
             } finally {
                 this.state.loading = false;
             }
@@ -96,6 +106,8 @@ export class SalesCirculationIncharge extends Component {
         this.state.approved_staff = false;
         this.state.staff_waiting_for_approval = true;
         this.state.status = "un_activ";
+        this.state.searchTerm = ""; // Clear search term to show all unapproved staff
+        this.state.error = null; // Reset error state
     }
 
     office_staff_creation() {
@@ -104,10 +116,11 @@ export class SalesCirculationIncharge extends Component {
 
     get filteredStaffList() {
         const term = (this.state.searchTerm || "").trim().toLowerCase();
+        let filtered = this.state.staffList.filter(staff => staff.status === this.state.status);
         if (!term) {
-            return this.state.staffList;
+            return filtered;
         }
-        return this.state.staffList.filter((staff) => {
+        return filtered.filter((staff) => {
             const name = (staff.name ?? "").toString().toLowerCase();
             const email = (staff.email ?? "").toString().toLowerCase();
             const unit = (staff.unit_name ?? "").toString().toLowerCase();
@@ -252,39 +265,43 @@ export class SalesCirculationIncharge extends Component {
 
     async loadStaffUnactive(login, user_id, name) {
         try {
-            this.state.number_of_resources = true;
-            this.state.attend_customer = false;
-            this.state.view_all_customer_forms = false;
-            this.state.approved_staff = false;
-            this.state.staff_waiting_for_approval = true;
-            this.state.login = login;
-            this.state.name = name;
-            this.state.user_id = user_id;
-            try {
-                const res = await this.rpc("/local/update/status", { "user_id": user_id, "status": "active" });
-                if (res && res.success === "True") {
-                    console.log("Staff activated successfully:", res);
+            this.state.loading = true;
+            this.state.error = null;
+
+            // Call the status update endpoint
+            const res = await this.rpc("/local/update/status", { user_id: user_id, status: "active" });
+            if (res && res.success === true) {
+                // Show success notification
+                this.env.services.notification.add("Staff approved successfully!", {
+                    type: "success",
+                    title: "Success",
+                });
+
+                // Refresh the staff list
+                const staffRes = await this.rpc("/get_created_staff", {});
+                if (staffRes && staffRes.status === 200 && staffRes.users) {
+                    this.state.staffList = staffRes.users;
+                    this.state.count = staffRes.count || 0;
+                    this.state.cu_count = staffRes.cu_count || 0;
+                    this.state.unit_name = staffRes.unit_name || "";
                 } else {
-                    console.warn("Activation failed:", res);
+                    this.state.error = "Failed to refresh staff list.";
                 }
-            } catch (error) {
-                this.state.error = error.message || "RPC Error";
-            }
-            try {
-                const res = await this.rpc("/get_created_staff", {});
-                if (res && res.status === 200 && res.users) {
-                    this.state.staffList = res.users;
-                }
-                if (res && res.agencies) {
-                    this.state.agenciesList = res.agencies;
-                }
-            } catch (error) {
-                this.state.error = error.message || "RPC Error";
-            } finally {
-                this.state.loading = false;
+            } else {
+                this.state.error = res.error || "Failed to approve staff.";
+                this.env.services.notification.add(this.state.error, {
+                    type: "danger",
+                    title: "Error",
+                });
             }
         } catch (error) {
-            console.error("Error fetching staff details:", error);
+            this.state.error = error.message || "Failed to approve staff.";
+            this.env.services.notification.add(this.state.error, {
+                type: "danger",
+                title: "Error",
+            });
+        } finally {
+            this.state.loading = false;
         }
     }
     excel_report() {
@@ -293,49 +310,33 @@ export class SalesCirculationIncharge extends Component {
     attendance_excel_report() {
         this.actionService.doAction("sale_repo_app.action_attendance_report_users_wizard_excel");
     }
-    reg_head_cu_form() {
-        this.actionService.doAction("sale_repo_app.action_customer_form");
+    async reg_head_cu_form() {
+        try {
+            const domain = [["unit_name", "=", this.state.unit_name]];
+            const context = { default_unit_name: this.state.unit_name };
+            await this.actionService.doAction({
+                type: "ir.actions.act_window",
+                name: "Customer Form",
+                res_model: "customer.form",
+                view_mode: "kanban,form",
+                views: [
+                    [false, "kanban"],
+                    [false, "form"],
+                ],
+                target: "current",
+                domain: domain,
+                context: context,
+            });
+        } catch (error) {
+            console.error("Error opening customer forms:", error);
+            this.env.services.notification.add("Failed to load customer forms: " + (error.message || "Unknown error"), {
+                type: "danger",
+                title: "Error",
+            });
+        }
     }
 }
 registry.category("actions").add(
     "sale_repo_app.circulation_incharge_dashboard",
     SalesCirculationIncharge
 );
-
-
-
-
-            // ✅ Directly open your custom form view
-//            await this.actionService.doAction({
-//                type: "ir.actions.act_window",
-//                name: "Waiting User",
-//                res_model: "sale_repo_app.base.res.users",
-//                view_mode: "form",
-//                views: [[false, "form"]],   // default form view
-//                target: "current",
-//                res_id: user_id,
-//                context: { default_user_id: user_id },
-//            });
-
-
-
-
-//            const domain = [["user_id", "=", user_id]]; // Filter by user_id for work.session
-//            const context = {
-//                default_user_id: user_id, // Set default value for user_id field
-//            };
-//
-//
-//            await this.actionService.doAction({
-//                type: "ir.actions.act_window",
-//                name: "Work Sessions",
-//                res_model: "work.session", // Changed to work.session
-//                view_mode: "tree,form", // Specify both tree and form views
-//                views: [
-//                    [false, "tree"], // Use default tree view
-//                    [false, "form"], // Use default form view
-//                ],
-//                target: "current",
-//                domain: domain, // Apply the domain filter
-//                context: context, // Apply context for constraints
-//            });

@@ -71,12 +71,12 @@
                     <div class="oe_title">
                         <label for="name"/>
                         <h1>
-                            <field name="name" placeholder="e.g. John Doe" required="1"/>
+                                <field name="name"  required="1"/>
                         </h1>
                         <field name="email" invisible="1"/>
-                        <label for="login" string="Email Address"/>
+                        <label for="login" string="User ID"/>
                         <h2>
-                            <field name="login" placeholder="e.g. email@yourcompany.com"/>
+                            <field name="login" />
                         </h2>
                     </div>
                 </sheet>
@@ -109,28 +109,31 @@
             </xpath>
 
             <xpath expr="//field[@name='login']" position="after">
-                <group string="Custom Information">
+                <group>
                     <field name="role" widget="selection" selection="[('agent','Staff'),
-                   ('Office_staff','Office staff'),
-                   ('unit_manager','Unit manager'),
-                   ('segment_incharge','Segment incharge'),
-                   ('circulation_incharge','Circulation incharge'),
-                   ('region_head','Region head')]"/>
+                   ('Office_staff','Office staff')]"/>
                     <field name="target" attrs="{'invisible': [('role', '!=', 'agent')]}"/>
                     <!--                    <field name="status"/>-->
                     <field name="unit_name"
                            attrs="{'invisible': ['|', ('role', '=', 'circulation_head'), ('role', '=', 'region_head')]}"/>
                     <field name="unit_name_ids"
                            attrs="{'invisible': [('role', '!=', 'circulation_head'),('role', '!=', 'region_head')]}"/>
-                    <field name="aadhar_number"/>
-                    <field name="aadhar_base64" filename="aadhar_number"/>
-                    <field name="pan_number"/>
-                    <field name="Pan_base64" filename="pan_number"/>
+                     <field name="aadhar_number"
+                       widget="password"
+                       class="aadhar-mask oe_inline_input"
+                       placeholder="Enter 12-digit Aadhar"/>
+
+
+<!--                    <field name="aadhar_base64" filename="aadhar_number"/>-->
+<!--                    <field name="pan_number"/>-->
+<!--                    <field name="Pan_base64" filename="pan_number"/>-->
                     <field name="state"/>
                     <field name="phone"/>
-                    <field name="user_id"/>
-                    <field name="root_name_id"/>
-                    <field name="present_pin_id"/>
+<!--                    <field name="user_id"/>-->
+                    <field name="password" required="1" />
+
+<!--                    <field name="root_name_id"/>-->
+<!--                    <field name="present_pin_id"/>-->
                     <!--                    <field name="api_token" readonly="1"/>-->
                     <!--                    <field name="token_expiry" readonly="1"/>-->
                 </group>

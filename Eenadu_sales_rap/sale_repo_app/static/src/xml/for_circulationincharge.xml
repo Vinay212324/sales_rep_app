@@ -1,159 +1,153 @@
 <templates xml:space="preserve">
   <t t-name="sale_repo_app.circulation_incharge_dashboard_template" owl="1">
 
-    <div style="max-height: 85vh; overflow-y: auto;">
-      <div>
-        <div class="for-position">
-          <div class="d-flex flex-row align-items-center gap-4 p-4 bg-light rounded shadow">
+    <!-- 🌐 Centering Container -->
+    <div class="d-flex justify-content-center align-items-start" style="min-height: 100vh; padding-top: 2rem;">
 
-            <div t-on-click="openStaffList" class="button_st pt-3 btn btn-light btn-lg w-45 border">
-              <h4>Number of Resources</h4>
-              <hr/>
-              <p>Staff Name: <t t-esc="state.count"/></p>
-            </div>
+      <!-- 📦 Dashboard Content -->
+      <div style="width: 100%; max-width: 1200px; max-height: 85vh; overflow-y: auto; padding: 1rem;">
 
-            <div t-on-click="filteredAgenciesList_open" class="button_st pt-3 btn btn-light btn-lg w-45 border mt-3">
-              <h4>View All Customer Forms</h4>
-              <hr/>
-              <p>Customer Forms: <t t-esc="state.cu_count"/></p>
-            </div>
-            <div class="d-flex">
-                <div t-on-click="office_staff_creation" class="button_st pt-3 btn d-flex btn-light btn-lg border m-3 p-2">
-                  <p>Create Officestaff</p>
-                </div>
-
-                <div t-on-click="openStaffList_only" class="button_st pt-3 btn d-flex btn-light btn-lg border m-3 p-2">
-                  <p>Approved Staff</p>
-                </div>
-
-                <div class="button_st pt-3 btn d-flex btn-light btn-lg border m-3 p-2" t-on-click="user_unactive">
-                  <p>Staff Waiting for Approval</p>
-                </div>
-
-            </div>
+        <!-- 🔘 8 Button Grid -->
+        <div class="d-flex flex-wrap gap-3 mb-4 justify-content-center">
+          <!-- 1 -->
+          <div t-on-click="openStaffList"
+               class="btn btn-light btn-lg border"
+               style="flex: 1 1 calc(25% - 12px); min-width: 180px; min-height: 100px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
+            <h4 style="margin:0;">Number Of Promoters</h4>
+            <div><t t-esc="state.count"/></div>
           </div>
-        </div>
-        <div class="">
-          <div class="d-flex flex-row align-items-center gap-4 p-4 bg-light rounded shadow">
 
-            <div t-on-click="openStaffList" class="button_st pt-3 btn btn-light btn-lg w-45 border">
-              <h4>Number of Resources</h4>
-              <hr/>
-              <p>Staff Name: <t t-esc="state.count"/></p>
-            </div>
-
-            <div t-on-click="filteredAgenciesList_open" class="button_st pt-3 btn btn-light btn-lg w-45 border mt-3">
-              <h4>View All Customer Forms</h4>
-              <hr/>
-              <p>Customer Forms: <t t-esc="state.cu_count"/></p>
-            </div>
-            <div class="d-flex">
-                <div t-on-click="office_staff_creation" class="button_st pt-3 btn d-flex btn-light btn-lg border m-3 p-2">
-                  <p>Create Officestaff</p>
-                </div>
-
-                <div t-on-click="openStaffList_only" class="button_st pt-3 btn d-flex btn-light btn-lg border m-3 p-2">
-                  <p>Approved Staff</p>
-                </div>
-
-                <div class="button_st pt-3 btn d-flex btn-light btn-lg border m-3 p-2" t-on-click="user_unactive">
-                  <p>Staff Waiting for Approval</p>
-                </div>
-            </div>
-
+          <!-- 2 -->
+          <div t-on-click="filteredAgenciesList_open"
+               class="btn btn-light btn-lg border"
+               style="flex: 1 1 calc(25% - 12px); min-width: 180px; min-height: 100px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
+            <h4 style="margin:0;">Agencies Wise Customer Forms</h4>
+            <div><t t-esc="state.cu_count"/></div>
           </div>
-            <button t-on-click="excel_report" style="margin:5px;margin-left:20px; cursor:pointer; display: inline-block; padding: 8px 12px; white-space: nowrap; height:36px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);">Report of Customer Forms in EXCEL Format</button>
-            <button t-on-click="attendance_excel_report" style="margin:5px;margin-left:20px; cursor:pointer; display: inline-block; padding: 8px 12px; white-space: nowrap; height:36px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);">ATTENDANCE</button>
-            <button t-on-click="reg_head_cu_form" style="margin:5px;margin-left:20px; cursor:pointer; display: inline-block; padding: 8px 12px; white-space: nowrap; height:36px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);">Total Customer Forms</button>
+
+          <!-- 3 -->
+          <div t-on-click="office_staff_creation"
+               class="btn btn-light btn-lg border"
+               style="flex: 1 1 calc(25% - 12px); min-width: 180px; min-height: 100px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
+            <div>Create Office Staff</div>
+          </div>
+
+          <!-- 4 -->
+          <div t-on-click="openStaffList_only"
+               class="btn btn-light btn-lg border"
+               style="flex: 1 1 calc(25% - 12px); min-width: 180px; min-height: 100px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
+            <div>Approved Staff</div>
+          </div>
+
+          <!-- 5 -->
+          <div t-on-click="user_unactive"
+               class="btn btn-light btn-lg border"
+               style="flex: 1 1 calc(25% - 12px); min-width: 180px; min-height: 100px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
+            <div>Staff Waiting for Approval</div>
+          </div>
+
+          <!-- 6 -->
+          <button t-on-click="excel_report"
+                  class="btn btn-outline-primary"
+                  style="flex: 1 1 calc(25% - 12px); min-width: 180px; min-height: 100px; display: flex; align-items: center; justify-content: center; text-align: center;">
+            Report of Customer Forms (Excel)
+          </button>
+
+          <!-- 7 -->
+          <button t-on-click="attendance_excel_report"
+                  class="btn btn-outline-secondary"
+                  style="flex: 1 1 calc(25% - 12px); min-width: 180px; min-height: 100px; display: flex; align-items: center; justify-content: center; text-align: center;">
+            Attendance Report
+          </button>
+
+          <!-- 8 -->
+          <button t-on-click="reg_head_cu_form"
+                  class="btn btn-outline-success"
+                  style="flex: 1 1 calc(25% - 12px); min-width: 180px; min-height: 100px; display: flex; align-items: center; justify-content: center; text-align: center;">
+            Total Customer Forms
+          </button>
         </div>
 
-        <!-- Staff list view -->
-        <div t-if="state.number_of_resources" class="p-3">
+        <!-- 📋 Staff List Section -->
+        <div t-if="state.number_of_resources" class="mb-4">
+          <h4 class="mb-3">
+            <t t-if="state.status==='active'">Approved Staff List</t>
+            <t t-if="state.status==='un_activ'">Waiting for Approval Staff List</t>
+          </h4>
 
-          <h4 class="mt-2" t-if="state.status==='active'">Approved Staff List</h4>
-          <h4 class="mt-2" t-if="state.status==='un_activ'">Waiting for Approval Staff List</h4>
-
-          <div class="mb-3">
+          <div class="mb-3" style="max-width: 300px;">
             <input type="text" class="form-control" placeholder="Search staff..." t-model="state.searchTerm"/>
           </div>
 
           <div t-if="state.loading" class="text-muted">Loading staff...</div>
           <div t-if="state.error" class="text-danger"><t t-esc="state.error"/></div>
 
-          <div class="list-group">
+          <div class="d-flex flex-wrap gap-3">
             <t t-foreach="filteredStaffList" t-as="staff" t-key="staff.id">
-              <div t-if="staff.status===state.status and state.number_of_resources and !state.approved_staff and !state.staff_waiting_for_approval"
-                   class="list-group-item" style="margin:5px;cursor:pointer;"
-                   t-on-click="() => this.loadStaffDetails(staff.login,staff.id,staff.name)">
+              <div class="list-group-item border shadow-sm"
+                   style="cursor:pointer; flex: 0 1 auto; min-width: 250px; max-width: 100%;"
+                   t-on-click="() => this.state.status === 'un_activ' ? this.loadStaffUnactive(staff.login, staff.id, staff.name) : this.loadStaffDetails(staff.login, staff.id, staff.name)">
                 <strong><t t-esc="staff.name"/></strong><br/>
                 <small>
-                  Unit: <t t-esc="staff.unit_name"/>, Email: <t t-esc="staff.email"/>, Phone: <t t-esc="staff.phone"/>, User ID: <t t-esc="staff.id"/><br/>
-                  Aadhaar: <t t-esc="staff.aadhar_number"/><br/>
-                  Status: <t t-esc="staff.status"/>
+                  Unit: <t t-esc="staff.unit_name"/><br/>
+                  Email: <t t-esc="staff.email"/>, Phone: <t t-esc="staff.phone"/><br/>
+<!--                  Status: <t t-esc="staff.status"/>-->
                 </small>
-              </div>
-
-              <div t-if="staff.status===state.status and state.number_of_resources and state.approved_staff and !state.staff_waiting_for_approval"
-                   class="list-group-item" style="margin:5px;cursor:pointer;">
-                <strong><t t-esc="staff.name"/></strong><br/>
-                <small>
-                  Unit: <t t-esc="staff.unit_name"/>, Email: <t t-esc="staff.email"/>, Phone: <t t-esc="staff.phone"/>, User ID: <t t-esc="staff.id"/><br/>
-                  Aadhaar: <t t-esc="staff.aadhar_number"/><br/>
-                  Status: <t t-esc="staff.status"/>
-                </small>
-              </div>
-
-              <div t-if="staff.status===state.status and state.number_of_resources and !state.approved_staff and state.staff_waiting_for_approval"
-                   class="list-group-item" style="margin:5px;">
-                <strong><t t-esc="staff.name"/></strong><br/>
-                <div>
-                    <small>
-                    Unit: <t t-esc="staff.unit_name"/>, Email: <t t-esc="staff.email"/>, Phone: <t t-esc="staff.phone"/>, User ID: <t t-esc="staff.id"/><br/>
-                    Aadhaar: <t t-esc="staff.aadhar_number"/><br/>
-                    Status: Inactive
-                  </small>
-                    <button class="btn btn-primary ml-5 mr-5" t-on-click="() => this.loadStaffUnactive(staff.login,staff.id,staff.name)">
-                        Activate
-                    </button>
-                </div>
+                <t t-if="staff.status === 'un_activ'">
+                  <button t-on-click="(ev) => { ev.stopPropagation(); this.loadStaffUnactive(staff.login, staff.id, staff.name); }"
+                          class="btn btn-sm btn-success mt-2"
+                          style="width: 100%;">
+                    Activate User
+                  </button>
+                </t>
               </div>
             </t>
           </div>
         </div>
 
-        <div t-if="state.view_all_customer_forms" class="p-3">
+        <!-- 🏢 Agency List Section -->
+        <div t-if="state.view_all_customer_forms" class="mb-4">
+          <h4 class="mb-3">Agencies</h4>
 
-          <h4 class="mt-2">Agencies</h4>
-
-          <div class="mb-3">
+          <div class="mb-3" style="max-width: 300px;">
             <input type="text" class="form-control" placeholder="Search agency..." t-model="state.searchAge"/>
           </div>
 
           <div t-if="state.loading" class="text-muted">Loading agencies...</div>
           <div t-if="state.error" class="text-danger"><t t-esc="state.error"/></div>
 
-          <div class="list-group">
-            <t t-foreach="filteredAgenciesList" t-as="agency" t-key="agency.id">
-              <div class="list-group-item" style="margin:5px;cursor:pointer;"
-                   t-on-click="() => this.Open_agencies_List(agency.phone, agency.id, agency.location_name)">
-                <strong>Code: <t t-esc="agency.code"/></strong><br/>
-                <small>
-                    Location name: <t t-esc="agency.location_name"/>, Phone: <t t-esc="agency.phone"/><br/>
-                    Unit name: <t t-esc="agency.unit_name"/>
-                </small>
-              </div>
-            </t>
+          <div class="d-flex flex-wrap gap-3">
+              <t t-foreach="filteredAgenciesList" t-as="agency" t-key="agency.id">
+                <div class="list-group-item border shadow-sm"
+                     style="cursor:pointer; flex: 0 1 auto; min-width: 250px; max-width: 100%;"
+                     t-on-click="() => this.Open_agencies_List(agency.phone, agency.id, agency.location_name)">
+                  <strong>Code: <t t-esc="agency.code"/></strong><br/>
+                  <small>
+                    Location: <t t-esc="agency.location_name"/><br/>
+                    Phone: <t t-esc="agency.phone"/><br/>
+                    Unit: <t t-esc="agency.unit_name"/>
+                  </small>
+                </div>
+              </t>
+            </div>
+
+        </div>
+
+        <!-- 🧾 Attendance / Total Customer Forms -->
+        <div t-if="!state.number_of_resources and state.status==='active' and state.attend_customer">
+          <div t-on-click="today_attendance"
+               class="btn btn-light btn-lg border me-2"
+               style="display: inline-flex; align-items: center; justify-content: center; padding: 0.5rem 1rem;">
+            <div>Staff Attendance</div>
+          </div>
+
+          <div t-on-click="totalCustomerForms"
+               class="btn btn-light btn-lg border"
+               style="display: inline-flex; align-items: center; justify-content: center; padding: 0.5rem 1rem;">
+            <div>Total Customer Forms</div>
           </div>
         </div>
 
-        <div t-if="!state.number_of_resources and state.status==='active' and state.attend_customer">
-          <div t-on-click="today_attendance" class="btn d-flex btn-light btn-lg border m-3 p-2">
-            <p>Staff Attendance</p>
-          </div>
-          <div t-on-click="totalCustomerForms" class="btn d-flex btn-light btn-lg border m-3 p-2">
-            <p>Total customer forms</p>
-          </div>
-        </div>
       </div>
     </div>
   </t>

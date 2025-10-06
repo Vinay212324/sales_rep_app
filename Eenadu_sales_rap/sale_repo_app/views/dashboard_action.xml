@@ -54,10 +54,10 @@
               sequence="4"/>
 
     <menuitem id="menu_circulation_incharge"
-              name="Circulation incharge"
-              action="action_circulation_incharge_dashboard"
-              groups="sale_repo_app.circulation_incharge_group"
-              sequence="4"/>
+          name=" ← Circulation Incharge"
+          action="action_circulation_incharge_dashboard"
+          groups="sale_repo_app.circulation_incharge_group"
+          sequence="4"/>
 
     <menuitem id="menu_office_staff"
               name="Office Staff"
