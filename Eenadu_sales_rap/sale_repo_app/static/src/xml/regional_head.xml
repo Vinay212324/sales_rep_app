@@ -1,213 +1,378 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
   <t t-name="sale_repo_app.regional_head_dashboard_template" owl="1">
-      <div class="d-flex flex-row">
-          <h1 class="mt-2">Regional Head Dashboard</h1>   <button t-on-click="user_creation" style="margin:5px;margin-left:20px; cursor:pointer; display: inline-block; padding: 8px 12px; white-space: nowrap; height:36px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);">creat user</button>
-          <button t-on-click="excel_report" style="margin:5px;margin-left:20px; cursor:pointer; display: inline-block; padding: 8px 12px; white-space: nowrap; height:36px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);">Report of Customer Forms in EXCEL Format</button>
-          <button t-on-click="attendance_excel_report" style="margin:5px;margin-left:20px; cursor:pointer; display: inline-block; padding: 8px 12px; white-space: nowrap; height:36px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);">ATTENDANCE</button>
-          <button t-on-click="reg_head_cu_form">Total Customer Forms</button>
+    <div class="dashboard-container">
+      <!-- Header with buttons -->
+      <div class="d-flex justify-content-between align-items-center mb-4 p-3 bg-primary text-white rounded-top">
+        <h1 class="h3 mb-0">
+          <i class="fa fa-dashboard me-2"></i>
+          Regional Head Dashboard
+        </h1>
+        <div class="d-flex gap-2">
+          <button t-on-click="user_creation" class="btn btn-light btn-sm">
+            <i class="fa fa-user-plus me-1"></i>
+            Create User
+          </button>
+          <button t-on-click="excel_report" class="btn btn-light btn-sm">
+            <i class="fa fa-file-excel-o me-1"></i>
+            Customer Forms Report
+          </button>
+          <button t-on-click="attendance_excel_report" class="btn btn-light btn-sm">
+            <i class="fa fa-calendar-check-o me-1"></i>
+            Attendance Report
+          </button>
+          <button t-on-click="reg_head_cu_form" class="btn btn-light btn-sm">
+            <i class="fa fa-file-text-o me-1"></i>
+            Total Customer Forms
+          </button>
+        </div>
       </div>
-      <hr/>
-    <div class="dashboard-wrapper container-fluid" style="max-height: 85vh; overflow-y: auto; padding-right: 15px;">
-      <!-- Dashboard View -->
-      <t t-if="state.currentView === 'dashboard'">
-        <t t-if="state.loading">
-          <p>Loading units...</p>
-        </t>
-        <t t-elif="state.error">
-          <p class="text-danger">Error: <t t-esc="state.error" /></p>
-        </t>
-        <t t-elif="state.unit_names.length === 0">
-          <p>No units available.</p>
-        </t>
-        <t t-else="">
-          <t t-foreach="state.unit_names" t-as="unit" t-key="unit_index">
-            <div class="list-group-item" style="margin:5px; cursor:pointer; display: inline-block; padding: 8px 12px; white-space: nowrap; height:36px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);" t-on-click="() => this.navigateToUnit(unit)">
-              <i class="fa fa-building" style="margin-right: 8px;"></i>
-              Unit Name: <strong><t t-esc="unit" /></strong><br/>
+      <hr class="m-0"/>
+
+      <div class="dashboard-wrapper container-fluid p-3" style="max-height: 85vh; overflow-y: auto;">
+        <!-- Dashboard View: Units List -->
+        <t t-if="state.currentView === 'dashboard'">
+          <t t-if="state.loading">
+            <div class="text-center py-5">
+              <i class="fa fa-spinner fa-spin fa-3x text-primary mb-3"></i>
+              <p class="text-muted">Loading units...</p>
+            </div>
+          </t>
+          <t t-elif="state.error">
+            <div class="alert alert-danger">
+              <i class="fa fa-exclamation-triangle me-2"></i>
+              Error: <t t-esc="state.error" />
+            </div>
+          </t>
+          <t t-elif="state.unit_names.length === 0">
+            <div class="alert alert-info">
+              <i class="fa fa-info-circle me-2"></i>
+              No units available.
+            </div>
+          </t>
+          <t t-else="">
+            <div class="row">
+              <t t-foreach="state.unit_names" t-as="unit" t-key="unit_index">
+                <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12 mb-4">
+                  <div class="card shadow-sm border-0" t-on-click="() => this.navigateToUnit(unit)" style="cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;margin:10px;">
+                    <div class="card-body d-flex flex-column align-items-center justify-content-center p-4 text-center" style="min-height: 150px;min-width: 100px; ">
+                      <i class="fa fa-building fa-3x text-primary mb-3"></i>
+                      <h5 class="card-title mb-2"><t t-esc="unit" /></h5>
+                      <p class="card-text text-muted small mb-0">Click to view details</p>
+                    </div>
+                  </div>
+                </div>
+              </t>
             </div>
           </t>
         </t>
-      </t>
-      <!-- Unit Detail View -->
-      <t t-if="state.currentView === 'unit_detail'">
-        <div class="container-fluid" style="padding: 15px;">
 
-            <hr/>
+        <!-- Unit Detail View -->
+        <t t-if="state.currentView === 'unit_detail'">
           <t t-if="state.selected_unit">
-            <h4>Unit: <strong><t t-esc="state.selected_unit" /></strong></h4>
+            <div class="row mb-3 align-items-center">
+              <div class="col-auto">
+                <button class="btn btn-secondary" t-on-click="goBack">
+                  <i class="fa fa-arrow-left me-1"></i>
+                  Back to Dashboard
+                </button>
+              </div>
+              <div class="col">
+                <h4 class="mb-0">
+                  <i class="fa fa-building-o me-2 text-primary"></i>
+                  Unit: <strong><t t-esc="state.selected_unit" /></strong>
+                </h4>
+              </div>
+            </div>
+
             <t t-if="state.loading">
-              <p>Loading unit details...</p>
+              <div class="text-center py-5">
+                <i class="fa fa-spinner fa-spin fa-3x text-primary mb-3"></i>
+                <p class="text-muted">Loading unit details...</p>
+              </div>
             </t>
             <t t-elif="state.error">
-              <p class="text-danger">Error: <t t-esc="state.error" /></p>
+              <div class="alert alert-danger">
+                <i class="fa fa-exclamation-triangle me-2"></i>
+                Error: <t t-esc="state.error" />
+              </div>
             </t>
             <t t-elif="!state.unit_details">
-              <p>No unit details available.</p>
+              <div class="alert alert-warning">
+                <i class="fa fa-exclamation-circle me-2"></i>
+                No unit details available.
+              </div>
             </t>
             <t t-else="">
-              <!-- Circulation Incharge -->
-              <h5>Circulation Incharge</h5>
-              <t t-if="state.unit_details.circulation_incharge.length === 0">
-                <p>No Circulation Incharge assigned.</p>
-              </t>
-              <t t-else="">
-                <table class="table table-bordered">
-                  <thead>
-                    <tr>
-                      <th>Name</th>
-                      <th>Email</th>
-                      <th>Phone</th>
-                      <th>Aadhar Number</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <t t-foreach="state.unit_details.circulation_incharge" t-as="user" t-key="user.id">
-                      <tr>
-                        <td><t t-esc="user.name || 'Unknown'" /></td>
-                        <td><t t-esc="user.email || 'No email'" /></td>
-                        <td><t t-esc="user.phone || 'No phone'" /></td>
-                        <td><t t-esc="user.aadhar_number || 'Not provided'" /></td>
-                        <td><t t-esc="user.status || 'Unknown'" /></td>
-                      </tr>
-                    </t>
-                  </tbody>
-                </table>
-              </t>
-              <!-- Segment Incharge -->
-              <h5>Segment Incharge</h5>
-              <t t-if="state.unit_details.segment_incharge.length === 0">
-                <p>No Segment Incharge assigned.</p>
-              </t>
-              <t t-else="">
-                <table class="table table-bordered">
-                  <thead>
-                    <tr>
-                      <th>Name</th>
-                      <th>Email</th>
-                      <th>Phone</th>
-                      <th>Aadhar Number</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <t t-foreach="state.unit_details.segment_incharge" t-as="user" t-key="user.id">
-                      <tr>
-                        <td><t t-esc="user.name || 'Unknown'" /></td>
-                        <td><t t-esc="user.email || 'No email'" /></td>
-                        <td><t t-esc="user.phone || 'No phone'" /></td>
-                        <td><t t-esc="user.aadhar_number || 'Not provided'" /></td>
-                        <td><t t-esc="user.status || 'Unknown'" /></td>
-                      </tr>
-                    </t>
-                  </tbody>
-                </table>
-              </t>
-              <!-- Unit Manager -->
-              <h5>Unit Manager</h5>
-              <t t-if="state.unit_details.unit_manager.length === 0">
-                <p>No Unit Manager assigned.</p>
-              </t>
-              <t t-else="">
-                <table class="table table-bordered">
-                  <thead>
-                    <tr>
-                      <th>Name</th>
-                      <th>Email</th>
-                      <th>Phone</th>
-                      <th>Aadhar Number</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <t t-foreach="state.unit_details.unit_manager" t-as="user" t-key="user.id">
-                      <tr>
-                        <td><t t-esc="user.name || 'Unknown'" /></td>
-                        <td><t t-esc="user.email || 'No email'" /></td>
-                        <td><t t-esc="user.phone || 'No phone'" /></td>
-                        <td><t t-esc="user.aadhar_number || 'Not provided'" /></td>
-                        <td><t t-esc="user.status || 'Unknown'" /></td>
-                      </tr>
-                    </t>
-                  </tbody>
-                </table>
-              </t>
-              <!-- Office Staff -->
-              <h5>Office Staff</h5>
-              <t t-if="state.unit_details.Office_staff.length === 0">
-                <p>No Office Staff assigned.</p>
-              </t>
-              <t t-else="">
-                <table class="table table-bordered">
-                  <thead>
-                    <tr>
-                      <th>Name</th>
-                      <th>Email</th>
-                      <th>Phone</th>
-                      <th>Aadhar Number</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <t t-foreach="state.unit_details.Office_staff" t-as="user" t-key="user.id">
-                      <tr>
-                        <td><t t-esc="user.name || 'Unknown'" /></td>
-                        <td><t t-esc="user.email || 'No email'" /></td>
-                        <td><t t-esc="user.phone || 'No phone'" /></td>
-                        <td><t t-esc="user.aadhar_number || 'Not provided'" /></td>
-                        <td><t t-esc="user.status || 'Unknown'" /></td>
-                      </tr>
-                    </t>
-                  </tbody>
-                </table>
-              </t>
-              <!-- Agents -->
-              <h5>Agents</h5>
-              <t t-if="state.unit_details.agent.length === 0">
-                <p>No Agents assigned.</p>
-              </t>
-              <t t-else="">
-                <table class="table table-bordered">
-                  <thead>
-                    <tr>
-                      <th>Name</th>
-                      <th>Email</th>
-                      <th>Phone</th>
-                      <th>Aadhar Number</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <t t-foreach="state.unit_details.agent" t-as="user" t-key="user.id">
-                        <tr t-on-click="() => this.selectUser(user.id)"
-                            style="cursor: pointer;">
-                            <td><t t-esc="user.name || 'Unknown'" /></td>
-                            <td><t t-esc="user.email || 'No email'" /></td>
-                            <td><t t-esc="user.phone || 'No phone'" /></td>
-                            <td><t t-esc="user.aadhar_number || 'Not provided'" /></td>
-                            <td><t t-esc="user.status || 'Unknown'" /></td>
-                        </tr>
-                        <div t-if="state.selectedUserId === user.id">
-                          <div t-on-click="() => this.today_attendance(user.id)" class="btn d-flex btn-light btn-lg border m-3 p-2">
-                            <p>Staff Attendance</p>
-                          </div>
-                          <div t-on-click="() => this.totalCustomerForms(user.email,user.id)" class="btn d-flex btn-light btn-lg border m-3 p-2">
-                            <p>Total customer forms</p>
-                          </div>
+              <div class="row g-4">
+                <!-- Circulation Incharge -->
+                <div class="col-xl-6 col-lg-6 col-md-12">
+                  <div class="card shadow-sm h-100">
+                    <div class="card-header bg-light">
+                      <h6 class="mb-0">
+                        <i class="fa fa-users me-2 text-info"></i>
+                        Circulation Incharge
+                      </h6>
+                    </div>
+                    <div class="card-body">
+                      <t t-if="state.unit_details.circulation_incharge.length === 0">
+                        <p class="text-muted">No Circulation Incharge assigned.</p>
+                      </t>
+                      <t t-else="">
+                        <div class="table-responsive">
+                          <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                              <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Status</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <t t-foreach="state.unit_details.circulation_incharge" t-as="user" t-key="user.id">
+                                <tr>
+                                  <td><t t-esc="user.name || 'Unknown'" /></td>
+                                  <td><t t-esc="user.email || 'No email'" /></td>
+                                  <td><t t-esc="user.phone || 'No phone'" /></td>
+                                  <td>
+                                    <span class="badge" t-att-class="user.status === 'active' ? 'bg-success' : 'bg-warning'">
+                                      <t t-esc="user.status || 'Unknown'" />
+                                    </span>
+                                  </td>
+                                </tr>
+                              </t>
+                            </tbody>
+                          </table>
                         </div>
-                    </t>
-                  </tbody>
-                </table>
-              </t>
+                      </t>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Segment Incharge -->
+                <div class="col-xl-6 col-lg-6 col-md-12">
+                  <div class="card shadow-sm h-100">
+                    <div class="card-header bg-light">
+                      <h6 class="mb-0">
+                        <i class="fa fa-sitemap me-2 text-info"></i>
+                        Segment Incharge
+                      </h6>
+                    </div>
+                    <div class="card-body">
+                      <t t-if="state.unit_details.segment_incharge.length === 0">
+                        <p class="text-muted">No Segment Incharge assigned.</p>
+                      </t>
+                      <t t-else="">
+                        <div class="table-responsive">
+                          <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                              <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Status</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <t t-foreach="state.unit_details.segment_incharge" t-as="user" t-key="user.id">
+                                <tr>
+                                  <td><t t-esc="user.name || 'Unknown'" /></td>
+                                  <td><t t-esc="user.email || 'No email'" /></td>
+                                  <td><t t-esc="user.phone || 'No phone'" /></td>
+                                  <td>
+                                    <span class="badge" t-att-class="user.status === 'active' ? 'bg-success' : 'bg-warning'">
+                                      <t t-esc="user.status || 'Unknown'" />
+                                    </span>
+                                  </td>
+                                </tr>
+                              </t>
+                            </tbody>
+                          </table>
+                        </div>
+                      </t>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Unit Manager -->
+                <div class="col-xl-6 col-lg-6 col-md-12">
+                  <div class="card shadow-sm h-100">
+                    <div class="card-header bg-light">
+                      <h6 class="mb-0">
+                        <i class="fa fa-user-tie me-2 text-info"></i>
+                        Unit Manager
+                      </h6>
+                    </div>
+                    <div class="card-body">
+                      <t t-if="state.unit_details.unit_manager.length === 0">
+                        <p class="text-muted">No Unit Manager assigned.</p>
+                      </t>
+                      <t t-else="">
+                        <div class="table-responsive">
+                          <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                              <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Status</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <t t-foreach="state.unit_details.unit_manager" t-as="user" t-key="user.id">
+                                <tr>
+                                  <td><t t-esc="user.name || 'Unknown'" /></td>
+                                  <td><t t-esc="user.email || 'No email'" /></td>
+                                  <td><t t-esc="user.phone || 'No phone'" /></td>
+                                  <td>
+                                    <span class="badge" t-att-class="user.status === 'active' ? 'bg-success' : 'bg-warning'">
+                                      <t t-esc="user.status || 'Unknown'" />
+                                    </span>
+                                  </td>
+                                </tr>
+                              </t>
+                            </tbody>
+                          </table>
+                        </div>
+                      </t>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Office Staff -->
+                <div class="col-xl-6 col-lg-6 col-md-12">
+                  <div class="card shadow-sm h-100">
+                    <div class="card-header bg-light">
+                      <h6 class="mb-0">
+                        <i class="fa fa-briefcase me-2 text-info"></i>
+                        Office Staff
+                      </h6>
+                    </div>
+                    <div class="card-body">
+                      <t t-if="state.unit_details.Office_staff.length === 0">
+                        <p class="text-muted">No Office Staff assigned.</p>
+                      </t>
+                      <t t-else="">
+                        <div class="table-responsive">
+                          <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                              <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Status</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <t t-foreach="state.unit_details.Office_staff" t-as="user" t-key="user.id">
+                                <tr>
+                                  <td><t t-esc="user.name || 'Unknown'" /></td>
+                                  <td><t t-esc="user.email || 'No email'" /></td>
+                                  <td><t t-esc="user.phone || 'No phone'" /></td>
+                                  <td>
+                                    <span class="badge" t-att-class="user.status === 'active' ? 'bg-success' : 'bg-warning'">
+                                      <t t-esc="user.status || 'Unknown'" />
+                                    </span>
+                                  </td>
+                                </tr>
+                              </t>
+                            </tbody>
+                          </table>
+                        </div>
+                      </t>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Agents -->
+                <div class="col-12">
+                  <div class="card shadow-sm">
+                    <div class="card-header bg-light">
+                      <h6 class="mb-0">
+                        <i class="fa fa-user-circle-o me-2 text-info"></i>
+                        Agents
+                      </h6>
+                    </div>
+                    <div class="card-body">
+                      <t t-if="state.unit_details.agent.length === 0">
+                        <p class="text-muted">No Agents assigned.</p>
+                      </t>
+                      <t t-else="">
+                        <div class="table-responsive">
+                          <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                              <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <t t-foreach="state.unit_details.agent" t-as="user" t-key="user.id">
+                                <tr t-on-click="() => this.selectUser(user.id)" style="cursor: pointer;" class="table-row-hover">
+                                  <td><t t-esc="user.name || 'Unknown'" /></td>
+                                  <td><t t-esc="user.email || 'No email'" /></td>
+                                  <td><t t-esc="user.phone || 'No phone'" /></td>
+                                  <td>
+                                    <span class="badge" t-att-class="user.status === 'active' ? 'bg-success' : 'bg-warning'">
+                                      <t t-esc="user.status || 'Unknown'" />
+                                    </span>
+                                  </td>
+                                  <td>
+                                    <t t-if="state.selectedUserId === user.id">
+                                      <div class="d-flex gap-2">
+                                        <button t-on-click="(ev) => { ev.stopPropagation(); this.today_attendance(user.id); }" class="btn btn-outline-primary btn-sm">
+                                          <i class="fa fa-calendar me-1"></i>
+                                          Attendance
+                                        </button>
+                                        <button t-on-click="(ev) => { ev.stopPropagation(); this.totalCustomerForms(user.email, user.id); }" class="btn btn-outline-success btn-sm">
+                                          <i class="fa fa-file-o me-1"></i>
+                                          Forms
+                                        </button>
+                                      </div>
+                                    </t>
+                                  </td>
+                                </tr>
+                              </t>
+                            </tbody>
+                          </table>
+                        </div>
+                      </t>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </t>
-            <button class="btn btn-primary mt-3" t-on-click="goBack">Back to Dashboard</button>
           </t>
           <t t-else="">
-            <p>No unit selected.</p>
+            <div class="alert alert-warning">
+              <i class="fa fa-exclamation-circle me-2"></i>
+              No unit selected.
+            </div>
           </t>
-        </div>
-      </t>
+        </t>
+      </div>
+
+      <!-- Custom CSS for hover effect -->
+      <style>
+        .table-row-hover:hover {
+          background-color: rgba(0, 123, 255, 0.1);
+        }
+        .card:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+        }
+        .dashboard-container {
+          background-color: #f8f9fa;
+          min-height: 100vh;
+        }
+        .card {
+          border-radius: 10px;
+        }
+      </style>
     </div>
   </t>
 </templates>

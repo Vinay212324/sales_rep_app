@@ -15,7 +15,10 @@ export class RegionalHeadDashboard extends Component {
 
     setup() {
         this.actionService = useService("action");
+        this.orm = useService("orm");
         this.rpc = useService("rpc");
+
+        const STORAGE_KEY = 'regional_head_dashboard_state';
 
         this.state = useState({
             user_info: {},
@@ -26,7 +29,24 @@ export class RegionalHeadDashboard extends Component {
             error: null,
             currentView: "dashboard",
             selected_unit: null,
+            selectedUserId: null,
         });
+
+        // Load persisted state from localStorage
+        const savedState = localStorage.getItem(STORAGE_KEY);
+        if (savedState) {
+            try {
+                const parsed = JSON.parse(savedState);
+                // Merge persisted state, but keep loading and error as default
+                Object.assign(this.state, {
+                    ...parsed,
+                    loading: true,
+                    error: null,
+                });
+            } catch (e) {
+                console.warn("Failed to load saved state:", e);
+            }
+        }
 
         onWillStart(async () => {
             console.log("Fetching unit details...");
@@ -36,6 +56,10 @@ export class RegionalHeadDashboard extends Component {
                 if (res && res.status === 200 && res.user) {
                     this.state.user_info = res.user;
                     this.state.unit_names = res.user.unit_name_ids || [];
+                    // If unit_names changed, update persisted state
+                    if (this.state.unit_names.length !== (savedState ? JSON.parse(savedState).unit_names?.length || 0 : 0)) {
+                        this.saveState();
+                    }
                 } else {
                     this.state.error = res.message || "User not found";
                 }
@@ -44,8 +68,19 @@ export class RegionalHeadDashboard extends Component {
                 this.state.error = error.message || "Failed to fetch units";
             } finally {
                 this.state.loading = false;
+                this.saveState();
             }
         });
+    }
+
+    saveState() {
+        const STORAGE_KEY = 'regional_head_dashboard_state';
+        const stateToSave = {
+            ...this.state,
+            loading: false,  // Don't persist loading
+            error: null,     // Don't persist errors
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(stateToSave));
     }
 
     async navigateToUnit(unit) {
@@ -70,6 +105,8 @@ export class RegionalHeadDashboard extends Component {
             this.state.loading = false;
             this.state.currentView = "unit_detail";
             this.state.selected_unit = unit;
+            this.state.selectedUserId = null;
+            this.saveState();
             this.render();
         }
     }
@@ -82,10 +119,10 @@ export class RegionalHeadDashboard extends Component {
     }
     selectUser(userId) {
         this.state.selectedUserId = userId;
+        this.saveState();
     }
     async today_attendance(user_id) {
         try {
-
             const domain = [["user_id", "=", user_id]];
             const context = { default_user_id: user_id };
             await this.actionService.doAction({
@@ -128,8 +165,39 @@ export class RegionalHeadDashboard extends Component {
             console.error("Error fetching staff details:", error);
         }
     }
-    reg_head_cu_form() {
-        this.actionService.doAction("sale_repo_app.action_customer_form");
+    async reg_head_cu_form() {
+        if (this.state.unit_names.length === 0) {
+            console.warn("No units available for filtering customer forms.");
+            return;
+        }
+        try {
+            const users = await this.orm.searchRead("res.users", [
+                ["role", "=", "agent"],
+                ["unit_name", "in", this.state.unit_names],
+                ["status", "=", "active"],
+            ], ["login"]);
+            const agent_logins = users.map((u) => u.login).filter(Boolean);
+            if (agent_logins.length === 0) {
+                console.warn("No active agents found in the units.");
+                return;
+            }
+            const domain = [["agent_login", "in", agent_logins]];
+            await this.actionService.doAction({
+                type: "ir.actions.act_window",
+                name: "Customer Form",
+                res_model: "customer.form",
+                view_mode: "kanban,form",
+                views: [
+                    [false, "kanban"],
+                    [false, "form"],
+                ],
+                target: "current",
+                domain: domain,
+                context: {},
+            });
+        } catch (error) {
+            console.error("Error opening customer forms:", error);
+        }
     }
     user_creation() {
         this.actionService.doAction("sale_repo_app.action_users_wizard");
@@ -141,13 +209,14 @@ export class RegionalHeadDashboard extends Component {
         this.actionService.doAction("sale_repo_app.action_attendance_report_users_wizard_excel");
     }
 
-
     goBack() {
         console.log("Returning to dashboard");
         this.state.currentView = "dashboard";
         this.state.selected_unit = null;
         this.state.unit_details = null;
         this.state.error = null;
+        this.state.selectedUserId = null;
+        this.saveState();
         this.render();
     }
 }
