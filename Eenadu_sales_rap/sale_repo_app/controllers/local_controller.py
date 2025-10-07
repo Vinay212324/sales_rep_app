@@ -84,7 +84,7 @@ class localApi(http.Controller):
 
     @http.route('/create_staff', type='json', auth='user', methods=['POST'], csrf=False, cors="*")
     def create_staff(self, **kwargs):
-        print("vinay21212121aaaaaaaaaaaa")
+        print("vinay21212121aaaaaaaaaaaaaaaa")
 
         try:
             staff_data = kwargs.get('params', {})
@@ -101,6 +101,7 @@ class localApi(http.Controller):
                 'phone': staff_data.get('phone'),
                 'aadhar_number': staff_data.get('adhaar'),
                 'role': "agent",
+                'status': 'active',
                 'create_uid': user.id,
                 # Add any other necessary values here
             }
@@ -123,8 +124,7 @@ class localApi(http.Controller):
                 'name': user.name,
                 'unit_name': user.unit_name,
                 'email': user.email,
-                'login': user.user_id,
-                'password': user.password,
+                'login': user.login,
                 'phone': user.phone,
                 'aadhar_number': user.aadhar_number,
                 'create_uid': user.id,
@@ -149,7 +149,7 @@ class localApi(http.Controller):
                 "email": user.email,
                 "phone": user.phone,
                 "aadhar_number": user.aadhar_number,
-                "unit_name": user.unit_id.name if user.unit_id else "",
+                "unit_name": user.unit_name or "",
                 "status": user.active and "Active" or "Inactive",
             }
         }
@@ -160,7 +160,7 @@ class localApi(http.Controller):
     #for re head
     @http.route('/get_units_details', type='json', auth='user',methods=['POST'])
     def get_units_details(self):
-        user = user = request.env.user
+        user = request.env.user
         if not user.exists():
             return {"status": 404, "message": "User not found"}
         unit_names=[]

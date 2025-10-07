@@ -246,6 +246,7 @@ class unit_names(models.Model):
 
 from odoo import models, fields, _
 
+
 class UsersWizard(models.TransientModel):
     _name = "users.wizard"
     _description = "Users Wizard"
@@ -293,6 +294,12 @@ class UsersWizard(models.TransientModel):
             if user.aadhar_number and not re.fullmatch(r'\d{12}', user.aadhar_number):
                 raise ValidationError("Aadhar number must be exactly 12 digits and numeric only.")
 
+    @api.constrains('phone')
+    def _check_phone_number(self):
+        for user in self:
+            if user.phone and not re.fullmatch(r'\d{10}', user.phone):
+                raise ValidationError("Phone number must be exactly 10 digits and numeric only.")
+
     def action_create_user(self):
         self.ensure_one()
 
@@ -312,25 +319,26 @@ class UsersWizard(models.TransientModel):
         # Create the user with sudo
         user = self.env['res.users'].sudo().create(vals)
 
-        # Show a success notification
-        self.env.cr.commit()  # ensure transaction commit before redirect
+        # Clear the wizard record
+        self.sudo().unlink()
+
         return {
             'type': 'ir.actions.client',
             'tag': 'display_notification',
             'params': {
-                'title': "Success",
-                'message': f"User {user.name} created successfully!",
+                'title': 'Success',
+                'message': f'User {user.name} created successfully!',
                 'type': 'success',
                 'sticky': False,
+                'close': {
+                    'type': 'ir.actions.act_window',
+                    'res_model': 'res.users',
+                    'view_mode': 'tree,form',
+                    'target': 'current',
+                }
             }
-        }, {
-            # Redirect back to Users tree view
-            'type': 'ir.actions.act_window',
-            'res_model': 'res.users',
-            'view_mode': 'tree,form',
-            'target': 'current',
         }
-    # for xl report
+
     from openpyxl import Workbook
     from openpyxl.styles import Alignment, Font
     from io import BytesIO

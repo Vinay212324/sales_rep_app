@@ -1,97 +1,165 @@
 <templates xml:space="preserve">
   <t t-name="sale_repo_app.office_staff_dashboard_template" owl="1">
-    <div class="container-fluid" style="max-height: 85vh; overflow-y: auto;">
-      <!-- Header -->
-      <div class="d-flex justify-content-between align-items-center p-3 border-bottom">
-        <div>
-          <h5 class="m-0">Welcome <t t-esc="props.username"/></h5>
-          <small>Unitname : <t t-esc="state.staffData.unit"/></small>
+    <div class="container-fluid p-3" style="height: 100vh; overflow-y: auto; background-color: #f8f9fa;">
+      <!-- Loading Overlay -->
+      <t t-if="state.loading">
+        <div class="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center bg-light bg-opacity-75" style="z-index: 1050;">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
         </div>
-        <i class="fa fa-user fa-2x"></i>
+      </t>
+
+      <!-- Header -->
+      <div class="row mb-4">
+        <div class="col-12">
+          <div class="d-flex justify-content-between align-items-center bg-white p-3 rounded shadow-sm">
+            <div>
+              <h5 class="mb-1">Welcome</h5>
+              <small class="text-muted">Unit: <t t-esc="state.staffData.unit"/></small>
+            </div>
+            <i class="fa fa-user fa-2x text-secondary"></i>
+          </div>
+        </div>
       </div>
 
-      <h3 class="text-center mt-3 mb-4">Office Staff Dashboard</h3>
+      <!-- Success/Error Messages -->
+      <t t-if="state.successMessage">
+        <div class="alert alert-success alert-dismissible fade show mb-3" role="alert">
+          <i class="fa fa-check-circle me-2"></i>
+          <t t-esc="state.successMessage"/>
+          <button type="button" class="btn-close" t-on-click="() => state.successMessage = null"></button>
+        </div>
+      </t>
+      <t t-if="state.error">
+        <div class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
+          <i class="fa fa-exclamation-triangle me-2"></i>
+          <t t-esc="state.error"/>
+          <button type="button" class="btn-close" t-on-click="() => state.error = null"></button>
+        </div>
+      </t>
 
-      <!-- Buttons -->
-      <div class="d-flex flex-column align-items-center gap-3">
-        <button class="w-75 btn bg-white shadow-sm rounded-3 text-start py-3 px-3 d-flex align-items-center"
-                t-on-click="toggleViewStaff">
-          <i class="fa fa-clipboard fa-lg me-3 text-dark"></i>
-          <span class="flex-grow-1">
-            <t t-if="!state.isViewingStaff">View Created Staff</t>
-            <t t-if="state.isViewingStaff">Hide Staff</t>
-          </span>
-          <i class="fa fa-chevron-right text-muted"></i>
-        </button>
-        <button class="w-50 btn btn-dark rounded-3 py-3 d-flex align-items-center justify-content-center"
-                t-on-click="toggleCreate">
-          <i class="fa fa-user-plus me-2"></i>
-          <span>
+      <!-- Action Buttons -->
+      <div class="row g-3 mb-4">
+        <div class="col-md-8">
+          <button class="btn btn-outline-primary w-100 py-3 rounded" t-on-click="toggleViewStaff">
+            <i class="fa fa-users me-2"></i>
+            View Staff
+          </button>
+        </div>
+        <div class="col-md-4">
+          <button class="btn btn-primary w-100 py-3 rounded" t-on-click="toggleCreate" style="color: white;">
+            <i class="fa fa-user-plus me-2"></i>
             <t t-if="!state.isCreatingStaff">Create Staff</t>
-            <t t-if="state.isCreatingStaff">Cancel</t>
-          </span>
-        </button>
+            <t t-else="">Cancel</t>
+          </button>
+        </div>
       </div>
 
       <!-- Create Staff Form -->
       <t t-if="state.isCreatingStaff">
-        <form t-on-submit="submitStaff" class="mt-4 mb-4 px-3">
-          <div class="mb-3">
-            <label for="name" class="form-label">Name</label>
-            <input id="name" type="text" class="form-control" t-model="state.staffData.name" required="1"/>
+        <div class="row mb-4">
+          <div class="col-12">
+            <div class="card bg-white rounded shadow-sm">
+              <div class="card-header bg-primary text-white">
+                <h6 class="mb-0" style="color:white;"><i class="fa fa-user-plus me-2"></i>Create New Staff</h6>
+              </div>
+              <div class="card-body">
+                <form t-on-submit="submitStaff">
+                  <div class="row g-2">
+                    <div class="col-md-6">
+                      <label class="form-label">Full Name *</label>
+                      <input type="text" class="form-control" t-model="state.staffData.name" required="1" placeholder="Enter full name"/>
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label">Unit *</label>
+                      <input type="text" class="form-control" t-model="state.staffData.unit" required="1" placeholder="Enter unit"/>
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label">Email (optional)</label>
+                      <input type="email" class="form-control" t-model="state.staffData.email" placeholder="Enter email"/>
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label">Phone *</label>
+                      <input type="tel" class="form-control" t-model="state.staffData.phone" required="1" placeholder="Enter phone"/>
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label">User ID *</label>
+                      <input type="text" class="form-control" t-model="state.staffData.user_id" required="1" placeholder="Enter user ID"/>
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label">Password *</label>
+                      <input type="password" class="form-control" t-model="state.staffData.password" required="1" placeholder="Enter password"/>
+                    </div>
+                    <div class="col-12">
+                      <label class="form-label">Aadhaar (optional)</label>
+                      <input type="text" class="form-control" t-model="state.staffData.adhaar" placeholder="Enter Aadhaar"/>
+                    </div>
+                  </div>
+                  <div class="mt-3">
+                    <button type="submit" class="btn btn-primary" style="color: white;">
+                      <i class="fa fa-save me-2"></i>Create Staff
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
           </div>
-          <div class="mb-3">
-            <label for="unit" class="form-label">Unit</label>
-            <input id="unit" type="text" class="form-control" t-model="state.staffData.unit"  required="1"/>
-          </div>
-          <div class="mb-3">
-            <label for="email" class="form-label">Email</label>
-            <input id="email" type="email" class="form-control" t-model="state.staffData.email" required="1"/>
-          </div>
-          <div class="mb-3">
-            <label for="phone" class="form-label">Phone</label>
-            <input id="phone" type="text" class="form-control" t-model="state.staffData.phone" required="1"/>
-          </div>
-          <div class="mb-3">
-            <label for="user_id" class="form-label">User ID</label>
-            <input id="user_id" type="text" class="form-control" t-model="state.staffData.user_id" required="1"/>
-          </div>
-          <div class="mb-3">
-            <label for="password" class="form-label">Password</label>
-            <input id="password" type="password" class="form-control" t-model="state.staffData.password" required="1"/>
-          </div>
-          <div class="mb-3">
-            <label for="adhaar" class="form-label">Adhaar</label>
-            <input id="adhaar" type="text" class="form-control" t-model="state.staffData.adhaar" required="1"/>
-          </div>
-<!--          <div class="mb-3">-->
-<!--            <label for="address" class="form-label">Address</label>-->
-<!--            <textarea id="address" class="form-control" t-model="state.staffData.address" rows="3" required="1"></textarea>-->
-<!--          </div>-->
-          <button type="submit" class="btn btn-dark w-100 py-2 d-flex align-items-center justify-content-center">
-            <i class="fa fa-user-plus me-2"></i>
-            Create User
-          </button>
-        </form>
+        </div>
       </t>
 
-      <!-- Staff List with Search -->
+      <!-- Staff List -->
       <t t-if="state.isViewingStaff">
-        <h4 class="px-3 mt-4">Created Staff</h4>
-        <div class="mb-3 px-3">
-          <input type="text" class="form-control" placeholder="Search staff..." t-model="state.searchTerm"/>
-        </div>
-        <div class="list-group px-3">
-          <t t-foreach="filteredStaffList" t-as="staff" t-key="staff.id">
-            <div class="list-group-item">
-              <strong><t t-esc="staff.name"/></strong><br/>
-              <small>
-                Unit: <t t-esc="staff.unit_name"/>, Email: <t t-esc="staff.email"/>, Phone: <t t-esc="staff.phone"/>, User ID: <t t-esc="staff.id"/><br/>
-                Adhaar: <t t-esc="staff.aadhar_number"/><br/>
-                Status: <t t-esc="staff.status"/>
-              </small>
+        <div class="row">
+          <div class="col-12">
+            <div class="card bg-white rounded shadow-sm">
+              <div class="card-header d-flex justify-content-between align-items-center bg-primary text-white">
+                <h6 class="mb-0" style="color:white;"><i class="fa fa-users me-2"></i>Staff List (<t t-esc="filteredStaffList.length"/>)</h6>
+                <div class="input-group ms-auto" style="width: 250px;">
+                  <span class="input-group-text bg-primary text-white border-0"><i class="fa fa-search"></i></span>
+                  <input type="text" class="form-control bg-primary text-white border-1" placeholder="Search staff..." t-model="state.searchTerm" t-on-input="onSearchChange" style="color: white; --bs-placeholder-color: #E2E5F3;"/>
+                </div>
+              </div>
+              <div class="card-body p-0" style="max-height: 60vh; overflow-y: auto;">
+                <t t-if="filteredStaffList.length === 0">
+                  <div class="text-center py-4 text-muted">
+                    <i class="fa fa-users fa-2x mb-2"></i>
+                    <p>No active staff found.</p>
+                  </div>
+                </t>
+                <t t-else="">
+                  <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                      <thead class="table-light">
+                        <tr>
+                          <th>Name</th>
+                          <th>Unit</th>
+                          <th>Email</th>
+                          <th>Phone</th>
+                          <th>User ID</th>
+                          <th>Status</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <t t-foreach="filteredStaffList" t-as="staff" t-key="staff.id">
+                          <tr>
+                            <td><strong><t t-esc="staff.name"/></strong></td>
+                            <td><t t-esc="staff.unit_name"/></td>
+                            <td><t t-esc="staff.email || 'N/A'"/></td>
+                            <td><t t-esc="staff.phone"/></td>
+                            <td><t t-esc="staff.login"/></td>
+                            <td>
+                              <span class="badge bg-success" style="color: white;">Active</span>
+                            </td>
+                          </tr>
+                        </t>
+                      </tbody>
+                    </table>
+                  </div>
+                </t>
+              </div>
             </div>
-          </t>
+          </div>
         </div>
       </t>
     </div>

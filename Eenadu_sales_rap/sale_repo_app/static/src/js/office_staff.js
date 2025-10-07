@@ -10,12 +10,16 @@ export class SalesOfficeStaff extends Component {
     setup() {
         this.rpc = useService("rpc");
 
+        // Load persisted state from localStorage
+        const persistedState = JSON.parse(localStorage.getItem('officeStaffState') || '{}');
+
         this.state = useState({
             loading: true,
             error: null,
-            isCreatingStaff: false,
-            isViewingStaff: false,
-            searchTerm: "",           // <-- Add this line
+            successMessage: null,
+            isCreatingStaff: persistedState.isCreatingStaff || false,
+            isViewingStaff: persistedState.isViewingStaff || false,
+            searchTerm: persistedState.searchTerm || "",
             staffData: {
                 name: "",
                 unit: "",
@@ -52,30 +56,42 @@ export class SalesOfficeStaff extends Component {
         });
     }
 
-    // Filtered staff list
+    // Filtered staff list - only active
     get filteredStaffList() {
         const term = this.state.searchTerm.trim().toLowerCase();
-        if (!term) return this.state.staffList;
-        return this.state.staffList.filter((staff) =>
+        let filtered = this.state.staffList.filter(staff => staff.status === 'active');
+        if (!term) return filtered;
+        return filtered.filter((staff) =>
             staff.name?.toLowerCase().includes(term) ||
             staff.email?.toLowerCase().includes(term) ||
             staff.unit_name?.toLowerCase().includes(term) ||
-            staff.phone?.toLowerCase().includes(term) ||
-            staff.aadhar_number?.toLowerCase().includes(term)
+            staff.phone?.toLowerCase().includes(term)
         );
     }
 
     toggleCreate = () => {
         this.state.isCreatingStaff = !this.state.isCreatingStaff;
         this.state.isViewingStaff = false;
+        this.state.successMessage = null;
         if (!this.state.isCreatingStaff) {
             this.resetForm();
         }
+        this.saveState();
     };
 
     toggleViewStaff = () => {
-        this.state.isViewingStaff = !this.state.isViewingStaff;
+        this.state.isViewingStaff = true;
         this.state.isCreatingStaff = false;
+        this.saveState();
+    };
+
+    saveState = () => {
+        const stateToSave = {
+            isCreatingStaff: this.state.isCreatingStaff,
+            isViewingStaff: this.state.isViewingStaff,
+            searchTerm: this.state.searchTerm,
+        };
+        localStorage.setItem('officeStaffState', JSON.stringify(stateToSave));
     };
 
     resetForm() {
@@ -89,6 +105,11 @@ export class SalesOfficeStaff extends Component {
             adhaar: "",
         };
     }
+
+    onSearchChange = (ev) => {
+        this.state.searchTerm = ev.target.value;
+        this.saveState();
+    };
 
     submitStaff = async (ev) => {
         ev.preventDefault();
@@ -105,7 +126,9 @@ export class SalesOfficeStaff extends Component {
                 this.resetForm();
                 this.state.isCreatingStaff = false;
                 this.state.isViewingStaff = true;
+                this.state.successMessage = "Staff created successfully!";
                 this.state.error = null;
+                this.saveState();
             } else {
                 this.state.error = res.error || "Failed to create staff";
             }

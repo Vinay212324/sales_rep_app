@@ -358,6 +358,7 @@ export class SalesCirculationIncharge extends Component {
                 view_mode: "kanban,form",
                 views: [
                     [false, "kanban"],
+                    [false, "tree"],
                     [false, "form"],
                 ],
                 target: "current",

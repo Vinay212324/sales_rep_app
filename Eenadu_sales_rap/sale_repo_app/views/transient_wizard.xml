@@ -15,7 +15,7 @@
                     <field name="status"/>
                     <field name="unit_name_id"/>
                     <field name="aadhar_number"/>
-                    <field name="pan_number"/>
+<!--                    <field name="pan_number"/>-->
                     <field name="phone"/>
                     <field name="state"/>
                 </group>
