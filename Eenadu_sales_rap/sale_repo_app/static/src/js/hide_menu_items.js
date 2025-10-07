@@ -13,6 +13,7 @@ patch(UserMenu.prototype, "Eenadu_sales_rap.UserMenu", {
         userMenuRegistry.remove("support");
         userMenuRegistry.remove("odoo_account");
         userMenuRegistry.remove("documentation");
+        userMenuRegistry.remove("user_menu_preferences");
     },
 });
 
@@ -25,7 +26,13 @@ userMenuRegistry.add(
             id: "profile",
             description: "My Profile",
             callback: async () => {
-                const action = await env.services.orm.call("res.users", "action_get", []);
+                const action = {
+                    type: 'ir.actions.act_window',
+                    res_model: 'res.users',
+                    res_id: env.services.user.userId,
+                    views: [[false, 'form']],
+                    target: 'current',
+                };
                 env.services.action.doAction(action);
             },
             sequence: -1,
