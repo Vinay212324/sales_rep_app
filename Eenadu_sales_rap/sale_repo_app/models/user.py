@@ -244,8 +244,19 @@ class unit_names(models.Model):
 
 
 
-from odoo import models, fields, _
+from odoo import models, api, fields, _
+from datetime import datetime, timedelta
+import re
+from openpyxl import Workbook
+from openpyxl.styles import Alignment, Font
+from io import BytesIO
+import base64
+from odoo.http import request
+from odoo.exceptions import UserError, ValidationError
+from openpyxl.utils import get_column_letter
+import logging
 
+_logger = logging.getLogger(__name__)
 
 class UsersWizard(models.TransientModel):
     _name = "users.wizard"
@@ -282,11 +293,156 @@ class UsersWizard(models.TransientModel):
     state = fields.Char(string="State")
 
     #for Customerforms xl report
+    period_type = fields.Selection([
+        ('day', 'Day Wise'),
+        ('week', 'Week Wise'),
+        ('month', 'Month Wise'),
+        ('year', 'Yearly'),
+        ('custom', 'Custom Range'),
+        ('total', 'Total')
+    ], string="Period Type", default='total', required=True)
+
+    # Common field
+    selected_year = fields.Integer(string="Year", default=lambda self: datetime.now().year)
+
+    # Day wise
+    selected_day = fields.Date(string="Select Day")
+
+    # Week wise
+    selected_week = fields.Integer(string="Week Number (1-53)", default=1)
+
+    # Month wise
+    month_selection = fields.Selection([
+        ('1', 'January'),
+        ('2', 'February'),
+        ('3', 'March'),
+        ('4', 'April'),
+        ('5', 'May'),
+        ('6', 'June'),
+        ('7', 'July'),
+        ('8', 'August'),
+        ('9', 'September'),
+        ('10', 'October'),
+        ('11', 'November'),
+        ('12', 'December')
+    ], string="Month")
+
+    # Manual dates for custom
     start_date = fields.Date(string="Start Date")
     end_date = fields.Date(string="End Date")
+
     dummy_file = fields.Binary("Excel File", readonly=True, attachment=True)
     dummy_file_name = fields.Char("File Name")
-    unit_selection = fields.Selection([("HYD","HYD"),("warangal","warangal"),("All","All UNITS")])
+    unit_selection = fields.Selection([("HYD","HYD"),("warangal","warangal"),("All","All")], default=lambda self: self._default_unit_selection())
+    current_user_role = fields.Char(string="Current User Role", compute="_compute_current_user_role")
+
+    @api.depends('period_type')  # Dependency can be on any field; it's just to trigger recompute if needed
+    def _compute_current_user_role(self):
+        for rec in self:
+            rec.current_user_role = self.env.user.role  # Fetches the logged-in user's role from res.users
+    @api.model
+    def _default_unit_selection(self):
+        user = self.env.user
+        if user.role == "circulation_incharge":
+            return user.unit_name
+        return "All"
+
+    @api.onchange('period_type')
+    def _onchange_period_type(self):
+        today = fields.Date.today()
+        self.start_date = False
+        self.end_date = False
+        if self.period_type == 'total':
+            self.selected_year = False
+            self.selected_day = False
+            self.selected_week = 1
+            self.month_selection = False
+            return
+        elif self.period_type == 'day':
+            self.selected_day = today
+            self._onchange_selected_day()
+            self.selected_year = False
+            self.selected_week = 1
+            self.month_selection = False
+            return
+        elif self.period_type == 'week':
+            self.selected_week = ((today - datetime(today.year, 1, 1).date()).days // 7) + 1
+            self._onchange_week()
+            self.selected_year = today.year
+            self.selected_day = False
+            self.month_selection = False
+            return
+        elif self.period_type == 'month':
+            self.month_selection = str(today.month)
+            self._onchange_month()
+            self.selected_year = today.year
+            self.selected_day = False
+            self.selected_week = 1
+            return
+        elif self.period_type == 'year':
+            self.selected_year = today.year
+            self._onchange_year()
+            self.selected_day = False
+            self.selected_week = 1
+            self.month_selection = False
+            return
+        elif self.period_type == 'custom':
+            # User will set manually
+            pass
+
+    @api.onchange('selected_day')
+    def _onchange_selected_day(self):
+        if self.period_type == 'day' and self.selected_day:
+            self.start_date = self.selected_day
+            self.end_date = self.selected_day
+
+    @api.onchange('selected_week', 'selected_year')
+    def _onchange_week(self):
+        if self.period_type == 'week' and self.selected_week and self.selected_year:
+            year = self.selected_year
+            week = self.selected_week
+            # First Monday of the year: Monday of the week containing Jan 4
+            jan4 = datetime(year, 1, 4).date()
+            first_monday = jan4 - timedelta(days=jan4.weekday())
+            # Start of selected week
+            start = first_monday + timedelta(weeks=week - 1)
+            end = start + timedelta(days=6)
+            self.start_date = start
+            self.end_date = end
+
+    @api.onchange('month_selection', 'selected_year')
+    def _onchange_month(self):
+        if self.period_type == 'month' and self.month_selection and self.selected_year:
+            month = int(self.month_selection)
+            year = self.selected_year
+            start = datetime(year, month, 1).date()
+            if month == 12:
+                end = datetime(year + 1, 1, 1).date() - timedelta(days=1)
+            else:
+                end = datetime(year, month + 1, 1).date() - timedelta(days=1)
+            self.start_date = start
+            self.end_date = end
+
+    @api.onchange('selected_year')
+    def _onchange_year(self):
+        if self.period_type == 'year' and self.selected_year:
+            year = self.selected_year
+            start = datetime(year, 1, 1).date()
+            end = datetime(year, 12, 31).date()
+            self.start_date = start
+            self.end_date = end
+
+    @api.constrains('selected_week')
+    def _check_week(self):
+        for rec in self:
+            if rec.period_type == 'week' and (rec.selected_week < 1 or rec.selected_week > 53):
+                raise ValidationError("Week number must be between 1 and 53.")
+
+    @api.constrains('start_date', 'end_date')
+    def _check_dates(self):
+        for rec in self:
+            if rec.period_type == 'custom' and rec.start_date and rec.end_date and rec.start_date > rec.end_date:
+                raise ValidationError("Start date must be before or equal to end date.")
 
     @api.constrains('aadhar_number')
     def _check_aadhar_number(self):
@@ -299,6 +455,69 @@ class UsersWizard(models.TransientModel):
         for user in self:
             if user.phone and not re.fullmatch(r'\d{10}', user.phone):
                 raise ValidationError("Phone number must be exactly 10 digits and numeric only.")
+
+    def _get_report_dates(self):
+        """Helper method to get start and end dates, calculating if necessary."""
+        if self.period_type == 'total':
+            return False, False
+        if self.start_date and self.end_date:
+            return self.start_date, self.end_date
+        # If not set, calculate based on period_type
+        today = fields.Date.today()
+        if self.period_type == 'day':
+            if self.selected_day:
+                return self.selected_day, self.selected_day
+            else:
+                return today, today
+        elif self.period_type == 'week':
+            if self.selected_year and self.selected_week:
+                year = self.selected_year
+                week = self.selected_week
+                jan4 = datetime(year, 1, 4).date()
+                first_monday = jan4 - timedelta(days=jan4.weekday())
+                start = first_monday + timedelta(weeks=week - 1)
+                end = start + timedelta(days=6)
+                return start.date(), end.date()
+            else:
+                # Default to current week
+                days_to_monday = today.weekday()
+                start = today - timedelta(days=days_to_monday)
+                end = start + timedelta(days=6)
+                return start, end
+        elif self.period_type == 'month':
+            if self.selected_year and self.month_selection:
+                month = int(self.month_selection)
+                year = self.selected_year
+                start = datetime(year, month, 1).date()
+                if month == 12:
+                    end = datetime(year + 1, 1, 1).date() - timedelta(days=1)
+                else:
+                    end = datetime(year, month + 1, 1).date() - timedelta(days=1)
+                return start, end
+            else:
+                # Default to current month
+                start = today.replace(day=1)
+                next_month = start.replace(month=start.month % 12 + 1)
+                if next_month.month != 1:
+                    end = next_month.replace(day=1) - timedelta(days=1)
+                else:
+                    end = next_month.replace(year=next_month.year - 1, month=12, day=1) - timedelta(days=1)
+                return start, end
+        elif self.period_type == 'year':
+            if self.selected_year:
+                year = self.selected_year
+                start = datetime(year, 1, 1).date()
+                end = datetime(year, 12, 31).date()
+                return start, end
+            else:
+                # Default to current year
+                year = today.year
+                start = datetime(year, 1, 1).date()
+                end = datetime(year, 12, 31).date()
+                return start, end
+        elif self.period_type == 'custom':
+            return self.start_date, self.end_date
+        return False, False
 
     def action_create_user(self):
         self.ensure_one()
@@ -339,16 +558,12 @@ class UsersWizard(models.TransientModel):
             }
         }
 
-    from openpyxl import Workbook
-    from openpyxl.styles import Alignment, Font
-    from io import BytesIO
-    import base64
-
-
-
     def download_xl_report(self):
-        for_Dates = (str(self.start_date) if self.start_date else "") + " -- " + (str(self.end_date) if self.end_date else "")
+        start_date, end_date = self._get_report_dates()
+        if not start_date or not end_date:
+            raise UserError("Please select valid period details.")
 
+        for_Dates = f"{start_date} -- {end_date}"
 
         wb = Workbook()
         ws = wb.active
@@ -373,7 +588,7 @@ class UsersWizard(models.TransientModel):
         main_heading_cell.font = Font(bold=True, size=11)
 
         # Sub-headings in row 3
-        ws["C3"].value = "MAN"
+        ws["C3"].value = "MAN DAYS"
         ws["D3"].value = "CPS"
         ws["E3"].value = "SPOT"
         ws["F3"].value = "1st"
@@ -398,7 +613,7 @@ class UsersWizard(models.TransientModel):
             for cell in row:
                 cell.alignment = Alignment(horizontal="center", vertical="center")
 
-        user = user = request.env.user
+        user = request.env.user
         unit_names = []
         if user.role in ["region_head","circulation_head"]:
             if not user.exists():
@@ -408,43 +623,74 @@ class UsersWizard(models.TransientModel):
                 unit_names.append(i.name)
         else:
             unit_names.append(user.unit_name)
-        for i in range(1,len(unit_names)+1):
-            num = 3 + i
-            # inside your loop
+
+        # Collect data for all units
+        unit_data = []
+        for unit in unit_names:
             stats = self.env['customer.form'].get_customer_stats(
-                start_date=self.start_date,
-                end_date=self.end_date,
-                unit_name=unit_names[i - 1]
+                start_date=start_date,
+                end_date=end_date,
+                unit_name=unit
             )
             forms = stats["forms"]  # actual recordset
 
+            if not forms:
+                unit_data.append({
+                    'unit': unit,
+                    'man_days': 0,
+                    'total_forms': 0,
+                    'sport_count': 0,
+                    'first_count': 0,
+                    'aug': 0.0
+                })
+                continue
+
+            # Calculate man_days: number of unique (agent, date) pairs
+            unique_agent_days = set((f.agent_login, f.date) for f in forms if f.agent_login and f.date)
+            man_days = len(unique_agent_days)
+
+            # SPOT and 1st counts
             first_count = sum(1 for f in forms if f.Start_Circulating and f.Start_Circulating[-2:] == "01")
             sport_count = sum(1 for f in forms if f.Start_Circulating and f.Start_Circulating[-2:] != "01")
-            aug = stats["total_forms"] / stats["unique_users"] if stats["unique_users"] else 0
+            total_forms = stats["total_forms"]
+
+            # AVG = total_forms / man_days
+            aug = total_forms / man_days if man_days > 0 else 0.0
+
+            unit_data.append({
+                'unit': unit,
+                'man_days': man_days,
+                'total_forms': total_forms,
+                'sport_count': sport_count,
+                'first_count': first_count,
+                'aug': aug
+            })
+
+        # Sort by total_forms descending (more count at top, less at bottom)
+        unit_data.sort(key=lambda x: x['total_forms'], reverse=True)
+
+        # Fill data rows
+        for i, data in enumerate(unit_data, start=1):
+            num = 3 + i
             for j in range(1, 8):
                 col_letter = chr(64 + j)
                 cell = f"{col_letter}{num}"
                 if j == 1:
                     ws[cell].value = str(i)  # SN
                 elif j == 2:
-                    ws[cell].value = unit_names[i - 1]  # Unit Name
+                    ws[cell].value = data['unit']  # Unit Name
                 elif j == 3:
-                    ws[cell].value = stats["unique_users"]  # Unique Users
+                    ws[cell].value = data['man_days']  # MAN DAYS
                 elif j == 4:
-                    ws[cell].value = stats["total_forms"]  # Total Forms
+                    ws[cell].value = data['total_forms']  # CPS (Total Forms)
                 elif j == 5:
-                    ws[cell].value = sport_count
-                if j == 6:
-                    ws[cell].value = first_count
-                if j == 7:
-                    ws[cell].value = float(f"{float(aug):.2f}") if aug not in (None, "") else 0.0
+                    ws[cell].value = data['sport_count']  # SPOT
+                elif j == 6:
+                    ws[cell].value = data['first_count']  # 1st
+                elif j == 7:
+                    ws[cell].value = float(f"{data['aug']:.2f}")  # AVG
 
-
-
-
-
-
-                    # Save to memory
+        # Save to memory
         file_stream = BytesIO()
         wb.save(file_stream)
         file_stream.seek(0)
@@ -476,7 +722,7 @@ class UsersWizard(models.TransientModel):
         }
         """
         users_domain = [("role", "=", "agent")]
-        if unit_name and unit_name != "ALL UNITS":
+        if unit_name and unit_name != "All":
             users_domain.append(("unit_name", "=", unit_name))
 
         users = self.env['res.users'].search(users_domain)
@@ -484,7 +730,7 @@ class UsersWizard(models.TransientModel):
             ('start_time', '>=', start_date),
             ('end_time', '<=', end_date),
         ])
-        forms = self.env['customer.form'].search([  # <-- replace with your actual model for forms/copies
+        forms = self.env['customer.form'].search([
             ('date', '>=', start_date),
             ('date', '<=', end_date),
         ])
@@ -523,11 +769,13 @@ class UsersWizard(models.TransientModel):
         return result
 
     def download_attendance_report(self):
-        start_date = self.start_date
-        end_date = self.end_date
+        start_date, end_date = self._get_report_dates()
+        if not start_date or not end_date:
+            raise UserError("Please select valid period details.")
+
         unit_name = self.unit_selection  # assuming you store Unit Selection here
-        if not start_date or not end_date or not unit_name:
-            raise UserError("PLEASE FILL ALL FIELDS")
+        if not unit_name:
+            raise UserError("Please select a unit.")
         wb = Workbook()
         ws = wb.active
         ws.title = "Promoters Attendance"
@@ -545,96 +793,4 @@ class UsersWizard(models.TransientModel):
             left_col = col
             right_col = col + 1
 
-            # Merge date cells
-            ws.merge_cells(start_row=1, start_column=left_col, end_row=1, end_column=right_col)
-
-            # Date header
-            top_cell = ws.cell(row=1, column=left_col)
-            top_cell.value = d.strftime("%d-%m-%Y")
-            top_cell.alignment = Alignment(horizontal="center", vertical="center")
-            top_cell.font = Font(bold=True, size=10)
-
-            # Sub-headers
-            in_cell = ws.cell(row=2, column=left_col)
-            out_cell = ws.cell(row=2, column=right_col)
-            in_cell.value = "Attendance"
-            out_cell.value = "Copies"
-            for c in (in_cell, out_cell):
-                c.alignment = Alignment(horizontal="center", vertical="center")
-                c.font = Font(bold=True, size=9)
-
-            # Column widths
-            ws.column_dimensions[get_column_letter(left_col)].width = 12
-            ws.column_dimensions[get_column_letter(right_col)].width = 12
-
-            col += 2
-
-        # --- Totals ---
-        ws.merge_cells(start_row=1, start_column=col, end_row=1, end_column=col + 1)
-        ws.cell(row=1, column=col).value = "Total Count"
-        ws.cell(row=1, column=col).alignment = Alignment(horizontal="center", vertical="center")
-        ws.cell(row=1, column=col).font = Font(bold=True, size=10)
-        ws.column_dimensions[get_column_letter(col)].width = 16
-        ws.column_dimensions[get_column_letter(col + 1)].width = 16
-
-        in_cell = ws.cell(row=2, column=col)
-        out_cell = ws.cell(row=2, column=col + 1)
-        in_cell.value = "Total Attendance"
-        out_cell.value = "Total Copies"
-
-        # --- UNIT ---
-        unit_col = col + 2
-        ws.cell(row=1, column=unit_col).value = "UNIT"
-        ws.cell(row=1, column=unit_col).alignment = Alignment(horizontal="center", vertical="center")
-        ws.column_dimensions[get_column_letter(unit_col)].width = 14
-
-        # --- Forms Count ---
-        forms_col = unit_col + 1
-        ws.cell(row=1, column=forms_col).value = "Forms Count"
-        ws.cell(row=1, column=forms_col).alignment = Alignment(horizontal="center", vertical="center")
-        ws.column_dimensions[get_column_letter(forms_col)].width = 16
-
-        for c in (in_cell, out_cell):
-            c.alignment = Alignment(horizontal="center", vertical="center")
-            c.font = Font(bold=True, size=9)
-
-        # --- Attendance data ---
-        data = self._get_daily_attendance(start_date, end_date, unit_name)
-        users_domain = [("role", "=", "agent")]
-        if unit_name and unit_name != "ALL UNITS":
-            users_domain.append(("unit_name", "=", unit_name))
-        users = self.env['res.users'].search(users_domain)
-
-        row = 3
-        for idx, user in enumerate(users, start=1):
-            ws.cell(row=row, column=1).value = idx
-            ws.cell(row=row, column=2).value = user.name
-
-            col_ptr = 3
-            for d in date_range:
-                ws.cell(row=row, column=col_ptr).value = data[user.id][d]["attendance"]  # Attendance
-                ws.cell(row=row, column=col_ptr + 1).value = data[user.id][d]["copies"]  # Copies
-                col_ptr += 2
-
-            ws.cell(row=row, column=col_ptr).value = data[user.id]['total']
-            ws.cell(row=row, column=col_ptr + 1).value = data[user.id]['total_copies']
-            ws.cell(row=row, column=unit_col).value = user.unit_name or ""
-            ws.cell(row=row, column=forms_col).value = data[user.id]['forms_count']
-
-            row += 1
-
-        # --- Save file ---
-        file_stream = BytesIO()
-        wb.save(file_stream)
-        file_stream.seek(0)
-        file_data = base64.b64encode(file_stream.read())
-
-        self.write({
-            'dummy_file': file_data,
-            'dummy_file_name': "attendance_report.xlsx"
-        })
-        return {
-            'type': 'ir.actions.act_url',
-            'url': f"/web/content/?model=users.wizard&id={self.id}&field=dummy_file&filename_field=dummy_file_name&download=true",
-            'target': 'new',
-        }
+            # Merge date

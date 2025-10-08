@@ -36,60 +36,59 @@
         <field name="name">users.wizard.form</field>
         <field name="model">users.wizard</field>
         <field name="arch" type="xml">
-            <form string="Create User Wizard">
+            <form string="Customer Forms Excel Report">
                 <group>
                     <group>
-                    <field name="start_date"/>
-                    <field name="end_date"/>
-<!--                    <field name="dummy_file"/>-->
-
+                        <field name="period_type"/>
+                        <newline/>
+                        <field name="selected_year" attrs="{'invisible': [('period_type', 'in', ['day', 'custom', 'total'])]}"/>
+                        <field name="selected_day" attrs="{'invisible': [('period_type', '!=', 'day')]}"/>
+                        <field name="selected_week" attrs="{'invisible': [('period_type', '!=', 'week')]}"/>
+                        <field name="month_selection" attrs="{'invisible': [('period_type', '!=', 'month')]}"/>
+                        <newline/>
+                        <field name="start_date" attrs="{'readonly': [('period_type', '!=', 'custom')], 'invisible': [('period_type', '=', 'total')], 'required': [('period_type', '=', 'custom')]}"/>
+                        <field name="end_date" attrs="{'readonly': [('period_type', '!=', 'custom')], 'invisible': [('period_type', '=', 'total')], 'required': [('period_type', '=', 'custom')]}"/>
                     </group>
                     <group>
-                     <button string="Download Excel Report" type="object"
-                            name="download_xl_report"
-                            class="btn-secondary" />
+                         <button string="Download Excel Report" type="object"
+                                name="download_xl_report"
+                                class="btn-secondary" />
                     </group>
-
                 </group>
-
                 <footer>
-<!--                    <button string="Create User"-->
-<!--                            type="object"-->
-<!--                            name="action_create_user"-->
-<!--                            class="btn-primary"/>-->
                     <button string="Cancel" class="btn-secondary" special="cancel"/>
                 </footer>
             </form>
         </field>
     </record>
 
-
     <record id="view_users_attendance_wizard_form_excel" model="ir.ui.view">
         <field name="name">users.wizard.form</field>
         <field name="model">users.wizard</field>
         <field name="arch" type="xml">
-            <form string="Create User Wizard">
+            <form string="Attendance Excel Report">
                 <group>
                     <group>
-                    <field name="start_date"/>
-                    <field name="end_date"/>
-                    <field name="unit_selection"/>
-<!--                    <field name="dummy_file"/>-->
-
+                        <field name="period_type"/>
+                        <newline/>
+                        <field name="selected_year" attrs="{'invisible': [('period_type', 'in', ['day', 'custom', 'total'])]}"/>
+                        <field name="selected_day" attrs="{'invisible': [('period_type', '!=', 'day')]}"/>
+                        <field name="selected_week" attrs="{'invisible': [('period_type', '!=', 'week')]}"/>
+                        <field name="month_selection" attrs="{'invisible': [('period_type', '!=', 'month')]}"/>
+                        <newline/>
+                        <field name="start_date" attrs="{'readonly': [('period_type', '!=', 'custom')], 'invisible': [('period_type', '=', 'total')], 'required': [('period_type', '=', 'custom')]}"/>
+                        <field name="end_date" attrs="{'readonly': [('period_type', '!=', 'custom')], 'invisible': [('period_type', '=', 'total')], 'required': [('period_type', '=', 'custom')]}"/>
+                        <newline/>
+                        <field name="unit_selection" attrs="{'readonly': [('current_user_role', '=', 'circulation_incharge')]}"/>
+                        <field name="current_user_role" invisible="1"/>
                     </group>
                     <group>
-                     <button string="Download Attendance Report" type="object"
-                            name="download_attendance_report"
-                            class="btn-secondary" />
+                         <button string="Download Attendance Report" type="object"
+                                name="download_attendance_report"
+                                class="btn-secondary" />
                     </group>
-
                 </group>
-
                 <footer>
-<!--                    <button string="Create User"-->
-<!--                            type="object"-->
-<!--                            name="action_create_user"-->
-<!--                            class="btn-primary"/>-->
                     <button string="Cancel" class="btn-secondary" special="cancel"/>
                 </footer>
             </form>
