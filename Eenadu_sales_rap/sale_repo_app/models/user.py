@@ -560,8 +560,8 @@ class UsersWizard(models.TransientModel):
 
     def download_xl_report(self):
         start_date, end_date = self._get_report_dates()
-        if not start_date or not end_date:
-            raise UserError("Please select valid period details.")
+        # if not start_date or not end_date:
+        #     raise UserError("Please select valid period details.")
 
         for_Dates = f"{start_date} -- {end_date}"
 
@@ -770,8 +770,8 @@ class UsersWizard(models.TransientModel):
 
     def download_attendance_report(self):
         start_date, end_date = self._get_report_dates()
-        if not start_date or not end_date:
-            raise UserError("Please select valid period details.")
+        # if not start_date or not end_date:
+        #     raise UserError("Please select valid period details.")
 
         unit_name = self.unit_selection  # assuming you store Unit Selection here
         if not unit_name:
