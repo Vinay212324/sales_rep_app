@@ -243,7 +243,6 @@ class unit_names(models.Model):
 
 
 
-
 from odoo import models, api, fields, _
 from datetime import datetime, timedelta
 import re
@@ -458,17 +457,23 @@ class UsersWizard(models.TransientModel):
 
     def _get_report_dates(self):
         """Helper method to get start and end dates, calculating if necessary."""
+        today = fields.Date.today()
+
         if self.period_type == 'total':
-            return False, False
+            # ✅ Set start date as September 1 of current year and end date as today
+            start = datetime(today.year, 9, 1).date()
+            end = today
+            return start, end
+
         if self.start_date and self.end_date:
             return self.start_date, self.end_date
-        # If not set, calculate based on period_type
-        today = fields.Date.today()
+
         if self.period_type == 'day':
             if self.selected_day:
                 return self.selected_day, self.selected_day
             else:
                 return today, today
+
         elif self.period_type == 'week':
             if self.selected_year and self.selected_week:
                 year = self.selected_year
@@ -477,13 +482,13 @@ class UsersWizard(models.TransientModel):
                 first_monday = jan4 - timedelta(days=jan4.weekday())
                 start = first_monday + timedelta(weeks=week - 1)
                 end = start + timedelta(days=6)
-                return start.date(), end.date()
+                return start, end
             else:
-                # Default to current week
                 days_to_monday = today.weekday()
                 start = today - timedelta(days=days_to_monday)
                 end = start + timedelta(days=6)
                 return start, end
+
         elif self.period_type == 'month':
             if self.selected_year and self.month_selection:
                 month = int(self.month_selection)
@@ -495,7 +500,6 @@ class UsersWizard(models.TransientModel):
                     end = datetime(year, month + 1, 1).date() - timedelta(days=1)
                 return start, end
             else:
-                # Default to current month
                 start = today.replace(day=1)
                 next_month = start.replace(month=start.month % 12 + 1)
                 if next_month.month != 1:
@@ -503,6 +507,7 @@ class UsersWizard(models.TransientModel):
                 else:
                     end = next_month.replace(year=next_month.year - 1, month=12, day=1) - timedelta(days=1)
                 return start, end
+
         elif self.period_type == 'year':
             if self.selected_year:
                 year = self.selected_year
@@ -510,13 +515,14 @@ class UsersWizard(models.TransientModel):
                 end = datetime(year, 12, 31).date()
                 return start, end
             else:
-                # Default to current year
                 year = today.year
                 start = datetime(year, 1, 1).date()
                 end = datetime(year, 12, 31).date()
                 return start, end
+
         elif self.period_type == 'custom':
             return self.start_date, self.end_date
+
         return False, False
 
     def action_create_user(self):
@@ -721,22 +727,38 @@ class UsersWizard(models.TransientModel):
             }
         }
         """
+
         users_domain = [("role", "=", "agent")]
-        if unit_name and unit_name != "All":
+        current_user = request.env.user
+
+        # Handle unit_name logic
+        if unit_name == "All" and current_user.role in ["region_head", "circulation_head"]:
+            if not current_user.exists():
+                return {}
+            # Get all unit names under this region/circulation head
+            unit_names = current_user.unit_name_ids.mapped("name")
+            users_domain.append(("unit_name", "in", unit_names))
+        elif unit_name:
             users_domain.append(("unit_name", "=", unit_name))
 
-        users = self.env['res.users'].search(users_domain)
-        sessions = self.env['work.session'].search([
+        # Fetch all agents
+        users = self.env["res.users"].sudo().search(users_domain)
+
+        # Fetch sessions and forms
+        sessions = self.env["work.session"].sudo().search([
             ('start_time', '>=', start_date),
             ('end_time', '<=', end_date),
         ])
-        forms = self.env['customer.form'].search([
+        forms = self.env["customer.form"].sudo().search([
             ('date', '>=', start_date),
             ('date', '<=', end_date),
         ])
 
         result = {}
-        date_range = [start_date + timedelta(days=i) for i in range((end_date - start_date).days + 1)]
+        date_range = [
+            start_date + timedelta(days=i)
+            for i in range((end_date - start_date).days + 1)
+        ]
 
         for user in users:
             result[user.id] = {}
@@ -744,17 +766,17 @@ class UsersWizard(models.TransientModel):
             total_copies = 0
 
             for d in date_range:
-                # Attendance check
+                # Find sessions for that day
                 day_sessions = sessions.filtered(
-                    lambda s: s.user_id == user and s.start_time.date() == d
+                    lambda s: s.user_id.id == user.id and s.start_time.date() == d
                 )
                 attendance_val = "P/Logged in" if day_sessions else "A/Not Logged"
                 if day_sessions:
                     total_attendance += 1
 
-                # Copies count (forms filled that day)
+                # Count forms that day
                 day_forms = forms.filtered(lambda f: f.agent_login == user.login and f.date == d)
-                copies_val = len(day_forms)  # or f.copies if you have quantity field
+                copies_val = len(day_forms)
                 total_copies += copies_val
 
                 result[user.id][d] = {
@@ -762,9 +784,9 @@ class UsersWizard(models.TransientModel):
                     "copies": copies_val,
                 }
 
-            result[user.id]['total'] = total_attendance
-            result[user.id]['total_copies'] = total_copies
-            result[user.id]['forms_count'] = total_copies  # keep same for clarity
+            result[user.id]["total"] = total_attendance
+            result[user.id]["total_copies"] = total_copies
+            result[user.id]["forms_count"] = total_copies  # same for consistency
 
         return result
 
@@ -793,4 +815,113 @@ class UsersWizard(models.TransientModel):
             left_col = col
             right_col = col + 1
 
-            # Merge date
+            # Merge date cells
+            ws.merge_cells(start_row=1, start_column=left_col, end_row=1, end_column=right_col)
+
+            # Date header
+            top_cell = ws.cell(row=1, column=left_col)
+            top_cell.value = d.strftime("%d-%m-%Y")
+            top_cell.alignment = Alignment(horizontal="center", vertical="center")
+            top_cell.font = Font(bold=True, size=10)
+
+            # Sub-headers
+            in_cell = ws.cell(row=2, column=left_col)
+            out_cell = ws.cell(row=2, column=right_col)
+            in_cell.value = "Attendance"
+            out_cell.value = "Copies"
+            for c in (in_cell, out_cell):
+                c.alignment = Alignment(horizontal="center", vertical="center")
+                c.font = Font(bold=True, size=9)
+
+            # Column widths
+            ws.column_dimensions[get_column_letter(left_col)].width = 12
+            ws.column_dimensions[get_column_letter(right_col)].width = 12
+
+            col += 2
+
+        # --- Totals ---
+        ws.merge_cells(start_row=1, start_column=col, end_row=1, end_column=col + 1)
+        ws.cell(row=1, column=col).value = "Total Count"
+        ws.cell(row=1, column=col).alignment = Alignment(horizontal="center", vertical="center")
+        ws.cell(row=1, column=col).font = Font(bold=True, size=10)
+        ws.column_dimensions[get_column_letter(col)].width = 16
+        ws.column_dimensions[get_column_letter(col + 1)].width = 16
+
+        in_cell = ws.cell(row=2, column=col)
+        out_cell = ws.cell(row=2, column=col + 1)
+        in_cell.value = "Total Attendance"
+        out_cell.value = "Total Copies"
+
+        # --- UNIT ---
+        unit_col = col + 2
+        ws.cell(row=1, column=unit_col).value = "UNIT"
+        ws.cell(row=1, column=unit_col).alignment = Alignment(horizontal="center", vertical="center")
+        ws.column_dimensions[get_column_letter(unit_col)].width = 14
+
+        # --- Forms Count ---
+        forms_col = unit_col + 1
+        ws.cell(row=1, column=forms_col).value = "Forms Count"
+        ws.cell(row=1, column=forms_col).alignment = Alignment(horizontal="center", vertical="center")
+        ws.column_dimensions[get_column_letter(forms_col)].width = 16
+
+        for c in (in_cell, out_cell):
+            c.alignment = Alignment(horizontal="center", vertical="center")
+            c.font = Font(bold=True, size=9)
+
+        # --- Attendance data ---
+        data = self._get_daily_attendance(start_date, end_date, unit_name)
+
+        # Fetch users only from the keys in data to ensure consistency
+        users = self.env['res.users'].sudo().search([('id', 'in', list(data.keys()))])
+
+        # Group users by unit and sort units by total forms_count descending
+        from collections import defaultdict
+        unit_groups = defaultdict(list)
+        unit_totals = defaultdict(int)
+        for user in users:
+            unit = user.unit_name or ""
+            unit_groups[unit].append(user)
+            unit_totals[unit] += data[user.id]['forms_count']
+
+        # Sort units by total forms descending
+        sorted_units = sorted(unit_totals.keys(), key=lambda u: unit_totals[u], reverse=True)
+
+        # For each unit, sort users by total_copies descending
+        sorted_users = []
+        for unit in sorted_units:
+            unit_users = sorted(unit_groups[unit], key=lambda u: data[u.id]['total_copies'], reverse=True)
+            sorted_users.extend(unit_users)
+
+        row = 3
+        for idx, user in enumerate(sorted_users, start=1):
+            ws.cell(row=row, column=1).value = idx
+            ws.cell(row=row, column=2).value = user.name
+
+            col_ptr = 3
+            for d in date_range:
+                ws.cell(row=row, column=col_ptr).value = data[user.id][d]["attendance"]  # Attendance
+                ws.cell(row=row, column=col_ptr + 1).value = data[user.id][d]["copies"]  # Copies
+                col_ptr += 2
+
+            ws.cell(row=row, column=col_ptr).value = data[user.id]['total']
+            ws.cell(row=row, column=col_ptr + 1).value = data[user.id]['total_copies']
+            ws.cell(row=row, column=unit_col).value = user.unit_name or ""
+            ws.cell(row=row, column=forms_col).value = data[user.id]['forms_count']
+
+            row += 1
+
+        # --- Save file ---
+        file_stream = BytesIO()
+        wb.save(file_stream)
+        file_stream.seek(0)
+        file_data = base64.b64encode(file_stream.read())
+
+        self.write({
+            'dummy_file': file_data,
+            'dummy_file_name': "attendance_report.xlsx"
+        })
+        return {
+            'type': 'ir.actions.act_url',
+            'url': f"/web/content/?model=users.wizard&id={self.id}&field=dummy_file&filename_field=dummy_file_name&download=true",
+            'target': 'new',
+        }
