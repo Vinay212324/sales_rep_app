@@ -30,10 +30,11 @@
                     <div class="oe_kanban_global_click o_kanban_record">
                         <div class="oe_kanban_details">
                             <ul>
-                                <li><strong>Agent:</strong> <field name="agent_name"/></li>
-                                <li><strong>Unit:</strong> <field name="unit_name"/></li>
+                                <li><strong>Family Head:</strong> <field name="family_head_name"/></li>
+                                <li><strong>Agency:</strong> <field name="Agency"/></li>
                                 <li><strong>Phone:</strong> <field name="mobile_number"/></li>
-                                <li><strong>Profession:</strong> <field name="profession"/></li>
+                                <li><strong>Url: </strong> <field name="location_url" widget="url"/></li>
+                                <li><strong>Image: </strong><field name="face_base64" widget="image" class="oe_avatar"/></li>
                                 <li><strong>Create Date:</strong> <field name="date"/></li>
                             </ul>
                         </div>
