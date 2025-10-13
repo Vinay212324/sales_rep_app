@@ -9,10 +9,10 @@ class CustomerForm(models.Model):
     _name = 'customer.form'
     _description = 'Customer Form'
 
-    agent_name = fields.Char(string='Agent Name')
+    agent_name = fields.Char(string='Staff Name')
     root_name = fields.Char(string="Root Map")
-    agent_login = fields.Char(string="Agent login")
-    unit_name = fields.Char(string="Unit name")
+    agent_login = fields.Char(string="Staff login")
+    unit_name = fields.Char(string="Unit Name")
     date = fields.Date(string='Form Filled Date', default=fields.Date.context_today)
     time = fields.Char( string='Current Time', default=lambda self: datetime.now().strftime('%H:%M') )
 
