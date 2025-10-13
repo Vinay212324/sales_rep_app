@@ -68,6 +68,85 @@
                   style="flex: 1 1 calc(25% - 12px); min-width: 180px; min-height: 100px; display: flex; align-items: center; justify-content: center; text-align: center;">
             Total Customer Forms
           </button>
+
+          <!-- 9: Today's Active Users -->
+          <button t-on-click="loadTodayActiveUsers"
+                  class="btn btn-outline-info"
+                  style="flex: 1 1 calc(25% - 12px); min-width: 180px; min-height: 100px; display: flex; align-items: center; justify-content: center; text-align: center;">
+            <i class="fa fa-users me-2" style="font-size: 1.5rem;"></i>
+            Today's Active Users
+          </button>
+        </div>
+
+        <!-- 📋 Active Users Section -->
+        <div t-if="state.activeUsersView" class="mb-4">
+          <div class="row mb-3 align-items-center">
+            <div class="col-auto">
+              <button class="btn btn-secondary" t-on-click="goBackFromActiveUsers">
+                <i class="fa fa-arrow-left me-1"></i>
+                Back
+              </button>
+            </div>
+            <div class="col">
+              <h4 class="mb-0">
+                <i class="fa fa-users me-2 text-success"></i>
+                Today's Active Users for <t t-esc="state.unit_name" />
+              </h4>
+            </div>
+          </div>
+
+          <t t-if="state.loading">
+            <div class="text-center py-5">
+              <i class="fa fa-spinner fa-spin fa-3x text-primary mb-3"></i>
+              <p class="text-muted">Loading today's active users...</p>
+            </div>
+          </t>
+          <t t-elif="state.error">
+            <div class="alert alert-danger">
+              <i class="fa fa-exclamation-triangle me-2"></i>
+              Error: <t t-esc="state.error" />
+            </div>
+          </t>
+          <t t-elif="state.todayActiveUsers.length === 0">
+            <div class="alert alert-info">
+              <i class="fa fa-info-circle me-2"></i>
+              No active users today.
+            </div>
+          </t>
+          <t t-else="">
+            <div class="card shadow-sm">
+              <div class="card-body">
+                <div class="table-responsive">
+                  <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                      <tr>
+                        <th>Name</th>
+                        <th>Phone</th>
+                        <th>Starting Selfie Time</th>
+                        <th>First Customer Form Time</th>
+                        <th>Forms Filled Count</th>
+                        <th>Started Work Area</th>
+                        <th>Working Agency</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <t t-foreach="state.todayActiveUsers" t-as="au" t-key="au.user.id">
+                        <tr>
+                          <td><t t-esc="au.user.name || 'Unknown'" /></td>
+                          <td><t t-esc="au.user.phone || 'No phone'" /></td>
+                          <td><t t-esc="au.startSelfie || 'N/A'" /></td>
+                          <td><t t-esc="au.firstFormTime || 'N/A'" /></td>
+                          <td><strong><t t-esc="au.formCount" /></strong></td>
+                          <td><t t-esc="au.startArea || 'N/A'" /></td>
+                          <td><span class="badge bg-info"><t t-esc="au.agency || 'N/A'" /></span></td>
+                        </tr>
+                      </t>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </t>
         </div>
 
         <!-- 📋 Staff List Section -->

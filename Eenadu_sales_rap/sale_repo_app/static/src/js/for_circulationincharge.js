@@ -17,6 +17,7 @@ export class SalesCirculationIncharge extends Component {
 
     setup() {
         this.actionService = useService("action");
+        this.orm = useService("orm");
         this.rpc = useService("rpc");
 
         // Load persisted state from localStorage
@@ -33,11 +34,13 @@ export class SalesCirculationIncharge extends Component {
             view_all_customer_forms: persisted.view_all_customer_forms || false,
             approved_staff: persisted.approved_staff || false,
             staff_waiting_for_approval: persisted.staff_waiting_for_approval || false,
+            activeUsersView: persisted.activeUsersView || false,
             searchTerm: persisted.searchTerm || "",
             searchAge: persisted.searchAge || "",
             selectedStaff: null,
             staffList: [],
             agenciesList: [],
+            todayActiveUsers: [],
             loading: true,
             error: null,
             count:"",
@@ -85,6 +88,7 @@ export class SalesCirculationIncharge extends Component {
             view_all_customer_forms: this.state.view_all_customer_forms,
             approved_staff: this.state.approved_staff,
             staff_waiting_for_approval: this.state.staff_waiting_for_approval,
+            activeUsersView: this.state.activeUsersView,
             searchTerm: this.state.searchTerm,
             searchAge: this.state.searchAge,
         };
@@ -96,12 +100,88 @@ export class SalesCirculationIncharge extends Component {
         sharedStore.triggerFunction = !sharedStore.triggerFunction;
     }
 
+    async loadTodayActiveUsers() {
+        this.state.loading = true;
+        this.state.error = null;
+        try {
+            const today = new Date().toISOString().split('T')[0];
+            const unitName = this.state.unit_name;
+
+            // Fetch active agents in this unit
+            const users = await this.orm.searchRead('res.users', [
+                ['role', '=', 'agent'],
+                ['unit_name', '=', unitName],
+                ['status', '=', 'active']
+            ], ['id', 'name', 'login', 'phone'], { limit: 100 });
+
+            const activeUsers = [];
+            for (const user of users) {
+                // Fetch today's work sessions
+                const sessions = await this.orm.searchRead('work.session', [
+                    ['user_id', '=', user.id],
+                    ['start_time', '>=', `${today} 00:00:00`],
+                    ['start_time', '<=', `${today} 23:59:59`]
+                ], ['start_time'], { order: 'start_time asc' });
+
+                if (sessions.length === 0) continue;
+
+                const startSelfieTime = sessions[0].start_time;
+
+                // Fetch today's forms
+                const forms = await this.orm.searchRead('customer.form', [
+                    ['agent_login', '=', user.login],
+                    ['date', '=', today]
+                ], ['date', 'time', 'location_address', 'Agency'], { order: 'time asc' });
+
+                let firstFormTime = null;
+                let formCount = 0;
+                let startArea = null;
+                let agency = null;
+
+                if (forms.length > 0) {
+                    const firstForm = forms[0];
+                    firstFormTime = `${firstForm.date} ${firstForm.time}`;
+                    formCount = forms.length;
+                    startArea = firstForm.location_address || '';
+                    agency = firstForm.Agency || '';
+                }
+
+                activeUsers.push({
+                    user,
+                    startSelfie: startSelfieTime,
+                    firstFormTime,
+                    formCount,
+                    startArea,
+                    agency
+                });
+            }
+
+            // Sort by startSelfieTime ascending
+            activeUsers.sort((a, b) => new Date(a.startSelfie) - new Date(b.startSelfie));
+
+            this.state.todayActiveUsers = activeUsers;
+            this.state.activeUsersView = true;
+        } catch (error) {
+            this.state.error = error.message || 'Failed to load today\'s active users';
+        } finally {
+            this.state.loading = false;
+            this.saveState();
+        }
+    }
+
+    goBackFromActiveUsers() {
+        this.state.activeUsersView = false;
+        this.state.todayActiveUsers = [];
+        this.saveState();
+    }
+
     openStaffList() {
         this.state.number_of_resources = true;
         this.state.attend_customer = false;
         this.state.view_all_customer_forms = false;
         this.state.approved_staff = false;
         this.state.staff_waiting_for_approval = false;
+        this.state.activeUsersView = false;
         this.state.status = "active";
         this.state.name = "";
         this.state.user_id = "";
@@ -114,6 +194,7 @@ export class SalesCirculationIncharge extends Component {
         this.state.view_all_customer_forms = true;
         this.state.approved_staff = false;
         this.state.staff_waiting_for_approval = false;
+        this.state.activeUsersView = false;
         this.state.status = "active";
         this.state.name = "";
         this.state.user_id = "";
@@ -126,6 +207,7 @@ export class SalesCirculationIncharge extends Component {
         this.state.view_all_customer_forms = false;
         this.state.approved_staff = true;
         this.state.staff_waiting_for_approval = false;
+        this.state.activeUsersView = false;
         this.state.status = "active";
         this.state.name = "";
         this.state.user_id = "";
@@ -138,6 +220,7 @@ export class SalesCirculationIncharge extends Component {
         this.state.view_all_customer_forms = false;
         this.state.approved_staff = false;
         this.state.staff_waiting_for_approval = true;
+        this.state.activeUsersView = false;
         this.state.status = "un_activ";
         this.state.searchTerm = ""; // Clear search term to show all unapproved staff
         this.state.error = null; // Reset error state
@@ -249,6 +332,7 @@ export class SalesCirculationIncharge extends Component {
             this.state.view_all_customer_forms = false;
             this.state.approved_staff = false;
             this.state.staff_waiting_for_approval = false;
+            this.state.activeUsersView = false;
             this.state.status = "active";
             this.state.login = login;
             this.state.name = name;
@@ -267,6 +351,7 @@ export class SalesCirculationIncharge extends Component {
             this.state.view_all_customer_forms = true;
             this.state.approved_staff = false;
             this.state.staff_waiting_for_approval = false;
+            this.state.activeUsersView = false;
             this.state.status = "active";
             this.state.login = phone;
             this.state.name = name;

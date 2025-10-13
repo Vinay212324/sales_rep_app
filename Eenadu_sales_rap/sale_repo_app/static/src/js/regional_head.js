@@ -25,6 +25,8 @@ export class RegionalHeadDashboard extends Component {
             circulation_incharge: {},
             unit_names: [],
             unit_details: null,
+            todayActiveUsers: [],
+            unitActiveUsers: [],
             loading: true,
             error: null,
             currentView: "dashboard",
@@ -110,6 +112,164 @@ export class RegionalHeadDashboard extends Component {
             this.render();
         }
     }
+
+    async loadTodayActiveUsers() {
+        this.state.loading = true;
+        this.state.error = null;
+        try {
+            const today = new Date().toISOString().split('T')[0];
+            const unitNames = this.state.unit_names;
+
+            // Fetch active agents in these units
+            const users = await this.orm.searchRead('res.users', [
+                ['role', '=', 'agent'],
+                ['unit_name', 'in', unitNames],
+                ['status', '=', 'active']
+            ], ['id', 'name', 'login', 'phone'], { limit: 100 });  // Limit to avoid too many
+
+            const activeUsers = [];
+            for (const user of users) {
+                // Fetch today's work sessions
+                const sessions = await this.orm.searchRead('work.session', [
+                    ['user_id', '=', user.id],
+                    ['start_time', '>=', `${today} 00:00:00`],
+                    ['start_time', '<=', `${today} 23:59:59`]
+                ], ['start_time'], { order: 'start_time asc' });
+
+                if (sessions.length === 0) continue;  // Only active if has session
+
+                const startSelfieTime = sessions[0].start_time;
+
+                // Fetch today's forms
+                const forms = await this.orm.searchRead('customer.form', [
+                    ['agent_login', '=', user.login],
+                    ['date', '=', today]
+                ], ['date', 'time', 'location_address', 'Agency'], { order: 'time asc' });
+
+                let firstFormTime = null;
+                let formCount = 0;
+                let startArea = null;
+                let agency = null;
+
+                if (forms.length > 0) {
+                    const firstForm = forms[0];
+                    firstFormTime = `${firstForm.date} ${firstForm.time}`;
+                    formCount = forms.length;
+                    startArea = firstForm.location_address || '';
+                    agency = firstForm.Agency || '';
+                }
+
+                activeUsers.push({
+                    user,
+                    startSelfie: startSelfieTime,
+                    firstFormTime,
+                    formCount,
+                    startArea,
+                    agency
+                });
+            }
+
+            // Sort by startSelfieTime ascending
+            activeUsers.sort((a, b) => new Date(a.startSelfie) - new Date(b.startSelfie));
+
+            this.state.todayActiveUsers = activeUsers;
+            this.state.currentView = 'today_active_users';
+        } catch (error) {
+            this.state.error = error.message || 'Failed to load today\'s active users';
+        } finally {
+            this.state.loading = false;
+            this.saveState();
+        }
+    }
+
+    async loadUnitActiveUsers(unit) {
+        this.state.loading = true;
+        this.state.error = null;
+        try {
+            const today = new Date().toISOString().split('T')[0];
+
+            // Fetch active agents in this unit
+            const users = await this.orm.searchRead('res.users', [
+                ['role', '=', 'agent'],
+                ['unit_name', '=', unit],
+                ['status', '=', 'active']
+            ], ['id', 'name', 'login', 'phone'], { limit: 100 });
+
+            const activeUsers = [];
+            for (const user of users) {
+                // Fetch today's work sessions
+                const sessions = await this.orm.searchRead('work.session', [
+                    ['user_id', '=', user.id],
+                    ['start_time', '>=', `${today} 00:00:00`],
+                    ['start_time', '<=', `${today} 23:59:59`]
+                ], ['start_time'], { order: 'start_time asc' });
+
+                if (sessions.length === 0) continue;
+
+                const startSelfieTime = sessions[0].start_time;
+
+                // Fetch today's forms
+                const forms = await this.orm.searchRead('customer.form', [
+                    ['agent_login', '=', user.login],
+                    ['date', '=', today]
+                ], ['date', 'time', 'location_address', 'Agency'], { order: 'time asc' });
+
+                let firstFormTime = null;
+                let formCount = 0;
+                let startArea = null;
+                let agency = null;
+
+                if (forms.length > 0) {
+                    const firstForm = forms[0];
+                    firstFormTime = `${firstForm.date} ${firstForm.time}`;
+                    formCount = forms.length;
+                    startArea = firstForm.location_address || '';
+                    agency = firstForm.Agency || '';
+                }
+
+                activeUsers.push({
+                    user,
+                    startSelfie: startSelfieTime,
+                    firstFormTime,
+                    formCount,
+                    startArea,
+                    agency
+                });
+            }
+
+            // Sort by startSelfieTime ascending
+            activeUsers.sort((a, b) => new Date(a.startSelfie) - new Date(b.startSelfie));
+
+            this.state.unitActiveUsers = activeUsers;
+            this.state.currentView = 'unit_active_users';
+        } catch (error) {
+            this.state.error = error.message || 'Failed to load unit\'s active users';
+        } finally {
+            this.state.loading = false;
+            this.saveState();
+        }
+    }
+
+    goBackToDashboard() {
+        console.log("Returning to dashboard");
+        this.state.currentView = "dashboard";
+        this.state.selected_unit = null;
+        this.state.unit_details = null;
+        this.state.todayActiveUsers = [];
+        this.state.unitActiveUsers = [];
+        this.state.error = null;
+        this.state.selectedUserId = null;
+        this.saveState();
+        this.render();
+    }
+
+    goBackToUnitDetail() {
+        this.state.currentView = "unit_detail";
+        this.state.unitActiveUsers = [];
+        this.saveState();
+        this.render();
+    }
+
     async loadStaffDetails(email, user_id, name) {
         try {
             console.log("Loading details for user_id:", email);
