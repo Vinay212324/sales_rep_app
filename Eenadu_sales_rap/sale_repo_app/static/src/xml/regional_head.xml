@@ -276,7 +276,7 @@
                             <thead class="table-light">
                               <tr>
                                 <th>Name</th>
-                                <th>Email</th>
+                                <th>USer Id</th>
                                 <th>Phone</th>
                                 <th>Status</th>
                               </tr>
@@ -321,7 +321,7 @@
                             <thead class="table-light">
                               <tr>
                                 <th>Name</th>
-                                <th>Email</th>
+                                <th>USer Id</th>
                                 <th>Phone</th>
                                 <th>Status</th>
                               </tr>
@@ -366,7 +366,7 @@
                             <thead class="table-light">
                               <tr>
                                 <th>Name</th>
-                                <th>Email</th>
+                                <th>USer Id</th>
                                 <th>Phone</th>
                                 <th>Status</th>
                               </tr>
@@ -411,7 +411,7 @@
                             <thead class="table-light">
                               <tr>
                                 <th>Name</th>
-                                <th>Email</th>
+                                <th>USer Id</th>
                                 <th>Phone</th>
                                 <th>Status</th>
                               </tr>
@@ -456,7 +456,7 @@
                             <thead class="table-light">
                               <tr>
                                 <th>Name</th>
-                                <th>Email</th>
+                                <th>USer Id</th>
                                 <th>Phone</th>
                                 <th>Status</th>
                                 <th>Actions</th>
