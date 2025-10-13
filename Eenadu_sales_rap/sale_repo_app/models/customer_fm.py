@@ -17,7 +17,7 @@ class CustomerForm(models.Model):
     time = fields.Char( string='Current Time', default=lambda self: datetime.now().strftime('%H:%M') )
 
     # Family Details
-    family_head_name = fields.Char(string="Family Head Name")
+    family_head_name = fields.Char(string="Customer")
     father_name = fields.Char(string="Father's Name")
     mother_name = fields.Char(string="Mother's Name")
     spouse_name = fields.Char(string="Spouse's Name")
