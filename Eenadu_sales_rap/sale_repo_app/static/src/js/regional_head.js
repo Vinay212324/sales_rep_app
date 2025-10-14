@@ -32,6 +32,9 @@ export class RegionalHeadDashboard extends Component {
             currentView: "dashboard",
             selected_unit: null,
             selectedUserId: null,
+            login: '',
+            name: '',
+            user_id: '',
         });
 
         // Load persisted state from localStorage
@@ -90,6 +93,10 @@ export class RegionalHeadDashboard extends Component {
         this.state.loading = true;
         this.state.error = null; // Clear previous errors
         this.state.unit_details = null; // Reset unit details
+        this.state.selectedUserId = null;
+        this.state.login = '';
+        this.state.name = '';
+        this.state.user_id = '';
         try {
             const res = await this.rpc("/get_unit_information_users", { unit });
             console.log("Unit Details RPC Response:", res);
@@ -174,6 +181,7 @@ export class RegionalHeadDashboard extends Component {
 
             this.state.todayActiveUsers = activeUsers;
             this.state.currentView = 'today_active_users';
+            this.state.selectedUserId = null;
         } catch (error) {
             this.state.error = error.message || 'Failed to load today\'s active users';
         } finally {
@@ -242,12 +250,21 @@ export class RegionalHeadDashboard extends Component {
 
             this.state.unitActiveUsers = activeUsers;
             this.state.currentView = 'unit_active_users';
+            this.state.selectedUserId = null;
         } catch (error) {
             this.state.error = error.message || 'Failed to load unit\'s active users';
         } finally {
             this.state.loading = false;
             this.saveState();
         }
+    }
+
+    selectUser(au) {
+        this.state.selectedUserId = au.user.id;
+        this.state.login = au.user.login;
+        this.state.name = au.user.name;
+        this.state.user_id = au.user.id;
+        this.saveState();
     }
 
     goBackToDashboard() {
@@ -259,6 +276,9 @@ export class RegionalHeadDashboard extends Component {
         this.state.unitActiveUsers = [];
         this.state.error = null;
         this.state.selectedUserId = null;
+        this.state.login = '';
+        this.state.name = '';
+        this.state.user_id = '';
         this.saveState();
         this.render();
     }
@@ -266,6 +286,10 @@ export class RegionalHeadDashboard extends Component {
     goBackToUnitDetail() {
         this.state.currentView = "unit_detail";
         this.state.unitActiveUsers = [];
+        this.state.selectedUserId = null;
+        this.state.login = '';
+        this.state.name = '';
+        this.state.user_id = '';
         this.saveState();
         this.render();
     }
@@ -276,10 +300,6 @@ export class RegionalHeadDashboard extends Component {
         } catch (error) {
             console.error("Error fetching staff details:", error);
         }
-    }
-    selectUser(userId) {
-        this.state.selectedUserId = userId;
-        this.saveState();
     }
     async today_attendance(user_id) {
         try {
@@ -303,10 +323,10 @@ export class RegionalHeadDashboard extends Component {
         }
     }
 
-    async totalCustomerForms(email,user_id) {
+    async totalCustomerForms(login, user_id) {
         try {
-            console.log(email, "vinn");
-            const domain = [["agent_login", "=", email]];
+            console.log(login, "vinn");
+            const domain = [["agent_login", "=", login]];
             const context = { default_user_id: user_id };
             await this.actionService.doAction({
                 type: "ir.actions.act_window",
@@ -377,6 +397,9 @@ export class RegionalHeadDashboard extends Component {
         this.state.unit_details = null;
         this.state.error = null;
         this.state.selectedUserId = null;
+        this.state.login = '';
+        this.state.name = '';
+        this.state.user_id = '';
         this.saveState();
         this.render();
     }

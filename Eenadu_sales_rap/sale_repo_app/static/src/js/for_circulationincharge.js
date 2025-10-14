@@ -46,6 +46,7 @@ export class SalesCirculationIncharge extends Component {
             count:"",
             cu_count:"",
             unit_name: "",
+            selectedUserId: null,
         });
 
         onWillStart(async () => {
@@ -100,6 +101,19 @@ export class SalesCirculationIncharge extends Component {
         sharedStore.triggerFunction = !sharedStore.triggerFunction;
     }
 
+    formatDateTime(dtString) {
+        const date = new Date(dtString);
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = date.getHours();
+        const minutes = date.getMinutes();
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        const displayHour = hours % 12 || 12;
+        const timeStr = `${displayHour}:${String(minutes).padStart(2, '0')} ${ampm}`;
+        return `${year}-${month}-${day} ${timeStr}`;
+    }
+
     async loadTodayActiveUsers() {
         this.state.loading = true;
         this.state.error = null;
@@ -125,7 +139,9 @@ export class SalesCirculationIncharge extends Component {
 
                 if (sessions.length === 0) continue;
 
-                const startSelfieTime = sessions[0].start_time;
+                const originalStartTime = new Date(sessions[0].start_time);
+                const adjustedStartTime = new Date(originalStartTime.getTime() + (5 * 60 + 30) * 60 * 1000);
+                const startSelfieTime = this.formatDateTime(adjustedStartTime.toISOString());
 
                 // Fetch today's forms
                 const forms = await this.orm.searchRead('customer.form', [
@@ -160,6 +176,7 @@ export class SalesCirculationIncharge extends Component {
             activeUsers.sort((a, b) => new Date(a.startSelfie) - new Date(b.startSelfie));
 
             this.state.todayActiveUsers = activeUsers;
+            this.state.selectedUserId = null;
             this.state.activeUsersView = true;
         } catch (error) {
             this.state.error = error.message || 'Failed to load today\'s active users';
@@ -169,9 +186,18 @@ export class SalesCirculationIncharge extends Component {
         }
     }
 
+    selectUser(au) {
+        this.state.selectedUserId = au.user.id;
+        this.state.login = au.user.login;
+        this.state.name = au.user.name;
+        this.state.user_id = au.user.id;
+        this.saveState();
+    }
+
     goBackFromActiveUsers() {
         this.state.activeUsersView = false;
         this.state.todayActiveUsers = [];
+        this.state.selectedUserId = null;
         this.saveState();
     }
 
@@ -281,10 +307,10 @@ export class SalesCirculationIncharge extends Component {
         });
     }
 
-    async today_attendance() {
+    async today_attendance(user_id) {
         try {
-            const domain = [["user_id", "=", this.state.user_id]];
-            const context = { default_user_id: this.state.user_id };
+            const domain = [["user_id", "=", user_id]];
+            const context = { default_user_id: user_id };
             await this.actionService.doAction({
                 type: "ir.actions.act_window",
                 name: "Work Sessions",

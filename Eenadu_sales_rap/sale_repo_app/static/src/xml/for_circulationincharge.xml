@@ -127,11 +127,12 @@
                         <th>Forms Filled Count</th>
                         <th>Started Work Area</th>
                         <th>Working Agency</th>
+                        <th>Actions</th>
                       </tr>
                     </thead>
                     <tbody>
                       <t t-foreach="state.todayActiveUsers" t-as="au" t-key="au.user.id">
-                        <tr>
+                        <tr t-on-click="() => this.selectUser(au)" style="cursor: pointer;" class="table-row-hover">
                           <td><t t-esc="au.user.name || 'Unknown'" /></td>
                           <td><t t-esc="au.user.phone || 'No phone'" /></td>
                           <td><t t-esc="au.startSelfie || 'N/A'" /></td>
@@ -139,6 +140,20 @@
                           <td><strong><t t-esc="au.formCount" /></strong></td>
                           <td><t t-esc="au.startArea || 'N/A'" /></td>
                           <td><span class="badge bg-info"><t t-esc="au.agency || 'N/A'" /></span></td>
+                          <td>
+                            <t t-if="state.selectedUserId === au.user.id">
+                              <div class="d-flex gap-2">
+                                <button t-on-click="(ev) => { ev.stopPropagation(); this.today_attendance(au.user.id); }" class="btn btn-outline-primary btn-sm">
+                                  <i class="fa fa-calendar me-1"></i>
+                                  Attendance
+                                </button>
+                                <button t-on-click="(ev) => { ev.stopPropagation(); this.totalCustomerForms(); }" class="btn btn-outline-success btn-sm">
+                                  <i class="fa fa-file-o me-1"></i>
+                                  Forms
+                                </button>
+                              </div>
+                            </t>
+                          </td>
                         </tr>
                       </t>
                     </tbody>
@@ -218,7 +233,7 @@
         <div t-if="!state.number_of_resources and state.status==='active' and state.attend_customer" class="mb-4">
           <h4 class="mb-3">Staff Details for <t t-esc="state.name"/></h4>
           <div class="d-flex gap-3">
-            <div t-on-click="today_attendance"
+            <div t-on-click="() => this.today_attendance(state.user_id)"
                  class="btn btn-light btn-lg border"
                  style="display: inline-flex; align-items: center; justify-content: center; padding: 0.5rem 1rem; flex: 1;">
               <div>Staff Attendance</div>
@@ -234,5 +249,12 @@
 
       </div>
     </div>
+
+    <!-- Custom CSS for hover effect -->
+    <style>
+      .table-row-hover:hover {
+        background-color: rgba(0, 123, 255, 0.1);
+      }
+    </style>
   </t>
 </templates>

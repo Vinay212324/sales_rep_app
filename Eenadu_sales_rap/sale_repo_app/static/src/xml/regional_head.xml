@@ -120,11 +120,12 @@
                         <th>Forms Filled Count</th>
                         <th>Started Work Area</th>
                         <th>Working Agency</th>
+                        <th>Actions</th>
                       </tr>
                     </thead>
                     <tbody>
                       <t t-foreach="state.todayActiveUsers" t-as="au" t-key="au.user.id">
-                        <tr>
+                        <tr t-on-click="() => this.selectUser(au)" style="cursor: pointer;" class="table-row-hover">
                           <td><t t-esc="au.user.name || 'Unknown'" /></td>
                           <td><t t-esc="au.user.phone || 'No phone'" /></td>
                           <td><t t-esc="au.startSelfie || 'N/A'" /></td>
@@ -132,6 +133,20 @@
                           <td><strong><t t-esc="au.formCount" /></strong></td>
                           <td><t t-esc="au.startArea || 'N/A'" /></td>
                           <td><span class="badge bg-info"><t t-esc="au.agency || 'N/A'" /></span></td>
+                          <td>
+                            <t t-if="state.selectedUserId === au.user.id">
+                              <div class="d-flex gap-2">
+                                <button t-on-click="(ev) => { ev.stopPropagation(); this.today_attendance(au.user.id); }" class="btn btn-outline-primary btn-sm">
+                                  <i class="fa fa-calendar me-1"></i>
+                                  Attendance
+                                </button>
+                                <button t-on-click="(ev) => { ev.stopPropagation(); this.totalCustomerForms(au.user.login, au.user.id); }" class="btn btn-outline-success btn-sm">
+                                  <i class="fa fa-file-o me-1"></i>
+                                  Forms
+                                </button>
+                              </div>
+                            </t>
+                          </td>
                         </tr>
                       </t>
                     </tbody>
@@ -191,11 +206,12 @@
                         <th>Forms Filled Count</th>
                         <th>Started Work Area</th>
                         <th>Working Agency</th>
+                        <th>Actions</th>
                       </tr>
                     </thead>
                     <tbody>
                       <t t-foreach="state.unitActiveUsers" t-as="au" t-key="au.user.id">
-                        <tr>
+                        <tr t-on-click="() => this.selectUser(au)" style="cursor: pointer;" class="table-row-hover">
                           <td><t t-esc="au.user.name || 'Unknown'" /></td>
                           <td><t t-esc="au.user.phone || 'No phone'" /></td>
                           <td><t t-esc="au.startSelfie || 'N/A'" /></td>
@@ -203,6 +219,20 @@
                           <td><strong><t t-esc="au.formCount" /></strong></td>
                           <td><t t-esc="au.startArea || 'N/A'" /></td>
                           <td><span class="badge bg-info"><t t-esc="au.agency || 'N/A'" /></span></td>
+                          <td>
+                            <t t-if="state.selectedUserId === au.user.id">
+                              <div class="d-flex gap-2">
+                                <button t-on-click="(ev) => { ev.stopPropagation(); this.today_attendance(au.user.id); }" class="btn btn-outline-primary btn-sm">
+                                  <i class="fa fa-calendar me-1"></i>
+                                  Attendance
+                                </button>
+                                <button t-on-click="(ev) => { ev.stopPropagation(); this.totalCustomerForms(au.user.login, au.user.id); }" class="btn btn-outline-success btn-sm">
+                                  <i class="fa fa-file-o me-1"></i>
+                                  Forms
+                                </button>
+                              </div>
+                            </t>
+                          </td>
                         </tr>
                       </t>
                     </tbody>
