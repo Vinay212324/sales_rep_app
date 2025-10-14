@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { Component, useState, onWillStart } from "@odoo/owl";
+import { Component, useState, onWillStart, onMounted } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { sharedStore } from "./dashboard";
@@ -74,6 +74,12 @@ export class SalesCirculationIncharge extends Component {
                 });
             } finally {
                 this.state.loading = false;
+            }
+        });
+
+        onMounted(() => {
+            if (this.state.activeUsersView && this.state.todayActiveUsers.length === 0) {
+                this.loadTodayActiveUsers();
             }
         });
     }

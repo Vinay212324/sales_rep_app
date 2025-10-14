@@ -78,6 +78,19 @@ export class RegionalHeadDashboard extends Component {
         });
     }
 
+    formatDateTime(dtString) {
+        const date = new Date(dtString);
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = date.getHours();
+        const minutes = date.getMinutes();
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        const displayHour = hours % 12 || 12;
+        const timeStr = `${displayHour}:${String(minutes).padStart(2, '0')} ${ampm}`;
+        return `${year}-${month}-${day} ${timeStr}`;
+    }
+
     saveState() {
         const STORAGE_KEY = 'regional_head_dashboard_state';
         const stateToSave = {
@@ -145,7 +158,9 @@ export class RegionalHeadDashboard extends Component {
 
                 if (sessions.length === 0) continue;  // Only active if has session
 
-                const startSelfieTime = sessions[0].start_time;
+                const originalStartTime = new Date(sessions[0].start_time);
+                const adjustedStartTime = new Date(originalStartTime.getTime() + (5 * 60 + 30) * 60 * 1000);
+                const startSelfieTime = this.formatDateTime(adjustedStartTime.toISOString());
 
                 // Fetch today's forms
                 const forms = await this.orm.searchRead('customer.form', [
@@ -214,7 +229,9 @@ export class RegionalHeadDashboard extends Component {
 
                 if (sessions.length === 0) continue;
 
-                const startSelfieTime = sessions[0].start_time;
+                const originalStartTime = new Date(sessions[0].start_time);
+                const adjustedStartTime = new Date(originalStartTime.getTime() + (5 * 60 + 30) * 60 * 1000);
+                const startSelfieTime = this.formatDateTime(adjustedStartTime.toISOString());
 
                 // Fetch today's forms
                 const forms = await this.orm.searchRead('customer.form', [
