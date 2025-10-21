@@ -242,7 +242,6 @@ class unit_names(models.Model):
     unit_name_id = fields.Many2one('res.users')
 
 
-
 from odoo import models, api, fields, _
 from datetime import datetime, timedelta
 import re
@@ -256,6 +255,7 @@ from openpyxl.utils import get_column_letter
 import logging
 
 _logger = logging.getLogger(__name__)
+
 
 class UsersWizard(models.TransientModel):
     _name = "users.wizard"
@@ -291,7 +291,7 @@ class UsersWizard(models.TransientModel):
     phone = fields.Char(string="Phone")
     state = fields.Char(string="State")
 
-    #for Customerforms xl report
+    # for Customerforms xl report
     period_type = fields.Selection([
         ('day', 'Day Wise'),
         ('week', 'Week Wise'),
@@ -332,19 +332,169 @@ class UsersWizard(models.TransientModel):
 
     dummy_file = fields.Binary("Excel File", readonly=True, attachment=True)
     dummy_file_name = fields.Char("File Name")
-    unit_selection = fields.Selection([("HYD","HYD"),("warangal","warangal"),("All","All")], default=lambda self: self._default_unit_selection())
+    unit_selection = fields.Selection([("HYD", "HYD"), ("warangal", "warangal"), ("All", "All")],
+                                      default=lambda self: self._default_unit_selection())
     current_user_role = fields.Char(string="Current User Role", compute="_compute_current_user_role")
+
+    # HTML Summary Field for Customer Forms Preview
+    customer_html_summary = fields.Html(string="Customer Forms Summary", compute="_compute_customer_html_summary",
+                                        sanitize=False)
 
     @api.depends('period_type')  # Dependency can be on any field; it's just to trigger recompute if needed
     def _compute_current_user_role(self):
         for rec in self:
             rec.current_user_role = self.env.user.role  # Fetches the logged-in user's role from res.users
+
     @api.model
     def _default_unit_selection(self):
         user = self.env.user
         if user.role == "circulation_incharge":
             return user.unit_name
         return "All"
+
+    @api.depends('start_date', 'end_date', 'period_type')
+    def _compute_customer_html_summary(self):
+        for rec in self:
+            if not rec.start_date or not rec.end_date:
+                rec.customer_html_summary = '<p class="text-muted">No dates selected. Please select a valid period to view the summary.</p>'
+                continue
+
+            try:
+                start_date, end_date = rec.start_date, rec.end_date
+                user = self.env.user
+                unit_names = []
+                if user.role == "region_head":
+                    unit_names = [u.name for u in user.unit_name_ids] if user.unit_name_ids else []
+                else:
+                    unit_name = getattr(user, 'unit_name', False)
+                    if unit_name:
+                        unit_names = [unit_name]
+
+                if not unit_names:
+                    rec.customer_html_summary = '<div class="alert alert-warning"><i class="fa fa-exclamation-triangle me-2"></i>No unit assigned to the user.</div>'
+                    continue
+
+                # Collect data for all units
+                unit_data = []
+                for unit in unit_names:
+                    stats = self.env['customer.form'].get_customer_stats(
+                        start_date=start_date,
+                        end_date=end_date,
+                        unit_name=unit
+                    )
+                    forms = stats["forms"]  # actual recordset
+
+                    if not forms:
+                        unit_data.append({
+                            'unit': unit,
+                            'man_days': 0,
+                            'total_forms': 0,
+                            'sport_count': 0,
+                            'first_count': 0,
+                            'aug': 0.0
+                        })
+                        continue
+
+                    # Calculate man_days: number of unique (agent, date) pairs
+                    unique_agent_days = set((f.agent_login, f.date) for f in forms if f.agent_login and f.date)
+                    man_days = len(unique_agent_days)
+
+                    # SPOT and 1st counts
+                    first_count = sum(1 for f in forms if f.Start_Circulating and f.Start_Circulating[-2:] == "01")
+                    sport_count = sum(1 for f in forms if f.Start_Circulating and f.Start_Circulating[-2:] != "01")
+                    total_forms = stats["total_forms"]
+
+                    # AVG = total_forms / man_days
+                    aug = total_forms / man_days if man_days > 0 else 0.0
+
+                    unit_data.append({
+                        'unit': unit,
+                        'man_days': man_days,
+                        'total_forms': total_forms,
+                        'sport_count': sport_count,
+                        'first_count': first_count,
+                        'aug': aug
+                    })
+
+                # Sort by total_forms descending
+                unit_data.sort(key=lambda x: x['total_forms'], reverse=True)
+
+                # Generate HTML table
+                html = f"""
+                <div class="card shadow-sm mt-3">
+                    <div class="card-header bg-primary text-white">
+                        <h6 class="mb-0">
+                            <i class="fa fa-table me-2"></i>
+                            Customer Forms Summary for {start_date.strftime('%d/%m/%Y')} to {end_date.strftime('%d/%m/%Y')}
+                            <span class="badge bg-light text-dark ms-2">{', '.join(unit_names)}</span>
+                        </h6>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>SN</th>
+                                        <th>Unit Name</th>
+                                        <th>Man Days</th>
+                                        <th>CPS (Total Forms)</th>
+                                        <th>Spot</th>
+                                        <th>1st</th>
+                                        <th>AVG</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                """
+
+                for i, data in enumerate(unit_data, 1):
+                    html += f"""
+                                    <tr>
+                                        <td>{i}</td>
+                                        <td><strong>{data['unit']}</strong></td>
+                                        <td><span class="badge bg-success">{data['man_days']}</span></td>
+                                        <td><span class="badge bg-info">{data['total_forms']}</span></td>
+                                        <td>{data['sport_count']}</td>
+                                        <td>{data['first_count']}</td>
+                                        <td>{data['aug']:.2f}</td>
+                                    </tr>
+                    """
+
+                # Grand totals
+                total_units = len([d for d in unit_data if d['total_forms'] > 0])  # Only units with data
+                grand_total_forms = sum(d['total_forms'] for d in unit_data)
+                grand_man_days = sum(d['man_days'] for d in unit_data)
+                grand_avg = grand_total_forms / grand_man_days if grand_man_days > 0 else 0.0
+
+                html += f"""
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="card-footer bg-light">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <strong>Total Units: {total_units}</strong>
+                                </div>
+                                <div class="col-md-3">
+                                    <strong>Total Man Days: {grand_man_days}</strong>
+                                </div>
+                                <div class="col-md-3">
+                                    <strong>Total Forms: {grand_total_forms}</strong>
+                                </div>
+                                <div class="col-md-3">
+                                    <strong>Overall AVG: {grand_avg:.2f}</strong>
+                                </div>
+                            </div>
+                            {'<p class="text-muted small mb-0">Note: Values are based on available data in the selected period. If zeros appear, no forms were recorded.</p>' if grand_total_forms == 0 else ''}
+                        </div>
+                    </div>
+                </div>
+                """
+
+                rec.customer_html_summary = html
+
+            except Exception as e:
+                _logger.error("Error in _compute_customer_html_summary: %s", e)
+                rec.customer_html_summary = f'<div class="alert alert-danger"><i class="fa fa-exclamation-triangle me-2"></i>Error loading summary: {str(e)}</div>'
 
     @api.onchange('period_type')
     def _onchange_period_type(self):
@@ -621,14 +771,18 @@ class UsersWizard(models.TransientModel):
 
         user = request.env.user
         unit_names = []
-        if user.role in ["region_head","circulation_head"]:
+        if user.role == "region_head":
             if not user.exists():
                 return {"status": 404, "message": "User not found"}
-
             for i in user.unit_name_ids:
                 unit_names.append(i.name)
         else:
-            unit_names.append(user.unit_name)
+            unit_name = user.unit_name
+            if unit_name:
+                unit_names = [unit_name]
+
+        if not unit_names:
+            raise UserError("No unit assigned to the user.")
 
         # Collect data for all units
         unit_data = []
@@ -732,11 +886,14 @@ class UsersWizard(models.TransientModel):
         current_user = request.env.user
 
         # Handle unit_name logic
-        if unit_name == "All" and current_user.role in ["region_head", "circulation_head"]:
+        if unit_name == "All" and current_user.role in ["region_head", "circulation_incharge"]:
             if not current_user.exists():
                 return {}
             # Get all unit names under this region/circulation head
-            unit_names = current_user.unit_name_ids.mapped("name")
+            if current_user.role == "region_head":
+                unit_names = current_user.unit_name_ids.mapped("name")
+            else:
+                unit_names = [current_user.unit_name] if current_user.unit_name else []
             users_domain.append(("unit_name", "in", unit_names))
         elif unit_name:
             users_domain.append(("unit_name", "=", unit_name))

@@ -55,6 +55,8 @@
                                 class="btn-secondary" />
                     </group>
                 </group>
+                <newline/>
+                <field name="customer_html_summary" nolabel="1" readonly="1" class="o_html_preview" attrs="{'invisible': [('period_type', '=', 'total')]}"/>
                 <footer>
                     <button string="Cancel" class="btn-secondary" special="cancel"/>
                 </footer>
