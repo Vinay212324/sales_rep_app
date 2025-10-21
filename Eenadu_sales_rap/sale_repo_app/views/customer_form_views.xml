@@ -36,6 +36,7 @@
                                 <li><strong>Url: </strong> <field name="location_url" widget="url"/></li>
                                 <li><strong>Image: </strong><field name="face_base64" widget="image" class="oe_avatar"/></li>
                                 <li><strong>Create Date:</strong> <field name="date"/></li>
+                                <li><strong>Create Time:</strong> <field name="time"/></li>
                             </ul>
                         </div>
                     </div>
