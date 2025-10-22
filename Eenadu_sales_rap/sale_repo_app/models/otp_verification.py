@@ -35,6 +35,7 @@ class PhoneVerificationOTP(models.Model):
         for res in unit_set:
             print(res)
             unit_name = res
+
             count = request.env['customer.form'].sudo().search_count(
                 [('unit_name', '=', unit_name), ('date', '=', date.today())])
             print(count)
@@ -58,8 +59,9 @@ class PhoneVerificationOTP(models.Model):
 
 
             great = "happy"
-            unit_number = "9642421753"
-            head_office_number = "9642421753"
+            unit_numbers={"HYD":"9121179317","warangal":"8008346594"}
+            unit_number = unit_numbers.unit_name
+            head_office_number = "7093299504"
             for_main_mes = [unit_number, head_office_number]
             try:
                 res = {}
