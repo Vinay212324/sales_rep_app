@@ -1,6 +1,6 @@
 <odoo>
     <data noupdate="1">
-        <!-- Cron job to call send_message every day at 7 PM -->
+        <!-- Cron job to call send_message every day at 7 PM IST (Hyderabad/Telangana timezone) -->
         <record id="ir_cron_send_daily_url_messages" model="ir.cron">
             <field name="name">Send Daily URL Messages</field>
             <field name="model_id" ref="model_verification_otp"/>
@@ -10,10 +10,10 @@
             <field name="interval_number">1</field>
             <field name="interval_type">days</field>
             <field name="numbercall">-1</field>
-            <field name="doall">False</field>
+            <field name="doall">True</field>  <!-- Changed to True for all processes -->
             <field name="active">True</field>
-            <!-- First run time (after this Odoo auto-updates daily) -->
-            <field name="nextcall">2025-10-08 19:00:00</field>
+            <!-- Next run: 7 PM IST on Oct 23, 2025 (13:30 UTC for IST=UTC+5:30) -->
+            <field name="nextcall">2025-10-23 13:30:00</field>
         </record>
     </data>
 </odoo>

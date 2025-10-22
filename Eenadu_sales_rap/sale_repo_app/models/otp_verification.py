@@ -25,6 +25,7 @@ class PhoneVerificationOTP(models.Model):
 
     def send_message_sales_rep(self):
         print("yyyyyyyyyyy")
+        today = date.today()
         all_unit_names = request.env['res.users'].sudo().search([("role","=","circulation_incharge")])
         unit_set = []
         for res in all_unit_names:
@@ -42,92 +43,92 @@ class PhoneVerificationOTP(models.Model):
 
             message_history = request.env['message.history'].create({
                 'unit_name': unit_name,
-                'date': date.today()
+                'date': today
             })
             message_history.sudo().generate_token()
             total_agencies = request.env['pin.location'].sudo().search([('unit_name', '=', unit_name)])
             total_agencies_filled_custon_forms_today = []
             print("hooo")
             for i in total_agencies:
-                count = request.env['customer.form'].sudo().search_count(
-                    [('unit_name', '=', unit_name), ('Agency', '=', i.location_name)])
-                if count >= 1:
-                    print(count,"vinay21vinnn")
+                agency_count = request.env['customer.form'].sudo().search_count(
+                    [('unit_name', '=', unit_name), ('date', '=', today), ('Agency', '=', i.location_name)])
+                if agency_count >= 1:
+                    print(agency_count, "vinay21vinnn")
                     total_agencies_filled_custon_forms_today.append([i.location_name, i.phone])
 
 
-            # great = "happy"
-            # unit_number = "8106040532"
-            # head_office_number = "9642421753"
-            # for_main_mes = [unit_number, head_office_number]
-            # try:
-            #     res = {}
-            #     for i in for_main_mes:
-            #
-            #
-            #         link = f"salesrep.esanchaya.com/daily-data/{date.today()}/{message_history.unic_code}"
-            #
-            #         msg = (
-            #             f"Hi,We are sharing the circulation subscribers details please click on the link {link} EENADU-CIRCULATION"
-            #         )
-            #         url = "https://www.smsstriker.com/API/sms.php"
-            #
-            #         payload = {
-            #             'username': 'EERETA',
-            #             'password': 'EERETA',
-            #             'from': 'EERETA',
-            #             'to': i,
-            #             'msg': msg,
-            #             'type': '1',
-            #             'template_id': '1407175507724602621'
-            #         }
-            #
-            #         agencies = request.env['pin.location'].sudo().search([('unit_name', '=', unit_name)])
-            #
-            #
-            #         response = requests.post(url, data=payload)
-            #
-            #
-            #         if not (response.status_code):
-            #             _logger.error(f"SMS sending failed: {response.text}")
-            #             res[str(i)] = {'status': 'error', 'message': 'Failed to send OTP'}
-            #
-            #         res[str(i)] = {'status': 'success', 'message': 'OTP sent successfully'}
-            #
-            #     for i in total_agencies_filled_custon_forms_today:
-            #
-            #         message_history = request.env['message.history'].create({
-            #             'unit_name': unit_name,
-            #             'date': date.today(),
-            #             'agency': i[0]
-            #         })
-            #
-            #         message_history.sudo().generate_token()
-            #
-            #         link = f"salesrep.esanchaya.com/daily-data/{message_history.unic_code}"
-            #         msg = (
-            #             f"Hi,We are sharing the circulation subscribers details please click on the link {link} EENADU-CIRCULATION"
-            #         )
-            #         url = "https://www.smsstriker.com/API/sms.php"
-            #
-            #         payload = {
-            #             'username': 'EERETA',
-            #             'password': 'EERETA',
-            #             'from': 'EERETA',
-            #             'to': i[1],
-            #             'msg': msg,
-            #             'type': '1',
-            #             'template_id': '1407175507724602621'
-            #         }
-            #
-            #         response = requests.post(url, data=payload)
-            #         if not (response.status_code):
-            #             _logger.error(f"SMS sending failed: {response.text}")
-            #             res[str(i)] = {'status': 'error', 'message': 'Failed to send OTP'}
-            #
-            #         res[str(i)] = {'status': 'success', 'message': 'OTP sent successfully'}
-            #
-            #     # _logger.info("SMS Response: %s %s", response.status_code, response.text)
-            # except Exception as e:
-            #     _logger.exception("Error sending OTP")
-            #     return {'status': 'error', 'message': str(e)}
+            great = "happy"
+            unit_number = "9642421753"
+            head_office_number = "9642421753"
+            for_main_mes = [unit_number, head_office_number]
+            try:
+                res = {}
+                for i in for_main_mes:
+
+
+                    link = f"salesrep.esanchaya.com/daily-data/{date.today()}/{message_history.unic_code}"
+
+                    msg = (
+                        f"Hi,We are sharing the circulation subscribers details please click on the link {link} EENADU-CIRCULATION"
+                    )
+                    url = "https://www.smsstriker.com/API/sms.php"
+
+                    payload = {
+                        'username': 'EERETA',
+                        'password': 'EERETA',
+                        'from': 'EERETA',
+                        'to': i,
+                        'msg': msg,
+                        'type': '1',
+                        'template_id': '1407175507724602621'
+                    }
+
+                    agencies = request.env['pin.location'].sudo().search([('unit_name', '=', unit_name)])
+
+
+                    response = requests.post(url, data=payload)
+
+
+                    if not (response.status_code):
+                        _logger.error(f"SMS sending failed: {response.text}")
+                        res[str(i)] = {'status': 'error', 'message': 'Failed to send OTP'}
+
+                    res[str(i)] = {'status': 'success', 'message': 'OTP sent successfully'}
+
+                for i in total_agencies_filled_custon_forms_today:
+
+                    message_history = request.env['message.history'].create({
+                        'unit_name': unit_name,
+                        'date': date.today(),
+                        'agency': i[0]
+                    })
+
+                    message_history.sudo().generate_token()
+
+                    link = f"salesrep.esanchaya.com/daily-data/{message_history.unic_code}"
+                    msg = (
+                        f"Hi,We are sharing the circulation subscribers details please click on the link {link} EENADU-CIRCULATION"
+                    )
+                    url = "https://www.smsstriker.com/API/sms.php"
+
+                    payload = {
+                        'username': 'EERETA',
+                        'password': 'EERETA',
+                        'from': 'EERETA',
+                        'to': i[1],
+                        'msg': msg,
+                        'type': '1',
+                        'template_id': '1407175507724602621'
+                    }
+
+                    response = requests.post(url, data=payload)
+                    if not (response.status_code):
+                        _logger.error(f"SMS sending failed: {response.text}")
+                        res[str(i)] = {'status': 'error', 'message': 'Failed to send OTP'}
+
+                    res[str(i)] = {'status': 'success', 'message': 'OTP sent successfully'}
+
+                # _logger.info("SMS Response: %s %s", response.status_code, response.text)
+            except Exception as e:
+                _logger.exception("Error sending OTP")
+                return {'status': 'error', 'message': str(e)}

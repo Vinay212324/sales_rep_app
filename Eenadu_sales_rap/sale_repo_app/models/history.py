@@ -16,3 +16,5 @@ class RootMap(models.Model):
         characters = string.ascii_letters + string.digits  # A-Z, a-z, 0-9
         token = ''.join(secrets.choice(characters) for _ in range(35))
         self.sudo().write({'unic_code': token})
+
+
