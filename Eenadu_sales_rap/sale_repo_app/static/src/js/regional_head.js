@@ -276,11 +276,24 @@ export class RegionalHeadDashboard extends Component {
         }
     }
 
-    selectUser(au) {
-        this.state.selectedUserId = au.user.id;
-        this.state.login = au.user.login;
-        this.state.name = au.user.name;
-        this.state.user_id = au.user.id;
+    // FIXED: Handle both 'au' objects (from active users) and direct 'user' objects (from agents)
+    selectUser(auOrUser) {
+        let user;
+        if (auOrUser && auOrUser.user) {
+            // From active users: au = { user: {...}, ... }
+            user = auOrUser.user;
+        } else {
+            // From agents: direct user object
+            user = auOrUser;
+        }
+        if (!user || !user.id) {
+            console.warn("Invalid user object passed to selectUser");
+            return;
+        }
+        this.state.selectedUserId = user.id;
+        this.state.login = user.login || user.email || '';  // Fallback for consistency
+        this.state.name = user.name || '';
+        this.state.user_id = user.id;
         this.saveState();
     }
 

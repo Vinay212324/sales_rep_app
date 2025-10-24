@@ -494,7 +494,8 @@
                             </thead>
                             <tbody>
                               <t t-foreach="state.unit_details.agent" t-as="user" t-key="user.id">
-                                <tr t-on-click="() => this.selectUser(user.id)" style="cursor: pointer;" class="table-row-hover">
+                                <!-- FIXED: Pass {user: user} instead of user.id -->
+                                <tr t-on-click="() => this.selectUser({user: user})" style="cursor: pointer;" class="table-row-hover">
                                   <td><t t-esc="user.name || 'Unknown'" /></td>
                                   <td><t t-esc="user.email || 'No email'" /></td>
                                   <td><t t-esc="user.phone || 'No phone'" /></td>
