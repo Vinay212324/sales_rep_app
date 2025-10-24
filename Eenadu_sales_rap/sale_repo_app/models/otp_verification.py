@@ -58,9 +58,13 @@ class PhoneVerificationOTP(models.Model):
                     total_agencies_filled_custon_forms_today.append([i.location_name, i.phone])
 
 
-            great = "happy"
+            # great = "happy"  # Unused, removed
             unit_numbers={"HYD":"9121179317","warangal":"8008346594"}
-            unit_number = unit_numbers.unit_name
+            # FIXED: Use bracket notation for dict access with unit_name as key
+            unit_number = unit_numbers.get(unit_name, '')  # Fallback to empty if key missing
+            if not unit_number:
+                _logger.warning(f"No phone number found for unit: {unit_name}")
+                continue  # Skip if no number
             head_office_number = "9642421753"
             for_main_mes = [unit_number, head_office_number]
             try:
@@ -68,7 +72,7 @@ class PhoneVerificationOTP(models.Model):
                 for i in for_main_mes:
 
 
-                    link = f"salesrep.esanchaya.com/daily-data/{date.today()}/{message_history.unic_code}"
+                    link = f"https://salesrep.esanchaya.com/daily-data/{date.today()}/{message_history.unic_code}"  # Added https://
 
                     msg = (
                         f"Hi,We are sharing the circulation subscribers details please click on the link {link} EENADU-CIRCULATION"
@@ -85,17 +89,18 @@ class PhoneVerificationOTP(models.Model):
                         'template_id': '1407175507724602621'
                     }
 
-                    agencies = request.env['pin.location'].sudo().search([('unit_name', '=', unit_name)])
+                    agencies = request.env['pin.location'].sudo().search([('unit_name', '=', unit_name)])  # Unused? Kept for now
 
 
                     response = requests.post(url, data=payload)
 
 
-                    if not (response.status_code):
-                        _logger.error(f"SMS sending failed: {response.text}")
-                        res[str(i)] = {'status': 'error', 'message': 'Failed to send OTP'}
-
-                    res[str(i)] = {'status': 'success', 'message': 'OTP sent successfully'}
+                    # FIXED: Check for successful status code (e.g., 200)
+                    if response.status_code != 200:
+                        _logger.error(f"SMS sending failed for {i}: {response.status_code} - {response.text}")
+                        res[str(i)] = {'status': 'error', 'message': 'Failed to send message'}
+                    else:
+                        res[str(i)] = {'status': 'success', 'message': 'Message sent successfully'}
 
                 for i in total_agencies_filled_custon_forms_today:
 
@@ -107,7 +112,7 @@ class PhoneVerificationOTP(models.Model):
 
                     message_history.sudo().generate_token()
 
-                    link = f"salesrep.esanchaya.com/daily-data/{message_history.unic_code}"
+                    link = f"https://salesrep.esanchaya.com/daily-data/{message_history.unic_code}"  # Added https:// and fixed date placeholder if needed
                     msg = (
                         f"Hi,We are sharing the circulation subscribers details please click on the link {link} EENADU-CIRCULATION"
                     )
@@ -124,13 +129,16 @@ class PhoneVerificationOTP(models.Model):
                     }
 
                     response = requests.post(url, data=payload)
-                    if not (response.status_code):
-                        _logger.error(f"SMS sending failed: {response.text}")
-                        res[str(i)] = {'status': 'error', 'message': 'Failed to send OTP'}
+                    # FIXED: Same status check
+                    if response.status_code != 200:
+                        _logger.error(f"SMS sending failed for agency {i[0]}: {response.status_code} - {response.text}")
+                        res[str(i[1])] = {'status': 'error', 'message': 'Failed to send message'}  # Use phone as key
+                    else:
+                        res[str(i[1])] = {'status': 'success', 'message': 'Message sent successfully'}
 
-                    res[str(i)] = {'status': 'success', 'message': 'OTP sent successfully'}
-
-                # _logger.info("SMS Response: %s %s", response.status_code, response.text)
+                # _logger.info("SMS Response: %s %s", response.status_code, response.text)  # Moved inside loops
+                _logger.info(f"Messages sent for unit {unit_name}: %s", res)
             except Exception as e:
-                _logger.exception("Error sending OTP")
+                _logger.exception("Error sending messages for unit %s: %s", unit_name, str(e))
                 return {'status': 'error', 'message': str(e)}
+        return {'status': 'success', 'message': 'All messages processed'}
