@@ -54,12 +54,13 @@ class MyMessage(http.Controller):
             total_agencies = request.env['pin.location'].sudo().search([('unit_name', '=', unit_name)])
 
             total_agencies_filled_custon_forms_today = []
-
+            print(day_str,"hhhh")
             for i in total_agencies:
-                print(i, "vinay")
+                print(i, "vinay",i.location_name)
                 count = request.env['customer.form'].sudo().search_count(
-                    [('unit_name', '=', unit_name), ('date', '=', day_str), ('Agency', '=', i.location_name)])
+                    [('unit_name', '=', unit_name), ('date', '=', day_str), ('Agency', '=', str(i.location_name)+" ")])
                 if count >= 1:
+                    print(count,"koooo")
                     total_agencies_filled_custon_forms_today.append([i.phone])
 
 
@@ -160,7 +161,7 @@ class MyMessage(http.Controller):
         unassigned_forms = request.env['customer.form'].sudo().search([
             ('unit_name', '=', unit_name),
             ('date', '=', date),
-            '|', ('Agency', '=', False), ('Agency', '=', '')  # Empty or null Agency
+            '|', ('Agency', '=', False), ('Agency', '=', "Other Agency ")  # Empty or null Agency
         ])
         for rec in unassigned_forms:
             total_agencies_filled_custon_forms_today.append(rec)
@@ -170,7 +171,7 @@ class MyMessage(http.Controller):
             customer_forms = request.env['customer.form'].sudo().search([
                 ('unit_name', '=', unit_name),
                 ('date', '=', date),
-                ('Agency', '=', i.location_name)
+                ('Agency', '=', str(i.location_name)+" ")
             ])
             if customer_forms:
                 # Append individual records
@@ -195,7 +196,7 @@ class MyMessage(http.Controller):
                 j.Start_Circulating,
                 j.mobile_number,
                 j.agent_name,
-                j.date,  # Second date as per header (duplicate)
+                j.date,  # or `date` from message.history?
                 j.time,
                 j.customer_type,
                 j.current_newspaper
@@ -336,7 +337,7 @@ class MyMessage(http.Controller):
         customer_forms = request.env['customer.form'].sudo().search([
             ('unit_name', '=', unit_name),
             ('date', '=', date),
-            ('Agency', '=', agency)
+            ('Agency', '=', str(agency)+" ")
         ])
 
         for j in customer_forms:
@@ -380,3 +381,8 @@ class MyMessage(http.Controller):
     #     if not user:
     #         return {'success': False, 'message': 'Invalid or expired token', 'code': 403}
     #     unit = user.unit_name
+
+
+
+
+
