@@ -61,7 +61,7 @@ class PhoneVerificationOTP(models.Model):
             great = "happy"
             unit_numbers={"HYD":"9121179317","warangal":"8008346594"}
             unit_number = unit_numbers.unit_name
-            head_office_number = "7093299504"
+            head_office_number = "9642421753"
             for_main_mes = [unit_number, head_office_number]
             try:
                 res = {}
