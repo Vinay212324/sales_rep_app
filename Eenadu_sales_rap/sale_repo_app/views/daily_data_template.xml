@@ -1,5 +1,5 @@
 <odoo>
-    <template id="daily_data_template" name="Daily Data Page">
+    <template id="sale_repo_app.daily_data_agency_template" name="Daily Data Page">
         <div class="container mt-5">
             <h2>Daily Data Information</h2>
             <table class="table table-bordered">
@@ -14,13 +14,13 @@
             </table>
 
             <!-- Download PDF -->
-<!--            <a t-att-href="'/daily-data/pdf/%s' % (unic_code)"-->
+<!--            <a t-att-href="'/daily_data_agency/pdf/%s' % (unic_code)"-->
 <!--               class="btn btn-primary mt-3">-->
 <!--                Download PDF-->
 <!--            </a>-->
 
             <!-- Download Excel -->
-            <a t-att-href="'/daily-data/excel/%s' % (unic_code)"
+            <a t-att-href="'/daily_data_agency/excel/%s' % (unic_code)"
                class="btn btn-success mt-3">
                 Download Excel
             </a>

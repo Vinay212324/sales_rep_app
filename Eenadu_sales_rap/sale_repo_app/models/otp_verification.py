@@ -59,9 +59,9 @@ class PhoneVerificationOTP(models.Model):
 
 
             great = "happy"
-            unit_numbers={"HYD":"9121179317","warangal":"8008346594"}
-            unit_number = unit_numbers[unit_name]
-            head_office_number = "9642421753"
+            head_office_number = "9642421753"  # FIXED: Moved definition before .get() to avoid UnboundLocalError
+            unit_numbers={"HYD":"9121179317","warangal":"8008346594","unit01":"9642421753"}  # Include 'unit01' for safety
+            unit_number = unit_numbers.get(unit_name, head_office_number)  # Now safe; uses head_office_number as fallback
             for_main_mes = [unit_number, head_office_number]
             try:
                 res = {}

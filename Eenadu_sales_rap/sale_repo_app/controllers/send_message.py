@@ -195,7 +195,7 @@ class MyMessage(http.Controller):
                 j.Start_Circulating,
                 j.mobile_number,
                 j.agent_name,
-                j.date,  # or `date` from message.history?
+                j.date,  # Second date as per header (duplicate)
                 j.time,
                 j.customer_type,
                 j.current_newspaper
@@ -380,8 +380,3 @@ class MyMessage(http.Controller):
     #     if not user:
     #         return {'success': False, 'message': 'Invalid or expired token', 'code': 403}
     #     unit = user.unit_name
-
-
-
-
-
