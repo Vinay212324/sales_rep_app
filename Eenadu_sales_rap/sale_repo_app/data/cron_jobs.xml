@@ -13,7 +13,7 @@
             <field name="doall">True</field>  <!-- Changed to True for all processes -->
             <field name="active">True</field>
             <!-- Next run: 7 PM IST on Oct 23, 2025 (13:30 UTC for IST=UTC+5:30) -->
-            <field name="nextcall">2025-10-23 13:30:00</field>
+            <field name="nextcall">2025-10-27 12:52:00</field>
         </record>
     </data>
 </odoo>
