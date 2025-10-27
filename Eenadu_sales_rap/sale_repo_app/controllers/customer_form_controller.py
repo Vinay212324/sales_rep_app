@@ -107,6 +107,7 @@ class CustomerFormAPI(http.Controller):
                 'Willing_to_Shift_to_EENADU': kwargs.get('would_like_to_stay_with_existing_news_papar', False),
                 'Start_Circulating':kwargs.get('Start_Circulating'),
                 'Agency':kwargs.get('Agency'),
+                'quantity':kwargs.get('quantity'),
                 'age':kwargs.get('age'),
                 'customer_type':kwargs.get('customer_type'),
                 'occupation':kwargs.get('occupation'),
@@ -285,6 +286,7 @@ class CustomerFormAPI(http.Controller):
             'would_like_to_stay_with_existing_news_papar':record.Willing_to_Shift_to_EENADU,
             'Start_Circulating':record.Start_Circulating,
             'Agency':record.Agency,
+            'quantity':record.quantity,
             'age':record.age,
             'customer_type':record.customer_type,
             'occupation':record.occupation
@@ -538,6 +540,7 @@ class CustomerFormAPI(http.Controller):
             'would_like_to_stay_with_existing_news_papar': record.Willing_to_Shift_to_EENADU,
             'Start_Circulating': record.Start_Circulating,
             'Agency': record.Agency,
+            'quantity': record.quantity,
             'age': record.age,
             'customer_type': record.customer_type,
             'occupation': record.occupation
@@ -646,6 +649,7 @@ class CustomerFormAPI(http.Controller):
             'would_like_to_stay_with_existing_news_papar': record.Willing_to_Shift_to_EENADU,
             'Start_Circulating': record.Start_Circulating,
             'Agency': record.Agency,
+            'quantity': record.quantity,
             'age': record.age,
             'customer_type': record.customer_type,
             'occupation': record.occupation
@@ -1158,6 +1162,7 @@ class CustomerFormAPI(http.Controller):
             'would_like_to_stay_with_existing_news_papar': form.Willing_to_Shift_to_EENADU,
             'Start_Circulating': form.Start_Circulating,
             'Agency': form.Agency,
+            'quantity': form.quantity,
             'age': form.age,
             'customer_type': form.customer_type,
             'occupation': form.occupation

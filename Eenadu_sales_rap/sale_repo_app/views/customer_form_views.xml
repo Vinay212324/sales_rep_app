@@ -32,6 +32,7 @@
                             <ul>
                                 <li><strong>Family Head:</strong> <field name="family_head_name"/></li>
                                 <li><strong>Agency:</strong> <field name="Agency"/></li>
+                                <li><strong>Quantity:</strong> <field name="quantity"/></li>
                                 <li><strong>Phone:</strong> <field name="mobile_number"/></li>
                                 <li><strong>Url: </strong> <field name="location_url" widget="url"/></li>
                                 <li><strong>Image: </strong><field name="face_base64" widget="image" class="oe_avatar"/></li>
@@ -109,6 +110,7 @@
                             <field name="longitude"/>
                             <field name="location_address"/>
                             <field name="Agency"/>
+                            <field name="quantity"/>
                             <field name="location_url" widget="url"/>
                         </group>
                     </group>
@@ -129,6 +131,7 @@
                 <field name="agent_login"/>
                 <field name="family_head_name"/>
                 <field name="Agency"/>
+                <field name="quantity"/>
 
                 <!-- Today Filter -->
                 <filter name="one_day_filter"
