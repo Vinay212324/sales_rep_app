@@ -158,13 +158,13 @@ class MyMessage(http.Controller):
         total_agencies_filled_custon_forms_today = []
 
         # 1. First: Collect unassigned/empty agency forms
-        unassigned_forms = request.env['customer.form'].sudo().search([
-            ('unit_name', '=', unit_name),
-            ('date', '=', date),
-            ('Agency', '=', "Other Agency ")  # Empty or null Agency
-        ])
-        for rec in unassigned_forms:
-            total_agencies_filled_custon_forms_today.append(rec)
+        # unassigned_forms = request.env['customer.form'].sudo().search([
+        #     ('unit_name', '=', unit_name),
+        #     ('date', '=', date),
+        #     ('Agency', '=', "Other Agency ")  # Empty or null Agency
+        # ])
+        # for rec in unassigned_forms:
+        #     total_agencies_filled_custon_forms_today.append(rec)
 
         # 2. Then: Collect forms by agency
         for i in total_agencies:
