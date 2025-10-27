@@ -6,7 +6,7 @@ import random
 import requests
 import logging
 from datetime import date
-from odoo import models, fields
+from odoo import models, fields,api,_
 import requests
 import logging
 from datetime import date
@@ -24,6 +24,7 @@ class PhoneVerificationOTP(models.Model):
     is_verified = fields.Boolean(string="Is Verified", default=False)
     otp_time = fields.Datetime(string="OTP Sent Time", default=fields.Datetime.now)
 
+    @api.model
     def send_message_sales_rep(self):
         start_time = time.time()
         print("yyyyyyyyyyy")
