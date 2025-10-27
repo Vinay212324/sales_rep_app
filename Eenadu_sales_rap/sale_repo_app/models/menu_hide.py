@@ -1,10 +1,15 @@
 from odoo import models, api
+import logging
+import time
+
+_logger = logging.getLogger(__name__)
 
 class IrUiMenu(models.Model):
     _inherit = 'ir.ui.menu'
 
     @api.model
     def load_menus(self, debug):
+        start_time = time.time()
         res = super().load_menus(debug)
         user = self.env.user
 
@@ -22,4 +27,7 @@ class IrUiMenu(models.Model):
 
                 res['children'] = list(filter(hide_menu, res['children']))
 
+        end_time = time.time()
+        duration = end_time - start_time
+        _logger.info(f"Function load_menus took {duration:.2f} seconds")
         return res

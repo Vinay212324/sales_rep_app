@@ -1,6 +1,7 @@
 from odoo import models, api, fields, _
 from datetime import datetime
 import logging
+import time
 
 _logger = logging.getLogger(__name__)
 import requests
@@ -76,30 +77,28 @@ class CustomerForm(models.Model):
     age = fields.Char()
     customer_type = fields.Char()
     occupation =  fields.Char()
+
     def _get_lat_lon_from_ip(self):
+        start_time = time.time()
         try:
             response = requests.get('http://ip-api.com/json/')
             data = response.json()
             if data.get('status') == 'success':
-                return str(data.get('lat')), str(data.get('lon'))
+                result = str(data.get('lat')), str(data.get('lon'))
+                end_time = time.time()
+                duration = end_time - start_time
+                _logger.info(f"Function _get_lat_lon_from_ip took {duration:.2f} seconds")
+                return result
         except Exception as e:
             _logger.warning("Geo IP fetch failed: %s", e)
-        return "0.0", "0.0"  # fallback values as string (since you use Char)
-
-    @api.model
-    def create(self, vals):
-        if not vals.get('latitude') or not vals.get('longitude'):
-            lat, lon = self._get_lat_lon_from_ip()
-            vals['latitude'] = lat
-            vals['longitude'] = lon
-        # Generate Google Maps link
-        if vals.get('latitude') and vals.get('longitude'):
-            lat = vals.get('latitude')
-            lon = vals.get('longitude')
-            vals['location_url'] = f"https://www.google.com/maps?q={lat},{lon}"
-        return super(CustomerForm, self).create(vals)
+        result = "0.0", "0.0"  # fallback values as string (since you use Char)
+        end_time = time.time()
+        duration = end_time - start_time
+        _logger.info(f"Function _get_lat_lon_from_ip took {duration:.2f} seconds")
+        return result
 
     def write(self, vals):
+        start_time = time.time()
         if not vals.get('latitude') or not vals.get('longitude'):
             lat, lon = self._get_lat_lon_from_ip()
             vals['latitude'] = lat
@@ -109,10 +108,15 @@ class CustomerForm(models.Model):
         lon = vals.get('longitude') or self.longitude
         if lat and lon:
             vals['location_url'] = f"https://www.google.com/maps?q={lat},{lon}"
-        return super(CustomerForm, self).write(vals)
+        result = super(CustomerForm, self).write(vals)
+        end_time = time.time()
+        duration = end_time - start_time
+        _logger.info(f"Function write took {duration:.2f} seconds")
+        return result
 
     @api.model
     def create(self, vals):
+        start_time = time.time()
         # Auto-fill agent-related fields if not provided
         user = self.env.user
         if not vals.get('agent_name'):
@@ -138,33 +142,15 @@ class CustomerForm(models.Model):
             lon = vals.get('longitude')
             vals['location_url'] = f"https://www.google.com/maps?q={lat},{lon}"
 
-        return super(CustomerForm, self).create(vals)
+        result = super(CustomerForm, self).create(vals)
+        end_time = time.time()
+        duration = end_time - start_time
+        _logger.info(f"Function create took {duration:.2f} seconds")
+        return result
 
-# @api.model
-# def create(self, vals):
-#     user = self.env.user
-#
-#     # Auto-fill agent info
-#     vals.setdefault('agent_name', user.name)
-#     vals.setdefault('agent_login', user.login)
-#     vals.setdefault('unit_name', user.company_id.name)
-#
-#     # Auto-fill current time if not already set
-#     vals.setdefault('time', datetime.now().strftime('%H:%M:%S'))
-#
-#     # Auto-fill latitude and longitude if not provided
-#     if not vals.get('latitude') or not vals.get('longitude'):
-#         lat, lon = self._get_lat_lon_from_ip()
-#         vals['latitude'] = lat
-#         vals['longitude'] = lon
-#
-#     # Auto-fill Google Maps URL
-#     if vals.get('latitude') and vals.get('longitude'):
-#         vals['location_url'] = f"https://www.google.com/maps?q={vals['latitude']},{vals['longitude']}"
-#
-#     return super(CustomerForm, self).create(vals)
     @api.model
     def default_get(self, fields_list):
+        start_time = time.time()
         """Auto-fill fields when opening the form"""
         res = super().default_get(fields_list)
         user = self.env.user
@@ -181,11 +167,15 @@ class CustomerForm(models.Model):
             res['latitude'] = lat
             res['longitude'] = lon
             res['location_url'] = f"https://www.google.com/maps?q={lat},{lon}"
+        end_time = time.time()
+        duration = end_time - start_time
+        _logger.info(f"Function default_get took {duration:.2f} seconds")
         return res
 
 
     @api.model
     def get_customer_stats(self, start_date=False, end_date=False, unit_name=False):
+        start_time = time.time()
         """
         Returns a dictionary containing:
             - total_forms: total number of customer.form records
@@ -218,8 +208,12 @@ class CustomerForm(models.Model):
         unique_users = len(set(forms.mapped('agent_login')))
 
         # Return as dictionary including recordset for use in other models
-        return {
+        result = {
             "total_forms": total_forms,
             "unique_users": unique_users,
             "forms": forms,  # the recordset
         }
+        end_time = time.time()
+        duration = end_time - start_time
+        _logger.info(f"Function get_customer_stats took {duration:.2f} seconds")
+        return result

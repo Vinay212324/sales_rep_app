@@ -9,6 +9,7 @@ from odoo import http
 from odoo.http import request
 import json
 import logging
+import time
 
 _logger = logging.getLogger(__name__)
 
@@ -16,7 +17,12 @@ class MyMessage(http.Controller):
 
     def _verify_api_key(self, token):
         """Check if the token belongs to a valid user"""
-        return request.env['res.users'].sudo().search([('api_token', '=', token)], limit=1)
+        start_time = time.time()
+        result = request.env['res.users'].sudo().search([('api_token', '=', token)], limit=1)
+        end_time = time.time()
+        duration = end_time - start_time
+        _logger.info(f"Function _verify_api_key took {duration:.2f} seconds")
+        return result
 
     @http.route(
         '/daily-data/<string:day>/<string:unic_code>',
@@ -25,7 +31,8 @@ class MyMessage(http.Controller):
         website=True,
         csrf=False
     )
-    def daily_data_excel(self, day,unic_code):
+    def daily_data_excel(self, day, unic_code):
+        start_time = time.time()
         print("hhhhhhhh")
         """Render daily data page"""
         try:
@@ -40,12 +47,18 @@ class MyMessage(http.Controller):
                 print("bbbbbbb")
 
             except ValueError as e:
+                end_time = time.time()
+                duration = end_time - start_time
+                _logger.info(f"Function daily_data_excel took {duration:.2f} seconds")
                 return str(e)
 
             day_str = day  # fallback if already string
             print("pkpkpkpk")
             record = request.env['message.history'].sudo().search([('unic_code', '=', unic_code)], limit=1)
             if not record:
+                end_time = time.time()
+                duration = end_time - start_time
+                _logger.info(f"Function daily_data_excel took {duration:.2f} seconds")
                 return "No data found"
             print("jjjjjjj")
             unit_name = record.unit_name
@@ -70,19 +83,29 @@ class MyMessage(http.Controller):
                 "unit_name": unit_name,
                 "unic_code": unic_code
             }
+            end_time = time.time()
+            duration = end_time - start_time
+            _logger.info(f"Function daily_data_excel took {duration:.2f} seconds")
             return http.request.render("sale_repo_app.daily_data_template", values)
 
         except Exception as e:
+            end_time = time.time()
+            duration = end_time - start_time
+            _logger.info(f"Function daily_data_excel took {duration:.2f} seconds")
             return str(e)
 
     @http.route('/daily-data/pdf/<string:unic_code>',
                 type='http', auth='public', website=True)
     def download_pdf(self, unic_code, **kwargs):
+        start_time = time.time()
         """Download PDF file"""
 
         print("vinnnnnnnnnnnn")
         record = request.env['message.history'].sudo().search([('unic_code', '=', unic_code)], limit=1)
         if not record:
+            end_time = time.time()
+            duration = end_time - start_time
+            _logger.info(f"Function download_pdf took {duration:.2f} seconds")
             return "No data found"
         unit_name = record.unit_name
         date = record.date
@@ -121,6 +144,10 @@ class MyMessage(http.Controller):
         pdf_data = buffer.getvalue()
         buffer.close()
 
+        end_time = time.time()
+        duration = end_time - start_time
+        _logger.info(f"Function download_pdf took {duration:.2f} seconds")
+
         return request.make_response(
             pdf_data,
             headers=[
@@ -132,6 +159,7 @@ class MyMessage(http.Controller):
     @http.route('/daily-data/excel/<string:unic_code>',
                 type='http', auth='public', website=True)
     def download_excel(self, unic_code, **kwargs):
+        start_time = time.time()
         """Download Excel file"""
         buffer = BytesIO()
         wb = Workbook()
@@ -146,6 +174,9 @@ class MyMessage(http.Controller):
         # Get record
         record = request.env['message.history'].sudo().search([('unic_code', '=', unic_code)], limit=1)
         if not record:
+            end_time = time.time()
+            duration = end_time - start_time
+            _logger.info(f"Function download_excel took {duration:.2f} seconds")
             return "No data found"
 
         unit_name = record.unit_name
@@ -206,6 +237,10 @@ class MyMessage(http.Controller):
         wb.save(buffer)
         buffer.seek(0)
 
+        end_time = time.time()
+        duration = end_time - start_time
+        _logger.info(f"Function download_excel took {duration:.2f} seconds")
+
         return request.make_response(
             buffer.read(),
             headers=[
@@ -225,12 +260,16 @@ class MyMessage(http.Controller):
         csrf=False
     )
     def daily_data_agency(self, unic_code):
+        start_time = time.time()
         print("hhhhhhhh")
         """Render daily data page for specific agency"""
         try:
             print("jjjjjjjj")
             record = request.env['message.history'].sudo().search([('unic_code', '=', unic_code)], limit=1)
             if not record:
+                end_time = time.time()
+                duration = end_time - start_time
+                _logger.info(f"Function daily_data_agency took {duration:.2f} seconds")
                 return "No data found"
             unit_name = record.unit_name
             day_str = str(record.date)  # Ensure date is string in YYYY-MM-DD format
@@ -252,20 +291,30 @@ class MyMessage(http.Controller):
                 "agency": record.agency,
                 "customer_forms": customer_forms  # Optional: pass for template display
             }
+            end_time = time.time()
+            duration = end_time - start_time
+            _logger.info(f"Function daily_data_agency took {duration:.2f} seconds")
             return http.request.render("sale_repo_app.daily_data_agency_template", values)
 
         except Exception as e:
+            end_time = time.time()
+            duration = end_time - start_time
+            _logger.info(f"Function daily_data_agency took {duration:.2f} seconds")
             _logger.error("Error in daily_data_agency: %s", e)
             return str(e)
 
     @http.route('/daily_data_agency/pdf/<string:unic_code>',
                 type='http', auth='public', website=True)
     def download_pdf_agency(self, unic_code, **kwargs):
+        start_time = time.time()
         """Download PDF file for specific agency"""
 
         print("vinnnnnnnnnnnn")
         record = request.env['message.history'].sudo().search([('unic_code', '=', unic_code)], limit=1)
         if not record:
+            end_time = time.time()
+            duration = end_time - start_time
+            _logger.info(f"Function download_pdf_agency took {duration:.2f} seconds")
             return "No data found"
         unit_name = record.unit_name
         date = record.date
@@ -303,6 +352,10 @@ class MyMessage(http.Controller):
         pdf_data = buffer.getvalue()
         buffer.close()
 
+        end_time = time.time()
+        duration = end_time - start_time
+        _logger.info(f"Function download_pdf_agency took {duration:.2f} seconds")
+
         return request.make_response(
             pdf_data,
             headers=[
@@ -314,6 +367,7 @@ class MyMessage(http.Controller):
     @http.route('/daily_data_agency/excel/<string:unic_code>',
                 type='http', auth='public', website=True)
     def download_excel_agency(self, unic_code, **kwargs):
+        start_time = time.time()
         """Download Excel file for specific agency"""
         buffer = BytesIO()
         wb = Workbook()
@@ -327,6 +381,9 @@ class MyMessage(http.Controller):
 
         record = request.env['message.history'].sudo().search([('unic_code', '=', unic_code)], limit=1)
         if not record:
+            end_time = time.time()
+            duration = end_time - start_time
+            _logger.info(f"Function download_excel_agency took {duration:.2f} seconds")
             return "No data found"
 
         unit_name = record.unit_name
@@ -365,6 +422,10 @@ class MyMessage(http.Controller):
         wb.save(buffer)
         buffer.seek(0)
 
+        end_time = time.time()
+        duration = end_time - start_time
+        _logger.info(f"Function download_excel_agency took {duration:.2f} seconds")
+
         return request.make_response(
             buffer.read(),
             headers=[
@@ -381,8 +442,3 @@ class MyMessage(http.Controller):
     #     if not user:
     #         return {'success': False, 'message': 'Invalid or expired token', 'code': 403}
     #     unit = user.unit_name
-
-
-
-
-

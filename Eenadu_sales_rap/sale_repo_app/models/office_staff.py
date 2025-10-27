@@ -1,6 +1,7 @@
 from odoo import models, api, fields, _
 from datetime import datetime, date, timedelta
 import logging
+import time
 
 _logger = logging.getLogger(__name__)
 import requests
@@ -29,21 +30,29 @@ class CustomerForm(models.Model):
     ], string='Status', default='draft')
 
     def waiting_for_approve(self):
+        start_time = time.time()
         self.ensure_one()
         self.state = 'waiting'
+        end_time = time.time()
+        duration = end_time - start_time
+        _logger.info(f"Function waiting_for_approve took {duration:.2f} seconds")
 
     def approved_staff(self):
+        start_time = time.time()
         self.ensure_one()
         self.state = 'approved'
-
+        end_time = time.time()
+        duration = end_time - start_time
+        _logger.info(f"Function approved_staff took {duration:.2f} seconds")
 
     def create_record(self):
+        start_time = time.time()
         """
         Saves the record automatically and returns a success notification.
         """
         self.ensure_one()
 
-        return {
+        result = {
             'type': 'ir.actions.client',
             'tag': 'display_notification',
             'params': {
@@ -53,5 +62,7 @@ class CustomerForm(models.Model):
                 'sticky': False,
             }
         }
-
-
+        end_time = time.time()
+        duration = end_time - start_time
+        _logger.info(f"Function create_record took {duration:.2f} seconds")
+        return result

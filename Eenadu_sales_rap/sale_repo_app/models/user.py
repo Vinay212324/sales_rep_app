@@ -14,6 +14,10 @@ from openpyxl import Workbook
 from openpyxl.styles import Alignment, Font
 
 from odoo.tools import round
+import logging
+import time
+
+_logger = logging.getLogger(__name__)
 
 
 class Users(models.Model):
@@ -38,12 +42,20 @@ class Users(models.Model):
     )
 
     def waiting_for_approve(self):
+        start_time = time.time()
         self.ensure_one()
         self.status = 'un_activ'
+        end_time = time.time()
+        duration = end_time - start_time
+        _logger.info(f"Function waiting_for_approve took {duration:.2f} seconds")
 
     def approved_staff(self):
+        start_time = time.time()
         self.ensure_one()
         self.status = 'active'
+        end_time = time.time()
+        duration = end_time - start_time
+        _logger.info(f"Function approved_staff took {duration:.2f} seconds")
 
     pin_location_ids = fields.Many2many('pin.location','user_id')
     present_pin_id = fields.Many2one("pin.location")
@@ -74,18 +86,27 @@ class Users(models.Model):
 
     @api.constrains('aadhar_number')
     def _check_aadhar_number(self):
+        start_time = time.time()
         for user in self:
             if user.aadhar_number and not re.fullmatch(r'\d{12}', user.aadhar_number):
                 raise ValidationError(_("Aadhar number must be exactly 12 digits and numeric only."))
+        end_time = time.time()
+        duration = end_time - start_time
+        _logger.info(f"Function _check_aadhar_number took {duration:.2f} seconds")
 
     @api.constrains('phone')
     def _check_phone_number(self):
+        start_time = time.time()
         for user in self:
             if user.phone and not re.fullmatch(r'\d{10}', user.phone):
                 raise ValidationError(_("Phone number must be exactly 10 digits and numeric only."))
+        end_time = time.time()
+        duration = end_time - start_time
+        _logger.info(f"Function _check_phone_number took {duration:.2f} seconds")
 
     @api.model_create_multi
     def create(self, vals_list):
+        start_time = time.time()
         for vals in vals_list:
             creating_user = self.env.user
 
@@ -104,26 +125,38 @@ class Users(models.Model):
         for user in users:
             user._update_user_group_by_role()
 
+        end_time = time.time()
+        duration = end_time - start_time
+        _logger.info(f"Function create took {duration:.2f} seconds")
         return users
 
     def _inverse_created_by(self):
+        start_time = time.time()
         for rec in self:
             if rec.created_by:
                 rec.write({'create_uid': rec.created_by.id})
+        end_time = time.time()
+        duration = end_time - start_time
+        _logger.info(f"Function _inverse_created_by took {duration:.2f} seconds")
 
     @api.depends_context('uid')
     def _compute_sale_user_readonly(self):
+        start_time = time.time()
         current_user_in_group = self.env.user.has_group('sale_repo_app.circulation_incharge_group')
         for rec in self:
             rec.edit_boll = current_user_in_group
+        end_time = time.time()
+        duration = end_time - start_time
+        _logger.info(f"Function _compute_sale_user_readonly took {duration:.2f} seconds")
 
     def create_record(self):
+        start_time = time.time()
         """
         Saves the record automatically and returns a success notification.
         """
         self.ensure_one()
 
-        return {
+        result = {
             'type': 'ir.actions.client',
             'tag': 'display_notification',
             'params': {
@@ -133,27 +166,49 @@ class Users(models.Model):
                 'sticky': False,
             }
         }
+        end_time = time.time()
+        duration = end_time - start_time
+        _logger.info(f"Function create_record took {duration:.2f} seconds")
+        return result
 
     def generate_token(self):
+        start_time = time.time()
         """ Generate a unique API token and set an expiration time. """
         self.api_token = secrets.token_hex(32)  # Generates a unique 32-character token
         self.token_expiry = fields.Datetime.now() + timedelta(hours=10)  # Expires in 1 hour
         self.sudo().write({'api_token': self.api_token, 'token_expiry': self.token_expiry})  # Save token
+        end_time = time.time()
+        duration = end_time - start_time
+        _logger.info(f"Function generate_token took {duration:.2f} seconds")
 
     def authenticate_by_token(self, token):
+        start_time = time.time()
         """ Validate the user using the API token. """
         user = self.sudo().search([('api_token', '=', token)], limit=1)
         if not user:
+            end_time = time.time()
+            duration = end_time - start_time
+            _logger.info(f"Function authenticate_by_token took {duration:.2f} seconds")
             raise AccessDenied(_("Invalid token!"))
 
         if user.token_expiry and user.token_expiry < fields.Datetime.now():
+            end_time = time.time()
+            duration = end_time - start_time
+            _logger.info(f"Function authenticate_by_token took {duration:.2f} seconds")
             raise AccessDenied(_("Token has expired! Please log in again."))
 
+        end_time = time.time()
+        duration = end_time - start_time
+        _logger.info(f"Function authenticate_by_token took {duration:.2f} seconds")
         return user
 
     def clear_token(self):
+        start_time = time.time()
         """ Clear the token when the user logs out. """
         self.sudo().write({'api_token': False, 'token_expiry': False})
+        end_time = time.time()
+        duration = end_time - start_time
+        _logger.info(f"Function clear_token took {duration:.2f} seconds")
 
 
     ROLE_GROUP_MAPPING = {
@@ -170,22 +225,34 @@ class Users(models.Model):
     # --- Create override to assign group by role ---
     @api.model_create_multi
     def create(self, vals_list):
+        start_time = time.time()
         users = super().create(vals_list)
         for user in users:
             user._update_user_group_by_role()
+        end_time = time.time()
+        duration = end_time - start_time
+        _logger.info(f"Function create took {duration:.2f} seconds")
         return users
 
     # --- Write override to reassign group if role changes ---
     def write(self, vals):
+        start_time = time.time()
         res = super().write(vals)
         if 'role' in vals:
             for user in self:
                 user._update_user_group_by_role()
+        end_time = time.time()
+        duration = end_time - start_time
+        _logger.info(f"Function write took {duration:.2f} seconds")
         return res
 
     # --- Core logic: remove all mapped groups and assign only current role group ---
     def _update_user_group_by_role(self):
+        start_time = time.time()
         if not self.role:
+            end_time = time.time()
+            duration = end_time - start_time
+            _logger.info(f"Function _update_user_group_by_role took {duration:.2f} seconds")
             return
 
         group_ids = []
@@ -206,18 +273,26 @@ class Users(models.Model):
             new_group = self.env.ref(new_group_xml_id, raise_if_not_found=False)
             if new_group:
                 self.groups_id = [(4, new_group.id)]
+        end_time = time.time()
+        duration = end_time - start_time
+        _logger.info(f"Function _update_user_group_by_role took {duration:.2f} seconds")
 
     @api.model
     def fields_get(self, allfields=None, attributes=None):
+        start_time = time.time()
         fields_res = super().fields_get(allfields=allfields, attributes=attributes)
         if 'role' in fields_res:
             if not (self.env.user.has_group('sale_repo_app.region_head_group') or
                     self.env.user.has_group('sale_repo_app.circulation_head_group')):
                 fields_res['role']['readonly'] = True
+        end_time = time.time()
+        duration = end_time - start_time
+        _logger.info(f"Function fields_get took {duration:.2f} seconds")
         return fields_res
 
     @api.model
     def fields_view_get(self, view_id=None, view_type='form', toolbar=False, submenu=False):
+        start_time = time.time()
         res = super().fields_view_get(view_id=view_id, view_type=view_type,
                                       toolbar=toolbar, submenu=submenu)
 
@@ -233,6 +308,9 @@ class Users(models.Model):
                         node.set('readonly', "1")
 
             res['arch'] = etree.tostring(doc, encoding='unicode')
+        end_time = time.time()
+        duration = end_time - start_time
+        _logger.info(f"Function fields_view_get took {duration:.2f} seconds")
         return res
 
 class unit_names(models.Model):
@@ -342,18 +420,29 @@ class UsersWizard(models.TransientModel):
 
     @api.depends('period_type')  # Dependency can be on any field; it's just to trigger recompute if needed
     def _compute_current_user_role(self):
+        start_time = time.time()
         for rec in self:
             rec.current_user_role = self.env.user.role  # Fetches the logged-in user's role from res.users
+        end_time = time.time()
+        duration = end_time - start_time
+        _logger.info(f"Function _compute_current_user_role took {duration:.2f} seconds")
 
     @api.model
     def _default_unit_selection(self):
+        start_time = time.time()
         user = self.env.user
         if user.role == "circulation_incharge":
-            return user.unit_name
-        return "All"
+            result = user.unit_name
+        else:
+            result = "All"
+        end_time = time.time()
+        duration = end_time - start_time
+        _logger.info(f"Function _default_unit_selection took {duration:.2f} seconds")
+        return result
 
     @api.depends('start_date', 'end_date', 'period_type')
     def _compute_customer_html_summary(self):
+        start_time = time.time()
         for rec in self:
             if not rec.start_date or not rec.end_date:
                 rec.customer_html_summary = '<p class="text-muted">No dates selected. Please select a valid period to view the summary.</p>'
@@ -495,9 +584,13 @@ class UsersWizard(models.TransientModel):
             except Exception as e:
                 _logger.error("Error in _compute_customer_html_summary: %s", e)
                 rec.customer_html_summary = f'<div class="alert alert-danger"><i class="fa fa-exclamation-triangle me-2"></i>Error loading summary: {str(e)}</div>'
+        end_time = time.time()
+        duration = end_time - start_time
+        _logger.info(f"Function _compute_customer_html_summary took {duration:.2f} seconds")
 
     @api.onchange('period_type')
     def _onchange_period_type(self):
+        start_time = time.time()
         today = fields.Date.today()
         self.start_date = False
         self.end_date = False
@@ -506,6 +599,9 @@ class UsersWizard(models.TransientModel):
             self.selected_day = False
             self.selected_week = 1
             self.month_selection = False
+            end_time = time.time()
+            duration = end_time - start_time
+            _logger.info(f"Function _onchange_period_type took {duration:.2f} seconds")
             return
         elif self.period_type == 'day':
             self.selected_day = today
@@ -513,6 +609,9 @@ class UsersWizard(models.TransientModel):
             self.selected_year = False
             self.selected_week = 1
             self.month_selection = False
+            end_time = time.time()
+            duration = end_time - start_time
+            _logger.info(f"Function _onchange_period_type took {duration:.2f} seconds")
             return
         elif self.period_type == 'week':
             self.selected_week = ((today - datetime(today.year, 1, 1).date()).days // 7) + 1
@@ -520,6 +619,9 @@ class UsersWizard(models.TransientModel):
             self.selected_year = today.year
             self.selected_day = False
             self.month_selection = False
+            end_time = time.time()
+            duration = end_time - start_time
+            _logger.info(f"Function _onchange_period_type took {duration:.2f} seconds")
             return
         elif self.period_type == 'month':
             self.month_selection = str(today.month)
@@ -527,6 +629,9 @@ class UsersWizard(models.TransientModel):
             self.selected_year = today.year
             self.selected_day = False
             self.selected_week = 1
+            end_time = time.time()
+            duration = end_time - start_time
+            _logger.info(f"Function _onchange_period_type took {duration:.2f} seconds")
             return
         elif self.period_type == 'year':
             self.selected_year = today.year
@@ -534,19 +639,30 @@ class UsersWizard(models.TransientModel):
             self.selected_day = False
             self.selected_week = 1
             self.month_selection = False
+            end_time = time.time()
+            duration = end_time - start_time
+            _logger.info(f"Function _onchange_period_type took {duration:.2f} seconds")
             return
         elif self.period_type == 'custom':
             # User will set manually
             pass
+        end_time = time.time()
+        duration = end_time - start_time
+        _logger.info(f"Function _onchange_period_type took {duration:.2f} seconds")
 
     @api.onchange('selected_day')
     def _onchange_selected_day(self):
+        start_time = time.time()
         if self.period_type == 'day' and self.selected_day:
             self.start_date = self.selected_day
             self.end_date = self.selected_day
+        end_time = time.time()
+        duration = end_time - start_time
+        _logger.info(f"Function _onchange_selected_day took {duration:.2f} seconds")
 
     @api.onchange('selected_week', 'selected_year')
     def _onchange_week(self):
+        start_time = time.time()
         if self.period_type == 'week' and self.selected_week and self.selected_year:
             year = self.selected_year
             week = self.selected_week
@@ -558,9 +674,13 @@ class UsersWizard(models.TransientModel):
             end = start + timedelta(days=6)
             self.start_date = start
             self.end_date = end
+        end_time = time.time()
+        duration = end_time - start_time
+        _logger.info(f"Function _onchange_week took {duration:.2f} seconds")
 
     @api.onchange('month_selection', 'selected_year')
     def _onchange_month(self):
+        start_time = time.time()
         if self.period_type == 'month' and self.month_selection and self.selected_year:
             month = int(self.month_selection)
             year = self.selected_year
@@ -571,41 +691,65 @@ class UsersWizard(models.TransientModel):
                 end = datetime(year, month + 1, 1).date() - timedelta(days=1)
             self.start_date = start
             self.end_date = end
+        end_time = time.time()
+        duration = end_time - start_time
+        _logger.info(f"Function _onchange_month took {duration:.2f} seconds")
 
     @api.onchange('selected_year')
     def _onchange_year(self):
+        start_time = time.time()
         if self.period_type == 'year' and self.selected_year:
             year = self.selected_year
             start = datetime(year, 1, 1).date()
             end = datetime(year, 12, 31).date()
             self.start_date = start
             self.end_date = end
+        end_time = time.time()
+        duration = end_time - start_time
+        _logger.info(f"Function _onchange_year took {duration:.2f} seconds")
 
     @api.constrains('selected_week')
     def _check_week(self):
+        start_time = time.time()
         for rec in self:
             if rec.period_type == 'week' and (rec.selected_week < 1 or rec.selected_week > 53):
                 raise ValidationError("Week number must be between 1 and 53.")
+        end_time = time.time()
+        duration = end_time - start_time
+        _logger.info(f"Function _check_week took {duration:.2f} seconds")
 
     @api.constrains('start_date', 'end_date')
     def _check_dates(self):
+        start_time = time.time()
         for rec in self:
             if rec.period_type == 'custom' and rec.start_date and rec.end_date and rec.start_date > rec.end_date:
                 raise ValidationError("Start date must be before or equal to end date.")
+        end_time = time.time()
+        duration = end_time - start_time
+        _logger.info(f"Function _check_dates took {duration:.2f} seconds")
 
     @api.constrains('aadhar_number')
     def _check_aadhar_number(self):
+        start_time = time.time()
         for user in self:
             if user.aadhar_number and not re.fullmatch(r'\d{12}', user.aadhar_number):
                 raise ValidationError("Aadhar number must be exactly 12 digits and numeric only.")
+        end_time = time.time()
+        duration = end_time - start_time
+        _logger.info(f"Function _check_aadhar_number took {duration:.2f} seconds")
 
     @api.constrains('phone')
     def _check_phone_number(self):
+        start_time = time.time()
         for user in self:
             if user.phone and not re.fullmatch(r'\d{10}', user.phone):
                 raise ValidationError("Phone number must be exactly 10 digits and numeric only.")
+        end_time = time.time()
+        duration = end_time - start_time
+        _logger.info(f"Function _check_phone_number took {duration:.2f} seconds")
 
     def _get_report_dates(self):
+        start_time = time.time()
         """Helper method to get start and end dates, calculating if necessary."""
         today = fields.Date.today()
 
@@ -613,16 +757,31 @@ class UsersWizard(models.TransientModel):
             # ✅ Set start date as September 1 of current year and end date as today
             start = datetime(today.year, 9, 1).date()
             end = today
+            end_time = time.time()
+            duration = end_time - start_time
+            _logger.info(f"Function _get_report_dates took {duration:.2f} seconds")
             return start, end
 
         if self.start_date and self.end_date:
-            return self.start_date, self.end_date
+            result = self.start_date, self.end_date
+            end_time = time.time()
+            duration = end_time - start_time
+            _logger.info(f"Function _get_report_dates took {duration:.2f} seconds")
+            return result
 
         if self.period_type == 'day':
             if self.selected_day:
-                return self.selected_day, self.selected_day
+                result = self.selected_day, self.selected_day
+                end_time = time.time()
+                duration = end_time - start_time
+                _logger.info(f"Function _get_report_dates took {duration:.2f} seconds")
+                return result
             else:
-                return today, today
+                result = today, today
+                end_time = time.time()
+                duration = end_time - start_time
+                _logger.info(f"Function _get_report_dates took {duration:.2f} seconds")
+                return result
 
         elif self.period_type == 'week':
             if self.selected_year and self.selected_week:
@@ -632,12 +791,20 @@ class UsersWizard(models.TransientModel):
                 first_monday = jan4 - timedelta(days=jan4.weekday())
                 start = first_monday + timedelta(weeks=week - 1)
                 end = start + timedelta(days=6)
-                return start, end
+                result = start, end
+                end_time = time.time()
+                duration = end_time - start_time
+                _logger.info(f"Function _get_report_dates took {duration:.2f} seconds")
+                return result
             else:
                 days_to_monday = today.weekday()
                 start = today - timedelta(days=days_to_monday)
                 end = start + timedelta(days=6)
-                return start, end
+                result = start, end
+                end_time = time.time()
+                duration = end_time - start_time
+                _logger.info(f"Function _get_report_dates took {duration:.2f} seconds")
+                return result
 
         elif self.period_type == 'month':
             if self.selected_year and self.month_selection:
@@ -648,7 +815,11 @@ class UsersWizard(models.TransientModel):
                     end = datetime(year + 1, 1, 1).date() - timedelta(days=1)
                 else:
                     end = datetime(year, month + 1, 1).date() - timedelta(days=1)
-                return start, end
+                result = start, end
+                end_time = time.time()
+                duration = end_time - start_time
+                _logger.info(f"Function _get_report_dates took {duration:.2f} seconds")
+                return result
             else:
                 start = today.replace(day=1)
                 next_month = start.replace(month=start.month % 12 + 1)
@@ -656,26 +827,47 @@ class UsersWizard(models.TransientModel):
                     end = next_month.replace(day=1) - timedelta(days=1)
                 else:
                     end = next_month.replace(year=next_month.year - 1, month=12, day=1) - timedelta(days=1)
-                return start, end
+                result = start, end
+                end_time = time.time()
+                duration = end_time - start_time
+                _logger.info(f"Function _get_report_dates took {duration:.2f} seconds")
+                return result
 
         elif self.period_type == 'year':
             if self.selected_year:
                 year = self.selected_year
                 start = datetime(year, 1, 1).date()
                 end = datetime(year, 12, 31).date()
-                return start, end
+                result = start, end
+                end_time = time.time()
+                duration = end_time - start_time
+                _logger.info(f"Function _get_report_dates took {duration:.2f} seconds")
+                return result
             else:
                 year = today.year
                 start = datetime(year, 1, 1).date()
                 end = datetime(year, 12, 31).date()
-                return start, end
+                result = start, end
+                end_time = time.time()
+                duration = end_time - start_time
+                _logger.info(f"Function _get_report_dates took {duration:.2f} seconds")
+                return result
 
         elif self.period_type == 'custom':
-            return self.start_date, self.end_date
+            result = self.start_date, self.end_date
+            end_time = time.time()
+            duration = end_time - start_time
+            _logger.info(f"Function _get_report_dates took {duration:.2f} seconds")
+            return result
 
-        return False, False
+        result = False, False
+        end_time = time.time()
+        duration = end_time - start_time
+        _logger.info(f"Function _get_report_dates took {duration:.2f} seconds")
+        return result
 
     def action_create_user(self):
+        start_time = time.time()
         self.ensure_one()
 
         vals = {
@@ -697,7 +889,7 @@ class UsersWizard(models.TransientModel):
         # Clear the wizard record
         self.sudo().unlink()
 
-        return {
+        result = {
             'type': 'ir.actions.client',
             'tag': 'display_notification',
             'params': {
@@ -713,8 +905,13 @@ class UsersWizard(models.TransientModel):
                 }
             }
         }
+        end_time = time.time()
+        duration = end_time - start_time
+        _logger.info(f"Function action_create_user took {duration:.2f} seconds")
+        return result
 
     def download_xl_report(self):
+        start_time = time.time()
         start_date, end_date = self._get_report_dates()
         # if not start_date or not end_date:
         #     raise UserError("Please select valid period details.")
@@ -773,6 +970,9 @@ class UsersWizard(models.TransientModel):
         unit_names = []
         if user.role == "region_head":
             if not user.exists():
+                end_time = time.time()
+                duration = end_time - start_time
+                _logger.info(f"Function download_xl_report took {duration:.2f} seconds")
                 return {"status": 404, "message": "User not found"}
             for i in user.unit_name_ids:
                 unit_names.append(i.name)
@@ -782,6 +982,9 @@ class UsersWizard(models.TransientModel):
                 unit_names = [unit_name]
 
         if not unit_names:
+            end_time = time.time()
+            duration = end_time - start_time
+            _logger.info(f"Function download_xl_report took {duration:.2f} seconds")
             raise UserError("No unit assigned to the user.")
 
         # Collect data for all units
@@ -863,13 +1066,18 @@ class UsersWizard(models.TransientModel):
         })
 
         # Return download action
-        return {
+        result = {
             'type': 'ir.actions.act_url',
             'url': f"/web/content/?model=users.wizard&id={self.id}&field=dummy_file&filename_field=dummy_file_name&download=true",
             'target': 'new',  # ensures download in new tab
         }
+        end_time = time.time()
+        duration = end_time - start_time
+        _logger.info(f"Function download_xl_report took {duration:.2f} seconds")
+        return result
 
     def _get_daily_attendance(self, start_date, end_date, unit_name=None):
+        start_time = time.time()
         """
         Returns a dict:
         {
@@ -888,6 +1096,9 @@ class UsersWizard(models.TransientModel):
         # Handle unit_name logic
         if unit_name == "All" and current_user.role in ["region_head", "circulation_incharge"]:
             if not current_user.exists():
+                end_time = time.time()
+                duration = end_time - start_time
+                _logger.info(f"Function _get_daily_attendance took {duration:.2f} seconds")
                 return {}
             # Get all unit names under this region/circulation head
             if current_user.role == "region_head":
@@ -945,15 +1156,22 @@ class UsersWizard(models.TransientModel):
             result[user.id]["total_copies"] = total_copies
             result[user.id]["forms_count"] = total_copies  # same for consistency
 
+        end_time = time.time()
+        duration = end_time - start_time
+        _logger.info(f"Function _get_daily_attendance took {duration:.2f} seconds")
         return result
 
     def download_attendance_report(self):
+        start_time = time.time()
         start_date, end_date = self._get_report_dates()
         # if not start_date or not end_date:
         #     raise UserError("Please select valid period details.")
 
         unit_name = self.unit_selection  # assuming you store Unit Selection here
         if not unit_name:
+            end_time = time.time()
+            duration = end_time - start_time
+            _logger.info(f"Function download_attendance_report took {duration:.2f} seconds")
             raise UserError("Please select a unit.")
         wb = Workbook()
         ws = wb.active
@@ -1077,8 +1295,12 @@ class UsersWizard(models.TransientModel):
             'dummy_file': file_data,
             'dummy_file_name': "attendance_report.xlsx"
         })
-        return {
+        result = {
             'type': 'ir.actions.act_url',
             'url': f"/web/content/?model=users.wizard&id={self.id}&field=dummy_file&filename_field=dummy_file_name&download=true",
             'target': 'new',
         }
+        end_time = time.time()
+        duration = end_time - start_time
+        _logger.info(f"Function download_attendance_report took {duration:.2f} seconds")
+        return result

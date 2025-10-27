@@ -62,6 +62,8 @@ from odoo.exceptions import AccessDenied, AccessError
 from cryptography.fernet import InvalidToken
 
 from werkzeug.utils import redirect
+import time
+
 _logger = logging.getLogger(__name__)
 SECRET_KEY = 'your_secret_key'
 
@@ -71,21 +73,40 @@ SECRET_KEY = 'your_secret_key'
 class ControllerA(http.Controller):
     @http.route('/', type='http', auth='public', website=True)
     def controller_a(self, **kw):
-        return redirect('/web/login')
+        start_time = time.time()
+        try:
+            result = redirect('/web/login')
+            duration = time.time() - start_time
+            _logger.info(f"controller_a completed successfully in {duration:.4f} seconds")
+            return result
+        except Exception as e:
+            duration = time.time() - start_time
+            _logger.error(f"controller_a failed in {duration:.4f} seconds with error: {str(e)}")
+            raise
 
 class UserPortal(http.Controller):
 
     @http.route('/self/dashboard/data', type='json', auth='user')
     def get_dashboard_data(self):
-        customers = request.env['customer.form'].sudo().search_read([], ['agent_name', 'latitude', 'longitude'])
-        root_maps = request.env['root.map'].sudo().search_read([], ['root_name', 'stage_dd'])
-        from_to_maps = request.env['fromto.rootmap'].sudo().search_read([], ['from_location', 'to_location'])
+        start_time = time.time()
+        try:
+            customers = request.env['customer.form'].sudo().search_read([], ['agent_name', 'latitude', 'longitude'])
+            root_maps = request.env['root.map'].sudo().search_read([], ['root_name', 'stage_dd'])
+            from_to_maps = request.env['fromto.rootmap'].sudo().search_read([], ['from_location', 'to_location'])
 
-        return {
-            'customers': customers,
-            'root_maps': root_maps,
-            'from_to_maps': from_to_maps,
-        }
+            result = {
+                'customers': customers,
+                'root_maps': root_maps,
+                'from_to_maps': from_to_maps,
+            }
+            duration = time.time() - start_time
+            _logger.info(f"get_dashboard_data completed successfully in {duration:.4f} seconds")
+            return result
+        except Exception as e:
+            duration = time.time() - start_time
+            _logger.error(f"get_dashboard_data failed in {duration:.4f} seconds with error: {str(e)}")
+            raise
+
     # @http.route('/lin', type='http', auth='public')
     # def user_portal(self, **kwargs):
     #     return http.request.render("sale_repo_app.user_portal_template")
@@ -100,32 +121,64 @@ class UserPortal(http.Controller):
 
     @http.route('/customers_form', type='http', auth='public')
     def customers_form(self, **kwargs):
-        return http.request.render("sale_repo_app.customers_form")
+        start_time = time.time()
+        try:
+            result = http.request.render("sale_repo_app.customers_form")
+            duration = time.time() - start_time
+            _logger.info(f"customers_form completed successfully in {duration:.4f} seconds")
+            return result
+        except Exception as e:
+            duration = time.time() - start_time
+            _logger.error(f"customers_form failed in {duration:.4f} seconds with error: {str(e)}")
+            raise
 
     @http.route(['/someurl'], type='http', auth="public", methods=["POST"], csrf=False)
     def shop(self, **post):
-        print("Received POST data:", post)
-        return Response("Forbidden", status="700")  # Use 403 for forbidden responses
+        start_time = time.time()
+        try:
+            _logger.info(f"Received POST data: {post}")
+            result = Response("Forbidden", status="700")  # Use 403 for forbidden responses
+            duration = time.time() - start_time
+            _logger.info(f"shop completed successfully in {duration:.4f} seconds")
+            return result
+        except Exception as e:
+            duration = time.time() - start_time
+            _logger.error(f"shop failed in {duration:.4f} seconds with error: {str(e)}")
+            raise
 
     @http.route('/customer_form_list', type='http', auth='public')
     def customer_form_list(self):
-        return http.request.render("sale_repo_app.list_customer_form")
+        start_time = time.time()
+        try:
+            result = http.request.render("sale_repo_app.list_customer_form")
+            duration = time.time() - start_time
+            _logger.info(f"customer_form_list completed successfully in {duration:.4f} seconds")
+            return result
+        except Exception as e:
+            duration = time.time() - start_time
+            _logger.error(f"customer_form_list failed in {duration:.4f} seconds with error: {str(e)}")
+            raise
 
 
 
     @http.route('/web/session/authenticate', type='json', auth="none", csrf=False, cors="*")
     def authenticate(self, login, password):
+        start_time = time.time()
         """ Authenticate user and generate API token with expiration time. """
-        db = request.session.db or "sale_rep_db"
-
         try:
+            db = request.session.db or "sale_rep_db"
+
             # ✅ Validate database access
             if db not in http.db_filter([db]):
+                duration = time.time() - start_time
+                _logger.info(f"authenticate completed in {duration:.4f} seconds with error: Database not found")
                 raise AccessDenied("Database not found")
 
             # ✅ Authenticate user session
             uid = request.session.authenticate(db, login, password)
             if not uid:
+                duration = time.time() - start_time
+                _logger.info(f"authenticate completed in {duration:.4f} seconds with error: Invalid credentials")
                 _logger.error("Authentication failed for %s@%s", login, db)
                 return {'error': 'Invalid credentials', 'code': "403"}
 
@@ -135,8 +188,10 @@ class UserPortal(http.Controller):
 
             # ✅ Fetch user from `res.users`
             user = env['res.users'].sudo().search([('login', '=', login)], limit=1)
-            print(user)
+            _logger.info(f"user: {user}")
             if not user:
+                duration = time.time() - start_time
+                _logger.info(f"authenticate completed in {duration:.4f} seconds with error: User not found!")
                 raise AccessDenied("User not found!")
 
             # ✅ Validate Password using `_check_credentials`
@@ -144,6 +199,8 @@ class UserPortal(http.Controller):
                 # Validate user's password
                 user.sudo()._check_credentials(password, {'interactive': True})
             except exceptions.AccessDenied:
+                duration = time.time() - start_time
+                _logger.info(f"authenticate completed in {duration:.4f} seconds with error: Invalid password!")
                 raise exceptions.AccessDenied("Invalid password!")
 
             # ✅ Generate API token using `generate_token()`
@@ -169,7 +226,7 @@ class UserPortal(http.Controller):
             # ✅ Commit transaction
             env.cr.commit()
 
-            return {
+            result = {
                 'user_id': uid,
                 'name':user.name,
                 'api_key': user.api_token,
@@ -186,25 +243,37 @@ class UserPortal(http.Controller):
                 'expiration': expiration,  # Set expiration if available
                 'code': "200"
             }
+            duration = time.time() - start_time
+            _logger.info(f"authenticate completed successfully in {duration:.4f} seconds for user: {login}")
+            return result
 
         except AccessDenied as e:
+            duration = time.time() - start_time
+            _logger.warning(f"authenticate completed in {duration:.4f} seconds with error: Access denied for {login}: {str(e)}")
             _logger.warning("Access denied for %s: %s", login, str(e))
             return {'error': 'Authentication failed', 'code': "403"}
 
         except Exception as e:
+            duration = time.time() - start_time
+            _logger.error(f"authenticate failed in {duration:.4f} seconds with error: {str(e)}")
             _logger.exception("Critical authentication failure")
             return {'error': str(e), 'code': "403"}
 
     @http.route('/sales_rep_user_creation', type='json', auth='none', methods=["POST"], csrf=False, cors="*")
     def user_creation(self, **kw):
+        start_time = time.time()
         try:
             # Authentication check
             token = kw.get('token')
             if not token:
+                duration = time.time() - start_time
+                _logger.info(f"user_creation completed in {duration:.4f} seconds with error: Authentication token required")
                 return {'error': 'Authentication token required', 'code': "403"}
 
             user = request.env['res.users'].sudo().search([('api_token', '=', token)], limit=1)
             if not user:
+                duration = time.time() - start_time
+                _logger.info(f"user_creation completed in {duration:.4f} seconds with error: Invalid authentication token")
                 return {'error': 'Invalid authentication token', 'code': "403"}
 
             env = request.env(user=user)
@@ -229,19 +298,27 @@ class UserPortal(http.Controller):
             elif env.user.has_group('sale_repo_app.office_staff_group'):
                 valid_roles = ["Office_staff", "agent"]
             else:
+                duration = time.time() - start_time
+                _logger.info(f"user_creation completed in {duration:.4f} seconds with error: Insufficient permissions")
                 return {'error': 'Insufficient permissions', 'code': "403"}
 
             if kw.get("role") not in valid_roles:
+                duration = time.time() - start_time
+                _logger.info(f"user_creation completed in {duration:.4f} seconds with error: Role is not valid for this user")
                 return {'error': 'Role is not valid for this user', 'code': "403"}
 
             # Field validation
             required_fields = ['name', 'status', 'email', 'phone', 'password', 'role', 'unit_name', 'state']
             missing = [field for field in required_fields if not kw.get(field)]
             if missing:
+                duration = time.time() - start_time
+                _logger.info(f"user_creation completed in {duration:.4f} seconds with error: Missing required fields: {', '.join(missing)}")
                 return {'error': f'Missing required fields: {", ".join(missing)}', 'code': "400"}
 
             # Check for existing user
             if env['res.users'].search([('login', '=', kw['email'])], limit=1):
+                duration = time.time() - start_time
+                _logger.info(f"user_creation completed in {duration:.4f} seconds with error: Email already registered")
                 return {'error': 'Email already registered', 'code': "409"}
 
             # Assign groups based on role
@@ -264,16 +341,20 @@ class UserPortal(http.Controller):
 
                 group_xml_ids = group_mapping.get(role)
                 if not group_xml_ids:
+                    duration = time.time() - start_time
+                    _logger.info(f"user_creation completed in {duration:.4f} seconds with error: Role is not valid")
                     return {'error': 'Role is not valid', 'code': "403"}
 
                 groups = [env.ref(xml_id).id for xml_id in group_xml_ids]
 
             except Exception as e:
+                duration = time.time() - start_time
+                _logger.error(f"user_creation failed in {duration:.4f} seconds: Error resolving group references: {e}")
                 _logger.error(f"Error resolving group references: {e}")
                 return {'error': 'Group reference not found', 'code': "500"}
 
             # Create user
-            print("vinayyyy1111")
+            _logger.info("vinayyyy1111")
 
             try:
                 company = env['res.company'].search([], limit=1)
@@ -299,25 +380,35 @@ class UserPortal(http.Controller):
 
                 _logger.info(f"New user created with ID: {new_user.id}")
 
-                return {
+                result = {
                     'success': True,
                     'user_id': new_user.id,
                     'message': 'User created successfully'
                 }
+                duration = time.time() - start_time
+                _logger.info(f"user_creation completed successfully in {duration:.4f} seconds for new user: {new_user.id}")
+                return result
 
             except Exception as e:
+                duration = time.time() - start_time
+                _logger.exception(f"user_creation failed in {duration:.4f} seconds: Error during user creation: {e}")
                 _logger.exception(f"Error during user creation: {e}")
                 return {'error': 'Internal server error', 'code': "500"}
 
         except exceptions.AccessDenied as e:
+            duration = time.time() - start_time
+            _logger.error(f"user_creation failed in {duration:.4f} seconds: Access denied: {str(e)}")
             _logger.error("Access denied: %s", str(e))
             return {'error': 'Authentication failed', 'code': "403"}
 
         except exceptions.ValidationError as e:
+            duration = time.time() - start_time
+            _logger.error(f"user_creation failed in {duration:.4f} seconds: Validation error: {str(e)}")
             _logger.error("Validation error: %s", str(e))
             return {'error': str(e), 'code': "400"}
 
         except Exception as e:
+            duration = time.time() - start_time
+            _logger.exception(f"user_creation failed in {duration:.4f} seconds: Unexpected server error: {str(e)}")
             _logger.exception("Unexpected server error: %s", str(e))
             return {'error': 'Internal server error', 'code': "500"}
-

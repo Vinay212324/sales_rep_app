@@ -1,5 +1,9 @@
 from odoo import models, api, fields, _
 from datetime import datetime, timedelta
+import logging
+import time
+
+_logger = logging.getLogger(__name__)
 
 class RootMap(models.Model):
     _name = "root.map"
@@ -28,22 +32,31 @@ class RootMap(models.Model):
 
     @api.model
     def create(self, vals):
+        start_time = time.time()
         record = super().create(vals)
         if 'user_id' in vals:
             users = self.env['res.users'].browse(vals['user_id'][0][2])
             users.write({'root_name_id': record.id})
+        end_time = time.time()
+        duration = end_time - start_time
+        _logger.info(f"Function create took {duration:.2f} seconds")
         return record
 
     def write(self, vals):
+        start_time = time.time()
         res = super().write(vals)
         if 'user_id' in vals:
             for rec in self:
                 users = rec.user_id
                 users.write({'root_name_id': rec.id})
+        end_time = time.time()
+        duration = end_time - start_time
+        _logger.info(f"Function write took {duration:.2f} seconds")
         return res
 
     @api.model
     def default_get(self, fields_list):
+        start_time = time.time()
         """Auto-fill fields when opening the form"""
         res = super().default_get(fields_list)
         user = self.env.user
@@ -52,6 +65,9 @@ class RootMap(models.Model):
         if 'date' in fields_list:
             res['date'] = datetime.now().date()
 
+        end_time = time.time()
+        duration = end_time - start_time
+        _logger.info(f"Function default_get took {duration:.2f} seconds")
         return res
 
 

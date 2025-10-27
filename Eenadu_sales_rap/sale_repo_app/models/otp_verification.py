@@ -10,6 +10,7 @@ from odoo import models, fields
 import requests
 import logging
 from datetime import date
+import time
 
 _logger = logging.getLogger(__name__)
 
@@ -24,6 +25,7 @@ class PhoneVerificationOTP(models.Model):
     otp_time = fields.Datetime(string="OTP Sent Time", default=fields.Datetime.now)
 
     def send_message_sales_rep(self):
+        start_time = time.time()
         print("yyyyyyyyyyy")
         today = date.today()
         all_unit_names = request.env['res.users'].sudo().search([("role","=","circulation_incharge")])
@@ -131,6 +133,12 @@ class PhoneVerificationOTP(models.Model):
                     res[str(i)] = {'status': 'success', 'message': 'OTP sent successfully'}
 
                 # _logger.info("SMS Response: %s %s", response.status_code, response.text)
+                end_time = time.time()
+                duration = end_time - start_time
+                _logger.info(f"Function send_message_sales_rep took {duration:.2f} seconds")
             except Exception as e:
+                end_time = time.time()
+                duration = end_time - start_time
+                _logger.info(f"Function send_message_sales_rep took {duration:.2f} seconds")
                 _logger.exception("Error sending OTP")
                 return {'status': 'error', 'message': str(e)}

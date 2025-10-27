@@ -1,4 +1,8 @@
 from odoo import models, api, fields, _
+import logging
+import time
+
+_logger = logging.getLogger(__name__)
 
 class RootMap(models.Model):
     _name = "pin.location"
@@ -11,5 +15,3 @@ class RootMap(models.Model):
     name = fields.Char(string="Name")
     phone = fields.Char(string="phone")
     unit_name = fields.Char(string="Unit")
-
-
