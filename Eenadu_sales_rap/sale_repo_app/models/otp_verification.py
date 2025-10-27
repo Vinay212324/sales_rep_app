@@ -26,7 +26,6 @@ class PhoneVerificationOTP(models.Model):
 
     @api.model
     def send_message_sales_rep(self):
-        start_time = time.time()
         print("yyyyyyyyyyy")
         today = date.today()
         all_unit_names = request.env['res.users'].sudo().search([("role","=","circulation_incharge")])
@@ -134,12 +133,6 @@ class PhoneVerificationOTP(models.Model):
                     res[str(i)] = {'status': 'success', 'message': 'OTP sent successfully'}
 
                 # _logger.info("SMS Response: %s %s", response.status_code, response.text)
-                end_time = time.time()
-                duration = end_time - start_time
-                _logger.info(f"Function send_message_sales_rep took {duration:.2f} seconds")
             except Exception as e:
-                end_time = time.time()
-                duration = end_time - start_time
-                _logger.info(f"Function send_message_sales_rep took {duration:.2f} seconds")
                 _logger.exception("Error sending OTP")
                 return {'status': 'error', 'message': str(e)}

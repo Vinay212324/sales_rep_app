@@ -1,10 +1,6 @@
 from odoo import api, models, fields
 from datetime import datetime
 import pytz
-import logging
-import time
-
-_logger = logging.getLogger(__name__)
 
 class WorkSession(models.Model):
     _name = 'work.session'
@@ -30,13 +26,9 @@ class WorkSession(models.Model):
 
     @api.depends('start_time', 'end_time')
     def _compute_duration(self):
-        start_time_func = time.time()
         for rec in self:
             if rec.start_time and rec.end_time:
                 delta = rec.end_time - rec.start_time
                 rec.duration = delta.total_seconds() / 3600.0
             else:
                 rec.duration = 0.0
-        end_time_func = time.time()
-        duration = end_time_func - start_time_func
-        _logger.info(f"Function _compute_duration took {duration:.2f} seconds")
