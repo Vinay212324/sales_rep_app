@@ -161,7 +161,7 @@ class MyMessage(http.Controller):
         unassigned_forms = request.env['customer.form'].sudo().search([
             ('unit_name', '=', unit_name),
             ('date', '=', date),
-            '|', ('Agency', '=', False), ('Agency', '=', "Other Agency ")  # Empty or null Agency
+            ('Agency', '=', "Other Agency ")  # Empty or null Agency
         ])
         for rec in unassigned_forms:
             total_agencies_filled_custon_forms_today.append(rec)
