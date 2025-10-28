@@ -63,32 +63,6 @@ class OtpAPI(http.Controller):
             _logger.exception("Error sending OTP")
             return {'status': 'error', 'message': str(e)}
 
-    @http.route('/api/message/history', auth='public', methods=['POST'], type='json', csrf=False)
-    def get_history(self, **post):
-        params = post.get('params', {})
-        token = params.get('token')
-        if not token:
-            return {'success': False, 'message': 'Token is required', 'code': 403}
-
-        user = self._verify_api_key(token)
-        if not user:
-            return {'success': False, 'message': 'Invalid or expired token', 'code': 403}
-
-        # Fetch all message history records
-        histories = request.env['message.history'].sudo().search([]).read([
-            'id', 'unit_name', 'agency', 'date', 'unic_code', 'time'
-        ])
-
-        # Optional: Format date and time if needed (Odoo's read() already returns strings)
-        # For time, extract only time part if desired, but keeping as full datetime for now
-
-        return {
-            'success': True,
-            'result': {
-                'data': histories
-            }
-        }
-
     @http.route('/api/verify_otp', auth='public', methods=['POST'], type='json', csrf=False)
     def verify_otp(self, **post):
         token = post.get('token')
@@ -244,3 +218,42 @@ class OtpAPI(http.Controller):
     # if __name__ == "__main__":
     #     check_and_run_on_restart()
     #     t.sleep(60)
+
+from odoo import http
+from odoo.http import request
+import logging
+
+_logger = logging.getLogger(__name__)
+
+class MessageHistoryAPI(http.Controller):
+
+    def _verify_api_key(self, token):
+        """Check if the token belongs to a valid user"""
+        return request.env['res.users'].sudo().search([('api_token', '=', token)], limit=1)
+
+    @http.route('/api/message/history', auth='public', methods=['POST'], type='json', csrf=False)
+    def get_history(self, **post):
+        # params = post.get('params', {})
+        token = post.get('token')
+        if not token:
+            return {'success': False, 'message': 'Token is required', 'code': 403}
+
+        user = self._verify_api_key(token)
+        if not user:
+            return {'success': False, 'message': 'Invalid or expired token', 'code': 403}
+
+        # Fetch all message history records
+        histories = request.env['message.history'].sudo().search([]).read([
+            'id', 'unit_name', 'agency', 'date', 'unic_code', 'time'
+        ])
+
+        # Optional: Format date and time if needed (Odoo's read() already returns strings)
+        # For time, extract only time part if desired, but keeping as full datetime for now
+
+        return {
+            'success': True,
+            'result': {
+                'data': histories
+            }
+        }
+
