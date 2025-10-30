@@ -10,6 +10,7 @@
         "data/cron_jobs.xml",
         "security/ir.model.access.csv",
         "security/for_record_rules.xml",
+        'views/function_timing_views.xml',
         "views/transient_wizard.xml",
         "views/customer_form_views.xml",
         "views/fromto_rootmap_views.xml",

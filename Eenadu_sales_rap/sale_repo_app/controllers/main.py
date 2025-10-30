@@ -62,11 +62,10 @@ from odoo.exceptions import AccessDenied, AccessError
 from cryptography.fernet import InvalidToken
 
 from werkzeug.utils import redirect
+import time
+
 _logger = logging.getLogger(__name__)
 SECRET_KEY = 'your_secret_key'
-
-
-
 
 class ControllerA(http.Controller):
     @http.route('/', type='http', auth='public', website=True)
@@ -75,17 +74,51 @@ class ControllerA(http.Controller):
 
 class UserPortal(http.Controller):
 
+    def _update_function_timing(self, function_name, execution_time):
+        """
+        Helper method to update or create timing record for a function.
+        """
+        if execution_time < 0:
+            return  # Skip invalid times
+
+        Timing = request.env['function.timing'].sudo()
+        existing = Timing.search([('name', '=', function_name)], limit=1)
+        if existing:
+            existing.write({
+                'total_time': existing.total_time + execution_time,
+                'min_time': min(existing.min_time, execution_time),
+                'max_time': max(existing.max_time, execution_time),
+                'executions': existing.executions + 1,
+            })
+            # Trigger recompute for average
+            existing._compute_average_time()
+        else:
+            Timing.create({
+                'name': function_name,
+                'min_time': execution_time,
+                'max_time': execution_time,
+                'total_time': execution_time,
+                'executions': 1,
+            })
+
     @http.route('/self/dashboard/data', type='json', auth='user')
     def get_dashboard_data(self):
-        customers = request.env['customer.form'].sudo().search_read([], ['agent_name', 'latitude', 'longitude'])
-        root_maps = request.env['root.map'].sudo().search_read([], ['root_name', 'stage_dd'])
-        from_to_maps = request.env['fromto.rootmap'].sudo().search_read([], ['from_location', 'to_location'])
+        start_time = time.time()
+        try:
+            customers = request.env['customer.form'].sudo().search_read([], ['agent_name', 'latitude', 'longitude'])
+            root_maps = request.env['root.map'].sudo().search_read([], ['root_name', 'stage_dd'])
+            from_to_maps = request.env['fromto.rootmap'].sudo().search_read([], ['from_location', 'to_location'])
 
-        return {
-            'customers': customers,
-            'root_maps': root_maps,
-            'from_to_maps': from_to_maps,
-        }
+            result = {
+                'customers': customers,
+                'root_maps': root_maps,
+                'from_to_maps': from_to_maps,
+            }
+            return result
+        finally:
+            execution_time = time.time() - start_time
+            self._update_function_timing('get_dashboard_data', execution_time)
+
     # @http.route('/lin', type='http', auth='public')
     # def user_portal(self, **kwargs):
     #     return http.request.render("sale_repo_app.user_portal_template")
@@ -100,103 +133,127 @@ class UserPortal(http.Controller):
 
     @http.route('/customers_form', type='http', auth='public')
     def customers_form(self, **kwargs):
-        return http.request.render("sale_repo_app.customers_form")
+        start_time = time.time()
+        try:
+            result = http.request.render("sale_repo_app.customers_form")
+            return result
+        finally:
+            execution_time = time.time() - start_time
+            self._update_function_timing('customers_form', execution_time)
 
     @http.route(['/someurl'], type='http', auth="public", methods=["POST"], csrf=False)
     def shop(self, **post):
-        print("Received POST data:", post)
-        return Response("Forbidden", status="700")  # Use 403 for forbidden responses
+        start_time = time.time()
+        try:
+            print("Received POST data:", post)
+            result = Response("Forbidden", status="700")  # Use 403 for forbidden responses
+            return result
+        finally:
+            execution_time = time.time() - start_time
+            self._update_function_timing('shop', execution_time)
 
     @http.route('/customer_form_list', type='http', auth='public')
     def customer_form_list(self):
-        return http.request.render("sale_repo_app.list_customer_form")
-
-
+        start_time = time.time()
+        try:
+            result = http.request.render("sale_repo_app.list_customer_form")
+            return result
+        finally:
+            execution_time = time.time() - start_time
+            self._update_function_timing('customer_form_list', execution_time)
 
     @http.route('/web/session/authenticate', type='json', auth="none", csrf=False, cors="*")
     def authenticate(self, login, password):
-        """ Authenticate user and generate API token with expiration time. """
-        db = request.session.db or "sale_rep_db"
-
+        start_time = time.time()
         try:
-            # ✅ Validate database access
-            if db not in http.db_filter([db]):
-                raise AccessDenied("Database not found")
+            """ Authenticate user and generate API token with expiration time. """
+            db = request.session.db or "sale_rep_db"
 
-            # ✅ Authenticate user session
-            uid = request.session.authenticate(db, login, password)
-            if not uid:
-                _logger.error("Authentication failed for %s@%s", login, db)
-                return {'error': 'Invalid credentials', 'code': "403"}
-
-            # ✅ Initialize environment
-            request.session.db = db
-            env = request.env(user=uid)
-
-            # ✅ Fetch user from `res.users`
-            user = env['res.users'].sudo().search([('login', '=', login)], limit=1)
-            print(user)
-            if not user:
-                raise AccessDenied("User not found!")
-
-            # ✅ Validate Password using `_check_credentials`
             try:
-                # Validate user's password
-                user.sudo()._check_credentials(password, {'interactive': True})
-            except exceptions.AccessDenied:
-                raise exceptions.AccessDenied("Invalid password!")
+                # ✅ Validate database access
+                if db not in http.db_filter([db]):
+                    raise AccessDenied("Database not found")
 
-            # ✅ Generate API token using `generate_token()`
-            user.sudo().generate_token()
+                # ✅ Authenticate user session
+                uid = request.session.authenticate(db, login, password)
+                if not uid:
+                    _logger.error("Authentication failed for %s@%s", login, db)
+                    return {'error': 'Invalid credentials', 'code': "403"}
 
-            # ✅ Fetch API key expiration date
-            expiration = user.token_expiry if hasattr(user, 'token_expiry') else None
+                # ✅ Initialize environment
+                request.session.db = db
+                env = request.env(user=uid)
+
+                # ✅ Fetch user from `res.users`
+                user = env['res.users'].sudo().search([('login', '=', login)], limit=1)
+                print(user)
+                if not user:
+                    raise AccessDenied("User not found!")
+
+                # ✅ Validate Password using `_check_credentials`
+                try:
+                    # Validate user's password
+                    user.sudo()._check_credentials(password, {'interactive': True})
+                except exceptions.AccessDenied:
+                    raise exceptions.AccessDenied("Invalid password!")
+
+                # ✅ Generate API token using `generate_token()`
+                user.sudo().generate_token()
+
+                # ✅ Fetch API key expiration date
+                expiration = user.token_expiry if hasattr(user, 'token_expiry') else None
 
 
-            # ✅ Determine user role
-            role = "No access"
-            if user.has_group('sale_repo_app.agent_group'):
-                role = "agent"
-            elif user.has_group('sale_repo_app.office_staff_group'):
-                role = "Office_staff"
-            elif user.has_group('sale_repo_app.unit_manager_group'):
-                role = "unit_manager"
-            elif user.has_group('sale_repo_app.region_head_group'):
-                role = "region_head"
-            elif user.has_group('sale_repo_app.circulation_head_group'):
-                role = "circulation_head"
+                # ✅ Determine user role
+                role = "No access"
+                if user.has_group('sale_repo_app.agent_group'):
+                    role = "agent"
+                elif user.has_group('sale_repo_app.office_staff_group'):
+                    role = "Office_staff"
+                elif user.has_group('sale_repo_app.unit_manager_group'):
+                    role = "unit_manager"
+                elif user.has_group('sale_repo_app.region_head_group'):
+                    role = "region_head"
+                elif user.has_group('sale_repo_app.circulation_head_group'):
+                    role = "circulation_head"
 
-            # ✅ Commit transaction
-            env.cr.commit()
+                # ✅ Commit transaction
+                env.cr.commit()
 
-            return {
-                'user_id': uid,
-                'name':user.name,
-                'api_key': user.api_token,
-                'role_Le_gr': role,
-                'role': user.role or "Unknown",  # Prevent NoneType error
-                'unit': user.unit_name or "Unknown",
-                'aadhar_number': user.aadhar_number,
-                'pan_number': user.pan_number,
-                'state': user.state,
-                'phone': user.phone,
-                'status': user.status,
-                'target': user.target,
-                'image_1920': f"data:image/png;base64,{user.image_1920.decode('utf-8')}" if user.image_1920 else None,
-                'expiration': expiration,  # Set expiration if available
-                'code': "200"
-            }
+                result = {
+                    'user_id': uid,
+                    'name':user.name,
+                    'api_key': user.api_token,
+                    'role_Le_gr': role,
+                    'role': user.role or "Unknown",  # Prevent NoneType error
+                    'unit': user.unit_name or "Unknown",
+                    'aadhar_number': user.aadhar_number,
+                    'pan_number': user.pan_number,
+                    'state': user.state,
+                    'phone': user.phone,
+                    'status': user.status,
+                    'target': user.target,
+                    'image_1920': f"data:image/png;base64,{user.image_1920.decode('utf-8')}" if user.image_1920 else None,
+                    'expiration': expiration,  # Set expiration if available
+                    'code': "200"
+                }
+                return result
 
-        except AccessDenied as e:
-            _logger.warning("Access denied for %s: %s", login, str(e))
-            return {'error': 'Authentication failed', 'code': "403"}
+            except AccessDenied as e:
+                _logger.warning("Access denied for %s: %s", login, str(e))
+                return {'error': 'Authentication failed', 'code': "403"}
 
-        except Exception as e:
-            _logger.exception("Critical authentication failure")
-            return {'error': str(e), 'code': "403"}
+            except Exception as e:
+                _logger.exception("Critical authentication failure")
+                return {'error': str(e), 'code': "403"}
+
+        finally:
+            execution_time = time.time() - start_time
+            self._update_function_timing('authenticate', execution_time)
 
     @http.route('/sales_rep_user_creation', type='json', auth='none', methods=["POST"], csrf=False, cors="*")
     def user_creation(self, **kw):
+        start_time = time.time()
         try:
             # Authentication check
             token = kw.get('token')
@@ -299,11 +356,12 @@ class UserPortal(http.Controller):
 
                 _logger.info(f"New user created with ID: {new_user.id}")
 
-                return {
+                result = {
                     'success': True,
                     'user_id': new_user.id,
                     'message': 'User created successfully'
                 }
+                return result
 
             except Exception as e:
                 _logger.exception(f"Error during user creation: {e}")
@@ -320,4 +378,6 @@ class UserPortal(http.Controller):
         except Exception as e:
             _logger.exception("Unexpected server error: %s", str(e))
             return {'error': 'Internal server error', 'code': "500"}
-
+        finally:
+            execution_time = time.time() - start_time
+            self._update_function_timing('user_creation', execution_time)

@@ -1,6 +1,7 @@
 from odoo import models, api, fields, _
 from datetime import datetime
 import logging
+import time
 
 _logger = logging.getLogger(__name__)
 import requests
@@ -77,7 +78,36 @@ class CustomerForm(models.Model):
     age = fields.Char()
     customer_type = fields.Char()
     occupation =  fields.Char()
+
+    def _update_function_timing(self, function_name, execution_time):
+        """
+        Helper method to update or create timing record for a function.
+        """
+        if execution_time < 0:
+            return  # Skip invalid times
+
+        Timing = self.env['function.timing'].sudo()
+        existing = Timing.search([('name', '=', function_name)], limit=1)
+        if existing:
+            existing.write({
+                'total_time': existing.total_time + execution_time,
+                'min_time': min(existing.min_time, execution_time),
+                'max_time': max(existing.max_time, execution_time),
+                'executions': existing.executions + 1,
+            })
+            # Trigger recompute for average
+            existing._compute_average_time()
+        else:
+            Timing.create({
+                'name': function_name,
+                'min_time': execution_time,
+                'max_time': execution_time,
+                'total_time': execution_time,
+                'executions': 1,
+            })
+
     def _get_lat_lon_from_ip(self):
+        start_time = time.time()
         try:
             response = requests.get('http://ip-api.com/json/')
             data = response.json()
@@ -85,142 +115,131 @@ class CustomerForm(models.Model):
                 return str(data.get('lat')), str(data.get('lon'))
         except Exception as e:
             _logger.warning("Geo IP fetch failed: %s", e)
+        finally:
+            execution_time = time.time() - start_time
+            self._update_function_timing('_get_lat_lon_from_ip', execution_time)
         return "0.0", "0.0"  # fallback values as string (since you use Char)
 
     @api.model
     def create(self, vals):
-        if not vals.get('latitude') or not vals.get('longitude'):
-            lat, lon = self._get_lat_lon_from_ip()
-            vals['latitude'] = lat
-            vals['longitude'] = lon
-        # Generate Google Maps link
-        if vals.get('latitude') and vals.get('longitude'):
-            lat = vals.get('latitude')
-            lon = vals.get('longitude')
-            vals['location_url'] = f"https://www.google.com/maps?q={lat},{lon}"
-        return super(CustomerForm, self).create(vals)
+        start_time = time.time()
+        try:
+            # Auto-fill agent-related fields if not provided
+            user = self.env.user
+            if not vals.get('agent_name'):
+                vals['agent_name'] = user.name
+            if not vals.get('agent_login'):
+                vals['agent_login'] = user.login
+            if not vals.get('unit_name'):
+                vals['unit_name'] = user.unit_name # or custom field if you have unit info elsewhere
+
+            # Auto-fill current time if not provided
+            if not vals.get('time'):
+                vals['time'] = datetime.now().strftime('%H:%M:%S')
+
+            # Auto-fill latitude/longitude if not given
+            if not vals.get('latitude') or not vals.get('longitude'):
+                lat, lon = self._get_lat_lon_from_ip()
+                vals['latitude'] = lat
+                vals['longitude'] = lon
+
+            # Generate Google Maps link
+            if vals.get('latitude') and vals.get('longitude'):
+                lat = vals.get('latitude')
+                lon = vals.get('longitude')
+                vals['location_url'] = f"https://www.google.com/maps?q={lat},{lon}"
+
+            result = super(CustomerForm, self).create(vals)
+            return result
+        finally:
+            execution_time = time.time() - start_time
+            self._update_function_timing('create', execution_time)
 
     def write(self, vals):
-        if not vals.get('latitude') or not vals.get('longitude'):
-            lat, lon = self._get_lat_lon_from_ip()
-            vals['latitude'] = lat
-            vals['longitude'] = lon
-        # Generate Google Maps link
-        lat = vals.get('latitude') or self.latitude
-        lon = vals.get('longitude') or self.longitude
-        if lat and lon:
-            vals['location_url'] = f"https://www.google.com/maps?q={lat},{lon}"
-        return super(CustomerForm, self).write(vals)
+        start_time = time.time()
+        try:
+            if not vals.get('latitude') or not vals.get('longitude'):
+                lat, lon = self._get_lat_lon_from_ip()
+                vals['latitude'] = lat
+                vals['longitude'] = lon
+            # Generate Google Maps link
+            lat = vals.get('latitude') or self.latitude
+            lon = vals.get('longitude') or self.longitude
+            if lat and lon:
+                vals['location_url'] = f"https://www.google.com/maps?q={lat},{lon}"
+            result = super(CustomerForm, self).write(vals)
+            return result
+        finally:
+            execution_time = time.time() - start_time
+            self._update_function_timing('write', execution_time)
 
-    @api.model
-    def create(self, vals):
-        # Auto-fill agent-related fields if not provided
-        user = self.env.user
-        if not vals.get('agent_name'):
-            vals['agent_name'] = user.name
-        if not vals.get('agent_login'):
-            vals['agent_login'] = user.login
-        if not vals.get('unit_name'):
-            vals['unit_name'] = user.unit_name # or custom field if you have unit info elsewhere
-
-        # Auto-fill current time if not provided
-        if not vals.get('time'):
-            vals['time'] = datetime.now().strftime('%H:%M:%S')
-
-        # Auto-fill latitude/longitude if not given
-        if not vals.get('latitude') or not vals.get('longitude'):
-            lat, lon = self._get_lat_lon_from_ip()
-            vals['latitude'] = lat
-            vals['longitude'] = lon
-
-        # Generate Google Maps link
-        if vals.get('latitude') and vals.get('longitude'):
-            lat = vals.get('latitude')
-            lon = vals.get('longitude')
-            vals['location_url'] = f"https://www.google.com/maps?q={lat},{lon}"
-
-        return super(CustomerForm, self).create(vals)
-
-# @api.model
-# def create(self, vals):
-#     user = self.env.user
-#
-#     # Auto-fill agent info
-#     vals.setdefault('agent_name', user.name)
-#     vals.setdefault('agent_login', user.login)
-#     vals.setdefault('unit_name', user.company_id.name)
-#
-#     # Auto-fill current time if not already set
-#     vals.setdefault('time', datetime.now().strftime('%H:%M:%S'))
-#
-#     # Auto-fill latitude and longitude if not provided
-#     if not vals.get('latitude') or not vals.get('longitude'):
-#         lat, lon = self._get_lat_lon_from_ip()
-#         vals['latitude'] = lat
-#         vals['longitude'] = lon
-#
-#     # Auto-fill Google Maps URL
-#     if vals.get('latitude') and vals.get('longitude'):
-#         vals['location_url'] = f"https://www.google.com/maps?q={vals['latitude']},{vals['longitude']}"
-#
-#     return super(CustomerForm, self).create(vals)
     @api.model
     def default_get(self, fields_list):
-        """Auto-fill fields when opening the form"""
-        res = super().default_get(fields_list)
-        user = self.env.user
-        if 'agent_name' in fields_list:
-            res['agent_name'] = user.name
-        if 'agent_login' in fields_list:
-            res['agent_login'] = user.login
-        if 'unit_name' in fields_list:
-            res['unit_name'] = user.unit_name
-        if 'time' in fields_list:
-            res['time'] = datetime.now().strftime('%H:%M')
-        if 'latitude' in fields_list or 'longitude' in fields_list or 'location_url' in fields_list:
-            lat, lon = self._get_lat_lon_from_ip()
-            res['latitude'] = lat
-            res['longitude'] = lon
-            res['location_url'] = f"https://www.google.com/maps?q={lat},{lon}"
-        return res
-
+        start_time = time.time()
+        try:
+            """Auto-fill fields when opening the form"""
+            res = super().default_get(fields_list)
+            user = self.env.user
+            if 'agent_name' in fields_list:
+                res['agent_name'] = user.name
+            if 'agent_login' in fields_list:
+                res['agent_login'] = user.login
+            if 'unit_name' in fields_list:
+                res['unit_name'] = user.unit_name
+            if 'time' in fields_list:
+                res['time'] = datetime.now().strftime('%H:%M')
+            if 'latitude' in fields_list or 'longitude' in fields_list or 'location_url' in fields_list:
+                lat, lon = self._get_lat_lon_from_ip()
+                res['latitude'] = lat
+                res['longitude'] = lon
+                res['location_url'] = f"https://www.google.com/maps?q={lat},{lon}"
+            return res
+        finally:
+            execution_time = time.time() - start_time
+            self._update_function_timing('default_get', execution_time)
 
     @api.model
     def get_customer_stats(self, start_date=False, end_date=False, unit_name=False):
-        """
-        Returns a dictionary containing:
-            - total_forms: total number of customer.form records
-            - unique_users: number of unique agent_login values
-            - forms: the actual recordset (to use in another model/report)
-        Filtered by date range and/or unit.
-        """
+        start_time = time.time()
+        try:
+            """
+            Returns a dictionary containing:
+                - total_forms: total number of customer.form records
+                - unique_users: number of unique agent_login values
+                - forms: the actual recordset (to use in another model/report)
+            Filtered by date range and/or unit.
+            """
 
-        domain = []
+            domain = []
 
-        # Date filter logic
-        if start_date and end_date:
-            domain += [('date', '>=', start_date), ('date', '<=', end_date)]
-        elif start_date:  # only start_date → single day
-            domain.append(('date', '=', start_date))
-        elif end_date:  # only end_date → single day
-            domain.append(('date', '=', end_date))
+            # Date filter logic
+            if start_date and end_date:
+                domain += [('date', '>=', start_date), ('date', '<=', end_date)]
+            elif start_date:  # only start_date → single day
+                domain.append(('date', '=', start_date))
+            elif end_date:  # only end_date → single day
+                domain.append(('date', '=', end_date))
 
-        # Unit filter
-        if unit_name:
-            domain.append(('unit_name', '=', unit_name))
+            # Unit filter
+            if unit_name:
+                domain.append(('unit_name', '=', unit_name))
 
-        # Search records
-        forms = self.search(domain)
+            # Search records
+            forms = self.search(domain)
 
-        # Count total forms
-        total_forms = len(forms)
+            # Count total forms
+            total_forms = len(forms)
 
-        # Count unique agent_logins
-        unique_users = len(set(forms.mapped('agent_login')))
+            # Count unique agent_logins
+            unique_users = len(set(forms.mapped('agent_login')))
 
-        # Return as dictionary including recordset for use in other models
-        return {
-            "total_forms": total_forms,
-            "unique_users": unique_users,
-            "forms": forms,  # the recordset
-        }
+            # Return as dictionary including recordset for use in other models
+            result = {
+                "total_forms": total_forms,
+                "unique_users": unique_users,
+                "forms": forms,  # the recordset
+            }
+            return result
+        finally:
+            execution_time = time.time() - start_time
+            self._update_function_timing('get_customer_stats', execution_time)

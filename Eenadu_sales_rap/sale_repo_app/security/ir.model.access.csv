@@ -1,5 +1,6 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 
+for_time,for_time_date,model_function_timing,admin_group,1,1,1,1
 sal,sale,base.model_res_users,base.group_user,1,1,1,1
 sal,sale,model_unit_name,base.group_user,1,1,1,1
 

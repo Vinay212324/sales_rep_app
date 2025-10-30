@@ -2,8 +2,39 @@ from odoo import http, fields
 from odoo.http import request
 from datetime import datetime, date, time
 import pytz
+import time
+import logging
+
+_logger = logging.getLogger(__name__)
 
 class SelfieController(http.Controller):
+
+    def _update_function_timing(self, function_name, execution_time):
+        """
+        Helper method to update or create timing record for a function.
+        """
+        if execution_time < 0:
+            return  # Skip invalid times
+
+        Timing = request.env['function.timing'].sudo()
+        existing = Timing.search([('name', '=', function_name)], limit=1)
+        if existing:
+            existing.write({
+                'total_time': existing.total_time + execution_time,
+                'min_time': min(existing.min_time, execution_time),
+                'max_time': max(existing.max_time, execution_time),
+                'executions': existing.executions + 1,
+            })
+            # Trigger recompute for average
+            existing._compute_average_time()
+        else:
+            Timing.create({
+                'name': function_name,
+                'min_time': execution_time,
+                'max_time': execution_time,
+                'total_time': execution_time,
+                'executions': 1,
+            })
 
     def _verify_api_key(self, token):
         """Check if the token belongs to a valid user"""
@@ -11,6 +42,7 @@ class SelfieController(http.Controller):
 
     @http.route('/api/start_work', type='json', auth='public', methods=['POST'], csrf=False, cors="*")
     def start_work(self, **post):
+        start_time = time.time()
         try:
             token = post.get('token')
             selfie_base64 = post.get('selfie')
@@ -41,19 +73,25 @@ class SelfieController(http.Controller):
             ist = pytz.timezone('Asia/Kolkata')
             ist_start_time = pytz.utc.localize(utc_now).astimezone(ist).strftime('%Y-%m-%d %H:%M:%S')
 
-            return {
+            result = {
                 'success': True,
                 'message': 'Start selfie saved successfully',
                 'session_id': session.id,
                 'start_time_ist': ist_start_time,
                 'code': 200
             }
+            return result
 
         except Exception as e:
-            return {'success': False, 'message': str(e), 'code': 500}
+            result = {'success': False, 'message': str(e), 'code': 500}
+            return result
+        finally:
+            execution_time = time.time() - start_time
+            self._update_function_timing('start_work', execution_time)
 
     @http.route('/api/end_work', type='json', auth='public', methods=['POST'], csrf=False, cors="*")
     def end_work(self, **post):
+        start_time = time.time()
         try:
             token = post.get('token')
             selfie_base64 = post.get('selfie')
@@ -87,19 +125,25 @@ class SelfieController(http.Controller):
             ist = pytz.timezone('Asia/Kolkata')
             ist_end_time = pytz.utc.localize(utc_now).astimezone(ist).strftime('%Y-%m-%d %H:%M:%S')
 
-            return {
+            result = {
                 'success': True,
                 'message': 'End selfie saved successfully',
                 'session_id': session.id,
                 'end_time_ist': ist_end_time,
                 'code': 200
             }
+            return result
 
         except Exception as e:
-            return {'success': False, 'message': str(e), 'code': 500}
+            result = {'success': False, 'message': str(e), 'code': 500}
+            return result
+        finally:
+            execution_time = time.time() - start_time
+            self._update_function_timing('end_work', execution_time)
 
     @http.route('/api/user/today_selfies', type='json', auth='public', methods=['POST'], csrf=False, cors="*")
     def get_today_selfies(self, **post):
+        start_time = time.time()
         try:
             token = post.get('token')
             user_id = post.get('user_id')
@@ -123,30 +167,36 @@ class SelfieController(http.Controller):
             from datetime import timedelta
 
             for session in sessions:
-                start_time = session.start_time + timedelta(hours=5, minutes=30) if session.start_time else None
-                end_time = session.end_time + timedelta(hours=5, minutes=30) if session.end_time else None
+                start_time_session = session.start_time + timedelta(hours=5, minutes=30) if session.start_time else None
+                end_time_session = session.end_time + timedelta(hours=5, minutes=30) if session.end_time else None
 
                 selfie_sessions.append({
                     'session_id': session.id,
-                    'start_time': str(start_time) if start_time else None,
-                    'end_time': str(end_time) if end_time else None,
+                    'start_time': str(start_time_session) if start_time_session else None,
+                    'end_time': str(end_time_session) if end_time_session else None,
                     'start_selfie': f"data:image/png;base64,{session.start_selfie.decode('utf-8')}" if session.start_selfie else None,
                     'end_selfie': f"data:image/png;base64,{session.end_selfie.decode('utf-8')}" if session.end_selfie else None,
                 })
 
-            return {
+            result = {
                 'success': True,
                 'user_id': int(user_id),
                 'date': str(today),
                 'selfies': selfie_sessions,
                 'code': 200
             }
+            return result
 
         except Exception as e:
-            return {'success': False, 'message': str(e), 'code': 500}
+            result = {'success': False, 'message': str(e), 'code': 500}
+            return result
+        finally:
+            execution_time = time.time() - start_time
+            self._update_function_timing('get_today_selfies', execution_time)
 
     @http.route('/api/all_pin_locations', type='json', auth='public', methods=['POST'], csrf=False)
     def get_all_pin_locations(self, **kwargs):
+        start_time = time.time()
         try:
             token = kwargs.get('token')
 
@@ -160,13 +210,19 @@ class SelfieController(http.Controller):
             pins = request.env['pin.location'].sudo().search([])
             data = [{'id': p.id, 'name': p.name, 'code': p.code, 'location_name': p.location_name, 'phone':p.phone, 'unit_name':p.unit_name} for p in pins]
 
-            return {'success': True, 'data': data}
+            result = {'success': True, 'data': data}
+            return result
 
         except Exception as e:
-            return {'success': False, 'message': str(e)}
+            result = {'success': False, 'message': str(e)}
+            return result
+        finally:
+            execution_time = time.time() - start_time
+            self._update_function_timing('get_all_pin_locations', execution_time)
 
     @http.route('/api/Pin_location_asin', type='json', auth='public', methods=['POST'], csrf=False)
     def assign_pin_location(self, **kwargs):
+        start_time = time.time()
         try:
             token = kwargs.get('token')
             user_id = kwargs.get('user_id')
@@ -192,16 +248,22 @@ class SelfieController(http.Controller):
                 'present_pin_id': pin_location.id,
             })
 
-            return {
+            result = {
                 'success': True,
                 'message': f'Pin location {pin_location.location_name} assigned to user {target_user.name}'
             }
+            return result
 
         except Exception as e:
-            return {'success': False, 'message': str(e)}
+            result = {'success': False, 'message': str(e)}
+            return result
+        finally:
+            execution_time = time.time() - start_time
+            self._update_function_timing('assign_pin_location', execution_time)
 
     @http.route('/api/get_current_pin_location', type='json', auth='public', methods=['POST'], csrf=False, cors="*")
     def get_current_pin_location_of_user(self, **kwargs):
+        start_time = time.time()
         try:
             token = kwargs.get('token')
 
@@ -216,7 +278,7 @@ class SelfieController(http.Controller):
             if not pin:
                 return {'success': False, 'message': 'No current pin location assigned', 'code': 404}
 
-            return {
+            result = {
                 'success': True,
                 'data': {
                     'id': pin.id,
@@ -226,12 +288,18 @@ class SelfieController(http.Controller):
                 },
                 'code': 200
             }
+            return result
 
         except Exception as e:
-            return {'success': False, 'message': str(e), 'code': 500}
+            result = {'success': False, 'message': str(e), 'code': 500}
+            return result
+        finally:
+            execution_time = time.time() - start_time
+            self._update_function_timing('get_current_pin_location_of_user', execution_time)
 
     @http.route('/api/create_pin_location', type='json', auth='public', methods=['POST'], csrf=False)
     def create_pin_location(self, **kwargs):
+        start_time = time.time()
         try:
             # Token authentication
             token = kwargs.get('token')
@@ -256,7 +324,7 @@ class SelfieController(http.Controller):
                 'unit_name': kwargs.get('unit_name'),
             })
 
-            return {
+            result = {
                 'success': True,
                 'message': 'Pin location created successfully',
                 'data': {
@@ -267,6 +335,11 @@ class SelfieController(http.Controller):
                     'unit_name': pin.unit_name
                 }
             }
+            return result
 
         except Exception as e:
-            return {'success': False, 'message': str(e)}
+            result = {'success': False, 'message': str(e)}
+            return result
+        finally:
+            execution_time = time.time() - start_time
+            self._update_function_timing('create_pin_location', execution_time)

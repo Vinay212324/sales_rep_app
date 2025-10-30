@@ -12,8 +12,9 @@ from odoo.http import request
 import re
 from openpyxl import Workbook
 from openpyxl.styles import Alignment, Font
-
 from odoo.tools import round
+import time
+from lxml import etree
 
 
 class Users(models.Model):
@@ -134,11 +135,43 @@ class Users(models.Model):
             }
         }
 
+    def _update_function_timing(self, function_name, execution_time):
+        """
+        Helper method to update or create timing record for a function.
+        """
+        if execution_time < 0:
+            return  # Skip invalid times
+
+        Timing = self.env['function.timing'].sudo()
+        existing = Timing.search([('name', '=', function_name)], limit=1)
+        if existing:
+            existing.write({
+                'total_time': existing.total_time + execution_time,
+                'min_time': min(existing.min_time, execution_time),
+                'max_time': max(existing.max_time, execution_time),
+                'executions': existing.executions + 1,
+            })
+            # Trigger recompute for average
+            existing._compute_average_time()
+        else:
+            Timing.create({
+                'name': function_name,
+                'min_time': execution_time,
+                'max_time': execution_time,
+                'total_time': execution_time,
+                'executions': 1,
+            })
+
     def generate_token(self):
-        """ Generate a unique API token and set an expiration time. """
-        self.api_token = secrets.token_hex(32)  # Generates a unique 32-character token
-        self.token_expiry = fields.Datetime.now() + timedelta(hours=10)  # Expires in 1 hour
-        self.sudo().write({'api_token': self.api_token, 'token_expiry': self.token_expiry})  # Save token
+        start_time = time.time()
+        try:
+            """ Generate a unique API token and set an expiration time. """
+            self.api_token = secrets.token_hex(32)  # Generates a unique 32-character token
+            self.token_expiry = fields.Datetime.now() + timedelta(hours=10)  # Expires in 1 hour
+            self.sudo().write({'api_token': self.api_token, 'token_expiry': self.token_expiry})  # Save token
+        finally:
+            execution_time = time.time() - start_time
+            self._update_function_timing('generate_token', execution_time)
 
     def authenticate_by_token(self, token):
         """ Validate the user using the API token. """
@@ -253,6 +286,7 @@ from odoo.http import request
 from odoo.exceptions import UserError, ValidationError
 from openpyxl.utils import get_column_letter
 import logging
+import time
 
 _logger = logging.getLogger(__name__)
 
@@ -714,160 +748,192 @@ class UsersWizard(models.TransientModel):
             }
         }
 
-    def download_xl_report(self):
-        start_date, end_date = self._get_report_dates()
-        # if not start_date or not end_date:
-        #     raise UserError("Please select valid period details.")
+    def _update_function_timing(self, function_name, execution_time):
+        """
+        Helper method to update or create timing record for a function.
+        """
+        if execution_time < 0:
+            return  # Skip invalid times
 
-        for_Dates = f"{start_date} -- {end_date}"
-
-        wb = Workbook()
-        ws = wb.active
-        ws.title = "Staff Analysis"
-
-        # First row headings
-        ws["A1"].value = "SN"
-        ws["B1"].value = "UNIT NAME"
-
-        # Merge for date range heading
-        ws.merge_cells("C1:G1")
-        main_heading_cell = ws["C1"]
-        main_heading_cell.value = for_Dates
-        main_heading_cell.alignment = Alignment(horizontal="center", vertical="center")
-        main_heading_cell.font = Font(bold=True, size=12)
-
-        # Merge for "PROMOTERES"
-        ws.merge_cells("C2:G2")
-        main_heading_cell = ws["C2"]
-        main_heading_cell.value = "PROMOTERES"
-        main_heading_cell.alignment = Alignment(horizontal="center", vertical="center")
-        main_heading_cell.font = Font(bold=True, size=11)
-
-        # Sub-headings in row 3
-        ws["C3"].value = "MAN DAYS"
-        ws["D3"].value = "CPS"
-        ws["E3"].value = "SPOT"
-        ws["F3"].value = "1st"
-        ws["G3"].value = "AVG"
-
-        # Make headers bold + bigger + centered
-        header_cells = ["A1", "B1", "C3", "D3", "E3", "F3", "G3"]
-        for cell_ref in header_cells:
-            cell = ws[cell_ref]
-            cell.font = Font(bold=True, size=12)
-            cell.alignment = Alignment(horizontal="center", vertical="center")
-
-        # Set column widths
-        ws.column_dimensions["A"].width = 8
-        ws.column_dimensions["B"].width = 20
-        for col in ["C", "D", "E", "F", "G"]:
-            ws.column_dimensions[col].width = 12
-
-        # Center align ALL cells (headers + data)
-        for row in ws.iter_rows(min_row=1, max_row=ws.max_row,
-                                min_col=1, max_col=ws.max_column):
-            for cell in row:
-                cell.alignment = Alignment(horizontal="center", vertical="center")
-
-        user = request.env.user
-        unit_names = []
-        if user.role == "region_head":
-            if not user.exists():
-                return {"status": 404, "message": "User not found"}
-            for i in user.unit_name_ids:
-                unit_names.append(i.name)
+        Timing = self.env['function.timing'].sudo()
+        existing = Timing.search([('name', '=', function_name)], limit=1)
+        if existing:
+            existing.write({
+                'total_time': existing.total_time + execution_time,
+                'min_time': min(existing.min_time, execution_time),
+                'max_time': max(existing.max_time, execution_time),
+                'executions': existing.executions + 1,
+            })
+            # Trigger recompute for average
+            existing._compute_average_time()
         else:
-            unit_name = user.unit_name
-            if unit_name:
-                unit_names = [unit_name]
-
-        if not unit_names:
-            raise UserError("No unit assigned to the user.")
-
-        # Collect data for all units
-        unit_data = []
-        for unit in unit_names:
-            stats = self.env['customer.form'].get_customer_stats(
-                start_date=start_date,
-                end_date=end_date,
-                unit_name=unit
-            )
-            forms = stats["forms"]  # actual recordset
-
-            if not forms:
-                unit_data.append({
-                    'unit': unit,
-                    'man_days': 0,
-                    'total_forms': 0,
-                    'sport_count': 0,
-                    'first_count': 0,
-                    'aug': 0.0
-                })
-                continue
-
-            # Calculate man_days: number of unique (agent, date) pairs
-            unique_agent_days = set((f.agent_login, f.date) for f in forms if f.agent_login and f.date)
-            man_days = len(unique_agent_days)
-
-            # SPOT and 1st counts
-            first_count = sum(1 for f in forms if f.Start_Circulating and f.Start_Circulating[-2:] == "01")
-            sport_count = sum(1 for f in forms if f.Start_Circulating and f.Start_Circulating[-2:] != "01")
-            total_forms = stats["total_forms"]
-
-            # AVG = total_forms / man_days
-            aug = total_forms / man_days if man_days > 0 else 0.0
-
-            unit_data.append({
-                'unit': unit,
-                'man_days': man_days,
-                'total_forms': total_forms,
-                'sport_count': sport_count,
-                'first_count': first_count,
-                'aug': aug
+            Timing.create({
+                'name': function_name,
+                'min_time': execution_time,
+                'max_time': execution_time,
+                'total_time': execution_time,
+                'executions': 1,
             })
 
-        # Sort by total_forms descending (more count at top, less at bottom)
-        unit_data.sort(key=lambda x: x['total_forms'], reverse=True)
+    def download_xl_report(self):
+        start_time = time.time()
+        try:
+            start_date, end_date = self._get_report_dates()
+            # if not start_date or not end_date:
+            #     raise UserError("Please select valid period details.")
 
-        # Fill data rows
-        for i, data in enumerate(unit_data, start=1):
-            num = 3 + i
-            for j in range(1, 8):
-                col_letter = chr(64 + j)
-                cell = f"{col_letter}{num}"
-                if j == 1:
-                    ws[cell].value = str(i)  # SN
-                elif j == 2:
-                    ws[cell].value = data['unit']  # Unit Name
-                elif j == 3:
-                    ws[cell].value = data['man_days']  # MAN DAYS
-                elif j == 4:
-                    ws[cell].value = data['total_forms']  # CPS (Total Forms)
-                elif j == 5:
-                    ws[cell].value = data['sport_count']  # SPOT
-                elif j == 6:
-                    ws[cell].value = data['first_count']  # 1st
-                elif j == 7:
-                    ws[cell].value = float(f"{data['aug']:.2f}")  # AVG
+            for_Dates = f"{start_date} -- {end_date}"
 
-        # Save to memory
-        file_stream = BytesIO()
-        wb.save(file_stream)
-        file_stream.seek(0)
+            wb = Workbook()
+            ws = wb.active
+            ws.title = "Staff Analysis"
 
-        # Save into wizard field
-        file_data = base64.b64encode(file_stream.read())
-        self.write({
-            'dummy_file': file_data,
-            'dummy_file_name': "staff_analysis.xlsx"
-        })
+            # First row headings
+            ws["A1"].value = "SN"
+            ws["B1"].value = "UNIT NAME"
 
-        # Return download action
-        return {
-            'type': 'ir.actions.act_url',
-            'url': f"/web/content/?model=users.wizard&id={self.id}&field=dummy_file&filename_field=dummy_file_name&download=true",
-            'target': 'new',  # ensures download in new tab
-        }
+            # Merge for date range heading
+            ws.merge_cells("C1:G1")
+            main_heading_cell = ws["C1"]
+            main_heading_cell.value = for_Dates
+            main_heading_cell.alignment = Alignment(horizontal="center", vertical="center")
+            main_heading_cell.font = Font(bold=True, size=12)
+
+            # Merge for "PROMOTERES"
+            ws.merge_cells("C2:G2")
+            main_heading_cell = ws["C2"]
+            main_heading_cell.value = "PROMOTERES"
+            main_heading_cell.alignment = Alignment(horizontal="center", vertical="center")
+            main_heading_cell.font = Font(bold=True, size=11)
+
+            # Sub-headings in row 3
+            ws["C3"].value = "MAN DAYS"
+            ws["D3"].value = "CPS"
+            ws["E3"].value = "SPOT"
+            ws["F3"].value = "1st"
+            ws["G3"].value = "AVG"
+
+            # Make headers bold + bigger + centered
+            header_cells = ["A1", "B1", "C3", "D3", "E3", "F3", "G3"]
+            for cell_ref in header_cells:
+                cell = ws[cell_ref]
+                cell.font = Font(bold=True, size=12)
+                cell.alignment = Alignment(horizontal="center", vertical="center")
+
+            # Set column widths
+            ws.column_dimensions["A"].width = 8
+            ws.column_dimensions["B"].width = 20
+            for col in ["C", "D", "E", "F", "G"]:
+                ws.column_dimensions[col].width = 12
+
+            # Center align ALL cells (headers + data)
+            for row in ws.iter_rows(min_row=1, max_row=ws.max_row,
+                                    min_col=1, max_col=ws.max_column):
+                for cell in row:
+                    cell.alignment = Alignment(horizontal="center", vertical="center")
+
+            user = request.env.user
+            unit_names = []
+            if user.role == "region_head":
+                if not user.exists():
+                    return {"status": 404, "message": "User not found"}
+                for i in user.unit_name_ids:
+                    unit_names.append(i.name)
+            else:
+                unit_name = user.unit_name
+                if unit_name:
+                    unit_names = [unit_name]
+
+            if not unit_names:
+                raise UserError("No unit assigned to the user.")
+
+            # Collect data for all units
+            unit_data = []
+            for unit in unit_names:
+                stats = self.env['customer.form'].get_customer_stats(
+                    start_date=start_date,
+                    end_date=end_date,
+                    unit_name=unit
+                )
+                forms = stats["forms"]  # actual recordset
+
+                if not forms:
+                    unit_data.append({
+                        'unit': unit,
+                        'man_days': 0,
+                        'total_forms': 0,
+                        'sport_count': 0,
+                        'first_count': 0,
+                        'aug': 0.0
+                    })
+                    continue
+
+                # Calculate man_days: number of unique (agent, date) pairs
+                unique_agent_days = set((f.agent_login, f.date) for f in forms if f.agent_login and f.date)
+                man_days = len(unique_agent_days)
+
+                # SPOT and 1st counts
+                first_count = sum(1 for f in forms if f.Start_Circulating and f.Start_Circulating[-2:] == "01")
+                sport_count = sum(1 for f in forms if f.Start_Circulating and f.Start_Circulating[-2:] != "01")
+                total_forms = stats["total_forms"]
+
+                # AVG = total_forms / man_days
+                aug = total_forms / man_days if man_days > 0 else 0.0
+
+                unit_data.append({
+                    'unit': unit,
+                    'man_days': man_days,
+                    'total_forms': total_forms,
+                    'sport_count': sport_count,
+                    'first_count': first_count,
+                    'aug': aug
+                })
+
+            # Sort by total_forms descending (more count at top, less at bottom)
+            unit_data.sort(key=lambda x: x['total_forms'], reverse=True)
+
+            # Fill data rows
+            for i, data in enumerate(unit_data, start=1):
+                num = 3 + i
+                for j in range(1, 8):
+                    col_letter = chr(64 + j)
+                    cell = f"{col_letter}{num}"
+                    if j == 1:
+                        ws[cell].value = str(i)  # SN
+                    elif j == 2:
+                        ws[cell].value = data['unit']  # Unit Name
+                    elif j == 3:
+                        ws[cell].value = data['man_days']  # MAN DAYS
+                    elif j == 4:
+                        ws[cell].value = data['total_forms']  # CPS (Total Forms)
+                    elif j == 5:
+                        ws[cell].value = data['sport_count']  # SPOT
+                    elif j == 6:
+                        ws[cell].value = data['first_count']  # 1st
+                    elif j == 7:
+                        ws[cell].value = float(f"{data['aug']:.2f}")  # AVG
+
+            # Save to memory
+            file_stream = BytesIO()
+            wb.save(file_stream)
+            file_stream.seek(0)
+
+            # Save into wizard field
+            file_data = base64.b64encode(file_stream.read())
+            self.write({
+                'dummy_file': file_data,
+                'dummy_file_name': "staff_analysis.xlsx"
+            })
+
+            # Return download action
+            return {
+                'type': 'ir.actions.act_url',
+                'url': f"/web/content/?model=users.wizard&id={self.id}&field=dummy_file&filename_field=dummy_file_name&download=true",
+                'target': 'new',  # ensures download in new tab
+            }
+        finally:
+            execution_time = time.time() - start_time
+            self._update_function_timing('download_xl_report', execution_time)
 
     def _get_daily_attendance(self, start_date, end_date, unit_name=None):
         """
@@ -948,137 +1014,142 @@ class UsersWizard(models.TransientModel):
         return result
 
     def download_attendance_report(self):
-        start_date, end_date = self._get_report_dates()
-        # if not start_date or not end_date:
-        #     raise UserError("Please select valid period details.")
+        start_time = time.time()
+        try:
+            start_date, end_date = self._get_report_dates()
+            # if not start_date or not end_date:
+            #     raise UserError("Please select valid period details.")
 
-        unit_name = self.unit_selection  # assuming you store Unit Selection here
-        if not unit_name:
-            raise UserError("Please select a unit.")
-        wb = Workbook()
-        ws = wb.active
-        ws.title = "Promoters Attendance"
+            unit_name = self.unit_selection  # assuming you store Unit Selection here
+            if not unit_name:
+                raise UserError("Please select a unit.")
+            wb = Workbook()
+            ws = wb.active
+            ws.title = "Promoters Attendance"
 
-        # --- Header row ---
-        ws["A1"].value = "S.No"
-        ws["B1"].value = "Name"
-        ws.column_dimensions["B"].width = 18
+            # --- Header row ---
+            ws["A1"].value = "S.No"
+            ws["B1"].value = "Name"
+            ws.column_dimensions["B"].width = 18
 
-        date_range = [start_date + timedelta(days=i)
-                      for i in range((end_date - start_date).days + 1)]
+            date_range = [start_date + timedelta(days=i)
+                          for i in range((end_date - start_date).days + 1)]
 
-        col = 3  # start column for dates
-        for d in date_range:
-            left_col = col
-            right_col = col + 1
+            col = 3  # start column for dates
+            for d in date_range:
+                left_col = col
+                right_col = col + 1
 
-            # Merge date cells
-            ws.merge_cells(start_row=1, start_column=left_col, end_row=1, end_column=right_col)
+                # Merge date cells
+                ws.merge_cells(start_row=1, start_column=left_col, end_row=1, end_column=right_col)
 
-            # Date header
-            top_cell = ws.cell(row=1, column=left_col)
-            top_cell.value = d.strftime("%d-%m-%Y")
-            top_cell.alignment = Alignment(horizontal="center", vertical="center")
-            top_cell.font = Font(bold=True, size=10)
+                # Date header
+                top_cell = ws.cell(row=1, column=left_col)
+                top_cell.value = d.strftime("%d-%m-%Y")
+                top_cell.alignment = Alignment(horizontal="center", vertical="center")
+                top_cell.font = Font(bold=True, size=10)
 
-            # Sub-headers
-            in_cell = ws.cell(row=2, column=left_col)
-            out_cell = ws.cell(row=2, column=right_col)
-            in_cell.value = "Attendance"
-            out_cell.value = "Copies"
+                # Sub-headers
+                in_cell = ws.cell(row=2, column=left_col)
+                out_cell = ws.cell(row=2, column=right_col)
+                in_cell.value = "Attendance"
+                out_cell.value = "Copies"
+                for c in (in_cell, out_cell):
+                    c.alignment = Alignment(horizontal="center", vertical="center")
+                    c.font = Font(bold=True, size=9)
+
+                # Column widths
+                ws.column_dimensions[get_column_letter(left_col)].width = 12
+                ws.column_dimensions[get_column_letter(right_col)].width = 12
+
+                col += 2
+
+            # --- Totals ---
+            ws.merge_cells(start_row=1, start_column=col, end_row=1, end_column=col + 1)
+            ws.cell(row=1, column=col).value = "Total Count"
+            ws.cell(row=1, column=col).alignment = Alignment(horizontal="center", vertical="center")
+            ws.cell(row=1, column=col).font = Font(bold=True, size=10)
+            ws.column_dimensions[get_column_letter(col)].width = 16
+            ws.column_dimensions[get_column_letter(col + 1)].width = 16
+
+            in_cell = ws.cell(row=2, column=col)
+            out_cell = ws.cell(row=2, column=col + 1)
+            in_cell.value = "Total Attendance"
+            out_cell.value = "Total Copies"
+
+            # --- UNIT ---
+            unit_col = col + 2
+            ws.cell(row=1, column=unit_col).value = "UNIT"
+            ws.cell(row=1, column=unit_col).alignment = Alignment(horizontal="center", vertical="center")
+            ws.column_dimensions[get_column_letter(unit_col)].width = 14
+
+            # --- Forms Count ---
+            forms_col = unit_col + 1
+            ws.cell(row=1, column=forms_col).value = "Forms Count"
+            ws.cell(row=1, column=forms_col).alignment = Alignment(horizontal="center", vertical="center")
+            ws.column_dimensions[get_column_letter(forms_col)].width = 16
+
             for c in (in_cell, out_cell):
                 c.alignment = Alignment(horizontal="center", vertical="center")
                 c.font = Font(bold=True, size=9)
 
-            # Column widths
-            ws.column_dimensions[get_column_letter(left_col)].width = 12
-            ws.column_dimensions[get_column_letter(right_col)].width = 12
+            # --- Attendance data ---
+            data = self._get_daily_attendance(start_date, end_date, unit_name)
 
-            col += 2
+            # Fetch users only from the keys in data to ensure consistency
+            users = self.env['res.users'].sudo().search([('id', 'in', list(data.keys()))])
 
-        # --- Totals ---
-        ws.merge_cells(start_row=1, start_column=col, end_row=1, end_column=col + 1)
-        ws.cell(row=1, column=col).value = "Total Count"
-        ws.cell(row=1, column=col).alignment = Alignment(horizontal="center", vertical="center")
-        ws.cell(row=1, column=col).font = Font(bold=True, size=10)
-        ws.column_dimensions[get_column_letter(col)].width = 16
-        ws.column_dimensions[get_column_letter(col + 1)].width = 16
+            # Group users by unit and sort units by total forms_count descending
+            from collections import defaultdict
+            unit_groups = defaultdict(list)
+            unit_totals = defaultdict(int)
+            for user in users:
+                unit = user.unit_name or ""
+                unit_groups[unit].append(user)
+                unit_totals[unit] += data[user.id]['forms_count']
 
-        in_cell = ws.cell(row=2, column=col)
-        out_cell = ws.cell(row=2, column=col + 1)
-        in_cell.value = "Total Attendance"
-        out_cell.value = "Total Copies"
+            # Sort units by total forms descending
+            sorted_units = sorted(unit_totals.keys(), key=lambda u: unit_totals[u], reverse=True)
 
-        # --- UNIT ---
-        unit_col = col + 2
-        ws.cell(row=1, column=unit_col).value = "UNIT"
-        ws.cell(row=1, column=unit_col).alignment = Alignment(horizontal="center", vertical="center")
-        ws.column_dimensions[get_column_letter(unit_col)].width = 14
+            # For each unit, sort users by total_copies descending
+            sorted_users = []
+            for unit in sorted_units:
+                unit_users = sorted(unit_groups[unit], key=lambda u: data[u.id]['total_copies'], reverse=True)
+                sorted_users.extend(unit_users)
 
-        # --- Forms Count ---
-        forms_col = unit_col + 1
-        ws.cell(row=1, column=forms_col).value = "Forms Count"
-        ws.cell(row=1, column=forms_col).alignment = Alignment(horizontal="center", vertical="center")
-        ws.column_dimensions[get_column_letter(forms_col)].width = 16
+            row = 3
+            for idx, user in enumerate(sorted_users, start=1):
+                ws.cell(row=row, column=1).value = idx
+                ws.cell(row=row, column=2).value = user.name
 
-        for c in (in_cell, out_cell):
-            c.alignment = Alignment(horizontal="center", vertical="center")
-            c.font = Font(bold=True, size=9)
+                col_ptr = 3
+                for d in date_range:
+                    ws.cell(row=row, column=col_ptr).value = data[user.id][d]["attendance"]  # Attendance
+                    ws.cell(row=row, column=col_ptr + 1).value = data[user.id][d]["copies"]  # Copies
+                    col_ptr += 2
 
-        # --- Attendance data ---
-        data = self._get_daily_attendance(start_date, end_date, unit_name)
+                ws.cell(row=row, column=col_ptr).value = data[user.id]['total']
+                ws.cell(row=row, column=col_ptr + 1).value = data[user.id]['total_copies']
+                ws.cell(row=row, column=unit_col).value = user.unit_name or ""
+                ws.cell(row=row, column=forms_col).value = data[user.id]['forms_count']
 
-        # Fetch users only from the keys in data to ensure consistency
-        users = self.env['res.users'].sudo().search([('id', 'in', list(data.keys()))])
+                row += 1
 
-        # Group users by unit and sort units by total forms_count descending
-        from collections import defaultdict
-        unit_groups = defaultdict(list)
-        unit_totals = defaultdict(int)
-        for user in users:
-            unit = user.unit_name or ""
-            unit_groups[unit].append(user)
-            unit_totals[unit] += data[user.id]['forms_count']
+            # --- Save file ---
+            file_stream = BytesIO()
+            wb.save(file_stream)
+            file_stream.seek(0)
+            file_data = base64.b64encode(file_stream.read())
 
-        # Sort units by total forms descending
-        sorted_units = sorted(unit_totals.keys(), key=lambda u: unit_totals[u], reverse=True)
-
-        # For each unit, sort users by total_copies descending
-        sorted_users = []
-        for unit in sorted_units:
-            unit_users = sorted(unit_groups[unit], key=lambda u: data[u.id]['total_copies'], reverse=True)
-            sorted_users.extend(unit_users)
-
-        row = 3
-        for idx, user in enumerate(sorted_users, start=1):
-            ws.cell(row=row, column=1).value = idx
-            ws.cell(row=row, column=2).value = user.name
-
-            col_ptr = 3
-            for d in date_range:
-                ws.cell(row=row, column=col_ptr).value = data[user.id][d]["attendance"]  # Attendance
-                ws.cell(row=row, column=col_ptr + 1).value = data[user.id][d]["copies"]  # Copies
-                col_ptr += 2
-
-            ws.cell(row=row, column=col_ptr).value = data[user.id]['total']
-            ws.cell(row=row, column=col_ptr + 1).value = data[user.id]['total_copies']
-            ws.cell(row=row, column=unit_col).value = user.unit_name or ""
-            ws.cell(row=row, column=forms_col).value = data[user.id]['forms_count']
-
-            row += 1
-
-        # --- Save file ---
-        file_stream = BytesIO()
-        wb.save(file_stream)
-        file_stream.seek(0)
-        file_data = base64.b64encode(file_stream.read())
-
-        self.write({
-            'dummy_file': file_data,
-            'dummy_file_name': "attendance_report.xlsx"
-        })
-        return {
-            'type': 'ir.actions.act_url',
-            'url': f"/web/content/?model=users.wizard&id={self.id}&field=dummy_file&filename_field=dummy_file_name&download=true",
-            'target': 'new',
-        }
+            self.write({
+                'dummy_file': file_data,
+                'dummy_file_name': "attendance_report.xlsx"
+            })
+            return {
+                'type': 'ir.actions.act_url',
+                'url': f"/web/content/?model=users.wizard&id={self.id}&field=dummy_file&filename_field=dummy_file_name&download=true",
+                'target': 'new',
+            }
+        finally:
+            execution_time = time.time() - start_time
+            self._update_function_timing('download_attendance_report', execution_time)
