@@ -1,5 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
+    <record id="tree_circulation_incharge_view" model="ir.ui.view">
+        <field name="name">circulation_incharge.tree</field>
+        <field name="model">circulation_incharge.view</field>
+        <field name="arch" type="xml">
+            <tree>
+
+
+            </tree>
+        </field>
+    </record>
 
     <record id="form_circulation_incharge_view" model="ir.ui.view">
         <field name="name">circulation_incharge.view</field>
@@ -84,6 +94,16 @@
         <field name="view_id" ref="view_users_form_inherit_custom"/>
         <field name="target">current</field>
     </record>
+<!--    <record id="action_create_office_staff_custom_tree" model="ir.actions.act_window">-->
+<!--        <field name="name">Create New Office Staff</field>-->
+<!--        <field name="res_model">res.users</field>-->
+<!--        <field name="view_mode">tree,form</field>-->
+<!--        <field name="view_id" ref="sale_repo_app.view_sales_rep_tree"/>-->
+<!--        <field name="context">{'create': False}</field>-->
+<!--        <field name="context">{'default_unit_name': unit_name}</field>-->
+<!--        <field name="domain">[('role', '=', 'Office_staff'),('unit_name','=', unit_name)]</field>-->
+<!--    </record>-->
+
 
     <record id="action_user_creation_form" model="ir.actions.act_window">
         <field name="name">Create New Office Staff</field>
@@ -145,6 +165,26 @@
               name="Circulation Incharge View"
               action="action_circulation_incharge_view"
               groups="sale_repo_app.admin_group"/>
+
+    <!-- Server Action -->
+   <record id="action_open_office_staff_same_unit" model="ir.actions.server">
+        <field name="name">Office Staff (Same Unit)</field>
+        <field name="model_id" ref="base.model_res_users"/>
+        <field name="state">code</field>
+        <field name="code">action = env['res.users'].action_open_office_staff_same_unit()</field>
+    </record>
+
+
+    <!-- Menu Item -->
+    <menuitem id="menu_office_staff_same_unit"
+              name="Office Staff List"
+              parent="sale_repo_app.menu_circulation_incharge"
+              action="action_open_office_staff_same_unit"
+              groups="sale_repo_app.circulation_incharge_group"
+              sequence="4"/>
+
+
+
 
 
 </odoo>

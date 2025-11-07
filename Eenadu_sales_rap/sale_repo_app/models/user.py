@@ -54,7 +54,15 @@ class Users(models.Model):
     state = fields.Char(string="state")
     phone = fields.Char(string="phone")
     user_id = fields.Integer(string="User ID")
-    unit_name = fields.Char(string="Unit Name")
+    unit_name = fields.Char(string="Unit Name", default=lambda self: self.env.user.unit_name or '')
+
+    @api.model
+    def default_get(self, fields_list):
+        defaults = super().default_get(fields_list)
+        # Pre-fill unit_name from the current user's unit_name if not already set
+        if 'unit_name' in fields_list and 'unit_name' not in defaults:
+            defaults['unit_name'] = self.env.user.unit_name or ''
+        return defaults
     create_uid = fields.Many2one(string="Created By",readonly=0)
     api_token = fields.Char(string="API Token", readonly=True)
     token_expiry = fields.Datetime(string="Token Expiry")
@@ -72,6 +80,26 @@ class Users(models.Model):
         readonly=False,  # make it editable
         inverse="_inverse_created_by"
     )
+
+    @api.model
+    def action_open_office_staff_same_unit(self):
+        """Open Office Staff filtered by current user's unit (car)."""
+        current_user = self.env.user
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Office Staff',
+            'res_model': 'res.users',
+            'view_mode': 'tree,form',
+            'views': [
+                (self.env.ref('sale_repo_app.view_sales_rep_tree').id, 'tree'),
+                (self.env.ref('sale_repo_app.view_users_form_inherit_custom').id, 'form'),
+            ],
+            'domain': [
+                ('role', '=', 'Office_staff'),
+                ('unit_name', '=', current_user.unit_name),
+            ],
+            'context': {'create': False},
+        }
 
     @api.constrains('aadhar_number')
     def _check_aadhar_number(self):
