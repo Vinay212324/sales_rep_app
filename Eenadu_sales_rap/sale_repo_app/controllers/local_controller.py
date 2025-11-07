@@ -141,7 +141,7 @@ class localApi(http.Controller):
                 'phone': staff_data.get('phone'),
                 'aadhar_number': staff_data.get('adhaar'),
                 'role': "agent",
-                'status': 'active',
+                'status': 'un_activ',
                 'create_uid': user.id,
                 # Add any other necessary values here
             }
