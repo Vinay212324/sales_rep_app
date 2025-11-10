@@ -1072,20 +1072,19 @@ class CustomerFormAPI(http.Controller):
             return {'success': False, 'message': 'Invalid or expired token', 'code': "403"}
 
         # Filters
-        from_date = params.get('from_date')  # format: "YYYY-MM-DD"
-        to_date = params.get('to_date')  # format: "YYYY-MM-DD"
-        unit_name = params.get('unit_name')  # string
-        agent_name = params.get('agent_name')  # string
-        Agency = params.get('Agency')  # string
-        order = params.get('order', 'desc')  # 'asc' or 'desc'
+        from_date = params.get('from_date')
+        to_date = params.get('to_date')
+        unit_name = params.get('unit_name')
+        agent_name = params.get('agent_name')
+        agency = params.get('Agency')
+        order = params.get('order', 'desc')
+        limit = int(params.get('limit', 0))
+        offset = int(params.get('offset', 0))
 
-        # Compose domain (search filters)
         domain = []
-
         try:
             if from_date and to_date:
-                domain.append(('date', '>=', from_date))
-                domain.append(('date', '<=', to_date))
+                domain += [('date', '>=', from_date), ('date', '<=', to_date)]
             elif from_date:
                 domain.append(('date', '>=', from_date))
             elif to_date:
@@ -1093,91 +1092,58 @@ class CustomerFormAPI(http.Controller):
 
             if unit_name:
                 domain.append(('unit_name', '=', unit_name))
-
             if agent_name:
                 domain.append(('agent_name', '=', agent_name))
-            if agent_name:
-                domain.append(('Agency', '=', Agency))
-
+            if agency:
+                domain.append(('Agency', '=', agency))
         except Exception as e:
             return {'success': False, 'message': f'Invalid filter values: {e}', 'code': "400"}
 
-        # Caching logic
-        cache_key = f"filter_forms_{from_date}_{to_date}_{unit_name}_{agent_name}_{order}"
+        cache_key = f"{from_date}_{to_date}_{unit_name}_{agent_name}_{agency}_{order}_{limit}_{offset}"
         now = time.time()
+        cached = _cached_customer_form_filter_data.get(cache_key)
+        if cached and now - cached[1] < CACHE_DURATION:
+            _logger.info(f"[CACHE] Returning cached data for {cache_key}")
+            return cached[0]
 
-        if cache_key in _cached_customer_form_filter_data:
-            cached_response, cached_time = _cached_customer_form_filter_data[cache_key]
-            if now - cached_time < CACHE_DURATION:
-                _logger.info(f"[CACHE] Returning cached data for key: {cache_key}")
-                return cached_response
+        fields_to_read = [
+            'agent_name', 'agent_login', 'unit_name', 'date', 'time', 'family_head_name',
+            'father_name', 'mother_name', 'spouse_name', 'house_number', 'street_number', 'city',
+            'pin_code', 'address', 'mobile_number', 'eenadu_newspaper', 'feedback_to_improve_eenadu_paper',
+            'read_newspaper', 'current_newspaper', 'reason_for_not_taking_eenadu_newsPaper',
+            'reason_not_reading', 'free_offer_15_days', 'reason_not_taking_offer', 'employed',
+            'job_type', 'job_type_one', 'job_profession', 'job_designation', 'company_name',
+            'profession', 'job_working_state', 'job_working_location', 'job_designation_one',
+            'latitude', 'longitude', 'location_address', 'location_url', 'face_base64', 'for_consider',
+            'shift_to_EENADU', 'Willing_to_Shift_to_EENADU', 'Start_Circulating', 'Agency', 'quantity',
+            'age', 'customer_type', 'occupation'
+        ]
 
-        # Sorting order
         order_by = 'date asc' if order == 'asc' else 'date desc'
+        records = request.env['customer.form'].sudo().search_read(
+            domain=domain,
+            fields=fields_to_read,
+            order=order_by,
+            limit=limit or None,
+            offset=offset
+        )
 
-        forms = request.env['customer.form'].sudo().search(domain, order=order_by)
-
-        result = [{
-            'id': form.id,
-            'agent_name': form.agent_name,
-            'agent_login': form.agent_login,
-            'unit_name': form.unit_name,
-            'date': str(form.date),
-            'time': form.time,
-            'family_head_name': form.family_head_name,
-            'father_name': form.father_name,
-            'mother_name': form.mother_name,
-            'spouse_name': form.spouse_name,
-            'house_number': form.house_number,
-            'street_number': form.street_number,
-            'city': form.city,
-            'pin_code': form.pin_code,
-            'address': form.address,
-            'mobile_number': form.mobile_number,
-            'eenadu_newspaper': form.eenadu_newspaper,
-            'feedback_to_improve_eenadu_paper': form.feedback_to_improve_eenadu_paper,
-            'read_newspaper': form.read_newspaper,
-            'current_newspaper': form.current_newspaper,
-            'reason_for_not_taking_eenadu_newsPaper': form.reason_for_not_taking_eenadu_newsPaper,
-            'reason_not_reading': form.reason_not_reading,
-            'free_offer_15_days': form.free_offer_15_days,
-            'reason_not_taking_offer': form.reason_not_taking_offer,
-            'employed': form.employed,
-            'job_type': form.job_type,
-            'job_type_one': form.job_type_one,
-            'job_profession': form.job_profession,
-            'job_designation': form.job_designation,
-            'company_name': form.company_name,
-            'profession': form.profession,
-            'job_working_state': form.job_working_state,
-            'job_working_location': form.job_working_location,
-            'job_designation_one': form.job_designation_one,
-            'latitude': form.latitude,
-            'longitude': form.longitude,
-            'location_address': form.location_address,
-            'location_url': form.location_url,
-            'face_base64': f"data:image/png;base64,{form.face_base64.decode('utf-8')}" if form.face_base64 else None,
-            'for_consider': form.for_consider,
-            'shift_to_EENADU': form.shift_to_EENADU,
-            'would_like_to_stay_with_existing_news_papar': form.Willing_to_Shift_to_EENADU,
-            'Start_Circulating': form.Start_Circulating,
-            'Agency': form.Agency,
-            'quantity': form.quantity,
-            'age': form.age,
-            'customer_type': form.customer_type,
-            'occupation': form.occupation
-        } for form in forms]
+        for rec in records:
+            if rec.get('face_base64'):
+                try:
+                    rec['face_base64'] = f"data:image/png;base64,{rec['face_base64'].decode('utf-8')}"
+                except Exception:
+                    rec['face_base64'] = None
 
         response = {
             'success': True,
-            'records': result,
-            'count': len(result),
+            'records': records,
+            'count': len(records),
             'code': "200"
         }
 
-        # Save to cache
         _cached_customer_form_filter_data[cache_key] = (response, now)
-        _logger.info(f"[CACHE] Data cached for filtered query key: {cache_key}")
+        _logger.info(f"[CACHE] Data cached for key: {cache_key}")
 
         return response
 
