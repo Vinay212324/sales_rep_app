@@ -1170,8 +1170,8 @@ class CustomerFormAPI(http.Controller):
 
         response = {
             'success': True,
-            'count': len(result),
             'records': result,
+            'count': len(result),
             'code': "200"
         }
 
