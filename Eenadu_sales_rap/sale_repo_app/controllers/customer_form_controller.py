@@ -1071,20 +1071,31 @@ class CustomerFormAPI(http.Controller):
         if not user:
             return {'success': False, 'message': 'Invalid or expired token', 'code': "403"}
 
-        # Filters
-        from_date = params.get('from_date')  # format: "YYYY-MM-DD"
-        to_date = params.get('to_date')  # format: "YYYY-MM-DD"
-        unit_name = params.get('unit_name')  # string
-        agent_name = params.get('agent_name')  # string
-        Agency = params.get('Agency')  # string
-        order = params.get('order', 'desc')  # 'asc' or 'desc'
-        limit = int(params.get('limit', 100))  # Default limit for pagination
-        offset = int(params.get('offset', 0))  # Default offset for pagination
+        # Filters - strip whitespace for string params to handle trailing spaces like "MANNEGUDA X ROADS "
+        from_date = params.get('from_date', '').strip() if params.get('from_date') else None
+        to_date = params.get('to_date', '').strip() if params.get('to_date') else None
+        unit_name = params.get('unit_name', '').strip() if params.get('unit_name') else None
+        agent_name = params.get('agent_name', '').strip() if params.get('agent_name') else None
+        Agency = params.get('Agency', '').strip() if params.get('Agency') else None  # Key fix: strip trailing space
+        order = params.get('order', 'desc')
+
+        # Safe integer parsing helper to avoid ValueError on empty strings
+        def safe_int(value, default=0):
+            if value is None or str(value).strip() == '':
+                return default
+            try:
+                return int(value)
+            except (ValueError, TypeError):
+                return default
+
+        # Pagination params (enforce defaults)
+        limit = min(safe_int(params.get('limit'), 100), 500)  # Cap at 500 max
+        offset = max(safe_int(params.get('offset'), 0), 0)
 
         # Compose domain (search filters)
         domain = []
 
-        # Date filters
+        # Date filters (only if non-empty after strip) - use exact for dates
         if from_date and to_date:
             domain.append(('date', '>=', from_date))
             domain.append(('date', '<=', to_date))
@@ -1093,14 +1104,19 @@ class CustomerFormAPI(http.Controller):
         elif to_date:
             domain.append(('date', '<=', to_date))
 
+        # String filters use 'ilike' with wildcards for partial/case-insensitive matching
         if unit_name:
-            domain.append(('unit_name', '=', unit_name))
+            domain.append(('unit_name', 'ilike', f"%{unit_name}%"))
 
         if agent_name:
-            domain.append(('agent_name', '=', agent_name))
+            domain.append(('agent_name', 'ilike', f"%{agent_name}%"))
 
-        if Agency:  # Fixed: was incorrectly using 'if agent_name'
-            domain.append(('Agency', '=', Agency))
+        if Agency:  # Now stripped and partial match, e.g., for "MANNEGUDA X ROADS"
+            domain.append(('Agency', 'ilike', f"%{Agency}%"))
+
+        # Log domain for debugging (remove in production if needed)
+        _logger.info(f"[DEBUG] Search domain: {domain}")
+        _logger.info(f"[DEBUG] Unit: {unit_name}, Agency: {Agency}")
 
         # Caching logic - include all filter params in key, handling None
         cache_key = f"filter_forms_{from_date or ''}_{to_date or ''}_{unit_name or ''}_{agent_name or ''}_{Agency or ''}_{order}_{limit}_{offset}"
@@ -1117,6 +1133,8 @@ class CustomerFormAPI(http.Controller):
 
         # Use search_count for total count (fast)
         total_count = request.env['customer.form'].sudo().search_count(domain)
+
+        _logger.info(f"[DEBUG] Total records matching filters: {total_count}")
 
         # Use search_read to fetch only required fields in one query (performance boost)
         required_fields = [
@@ -1141,20 +1159,19 @@ class CustomerFormAPI(http.Controller):
         for form in forms_data:
             face_base64 = form.get('face_base64')
             if face_base64:
-                # Assuming face_base64 is already a base64 string (Char field); no decode needed
-                # If it's Binary, Odoo search_read returns base64 str automatically
                 form['face_base64'] = f"data:image/png;base64,{face_base64}"
             else:
                 form['face_base64'] = None
             form['date'] = str(form['date'])  # Ensure date is string
             form['would_like_to_stay_with_existing_news_papar'] = form.get('Willing_to_Shift_to_EENADU', False)
+            # Ensure Agency is included (already in fields)
             result.append(form)
 
         response = {
             'success': True,
             'records': result,
             'count': len(result),
-            'total_count': total_count,  # Added for pagination awareness
+            'total_count': total_count,
             'code': "200"
         }
 
