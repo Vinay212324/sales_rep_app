@@ -1078,32 +1078,32 @@ class CustomerFormAPI(http.Controller):
         agent_name = params.get('agent_name')  # string
         Agency = params.get('Agency')  # string
         order = params.get('order', 'desc')  # 'asc' or 'desc'
+        limit = int(params.get('limit', 100))  # Default limit for pagination
+        offset = int(params.get('offset', 0))  # Default offset for pagination
 
         # Compose domain (search filters)
         domain = []
 
-        try:
-            if from_date and to_date:
-                domain.append(('date', '>=', from_date))
-                domain.append(('date', '<=', to_date))
-            elif from_date:
-                domain.append(('date', '>=', from_date))
-            elif to_date:
-                domain.append(('date', '<=', to_date))
+        # Date filters
+        if from_date and to_date:
+            domain.append(('date', '>=', from_date))
+            domain.append(('date', '<=', to_date))
+        elif from_date:
+            domain.append(('date', '>=', from_date))
+        elif to_date:
+            domain.append(('date', '<=', to_date))
 
-            if unit_name:
-                domain.append(('unit_name', '=', unit_name))
+        if unit_name:
+            domain.append(('unit_name', '=', unit_name))
 
-            if agent_name:
-                domain.append(('agent_name', '=', agent_name))
-            if agent_name:
-                domain.append(('Agency', '=', Agency))
+        if agent_name:
+            domain.append(('agent_name', '=', agent_name))
 
-        except Exception as e:
-            return {'success': False, 'message': f'Invalid filter values: {e}', 'code': "400"}
+        if Agency:  # Fixed: was incorrectly using 'if agent_name'
+            domain.append(('Agency', '=', Agency))
 
-        # Caching logic
-        cache_key = f"filter_forms_{from_date}_{to_date}_{unit_name}_{agent_name}_{order}"
+        # Caching logic - include all filter params in key, handling None
+        cache_key = f"filter_forms_{from_date or ''}_{to_date or ''}_{unit_name or ''}_{agent_name or ''}_{Agency or ''}_{order}_{limit}_{offset}"
         now = time.time()
 
         if cache_key in _cached_customer_form_filter_data:
@@ -1115,69 +1115,53 @@ class CustomerFormAPI(http.Controller):
         # Sorting order
         order_by = 'date asc' if order == 'asc' else 'date desc'
 
-        forms = request.env['customer.form'].sudo().search(domain, order=order_by)
+        # Use search_count for total count (fast)
+        total_count = request.env['customer.form'].sudo().search_count(domain)
 
-        result = [{
-            'id': form.id,
-            'agent_name': form.agent_name,
-            'agent_login': form.agent_login,
-            'unit_name': form.unit_name,
-            'date': str(form.date),
-            'time': form.time,
-            'family_head_name': form.family_head_name,
-            'father_name': form.father_name,
-            'mother_name': form.mother_name,
-            'spouse_name': form.spouse_name,
-            'house_number': form.house_number,
-            'street_number': form.street_number,
-            'city': form.city,
-            'pin_code': form.pin_code,
-            'address': form.address,
-            'mobile_number': form.mobile_number,
-            'eenadu_newspaper': form.eenadu_newspaper,
-            'feedback_to_improve_eenadu_paper': form.feedback_to_improve_eenadu_paper,
-            'read_newspaper': form.read_newspaper,
-            'current_newspaper': form.current_newspaper,
-            'reason_for_not_taking_eenadu_newsPaper': form.reason_for_not_taking_eenadu_newsPaper,
-            'reason_not_reading': form.reason_not_reading,
-            'free_offer_15_days': form.free_offer_15_days,
-            'reason_not_taking_offer': form.reason_not_taking_offer,
-            'employed': form.employed,
-            'job_type': form.job_type,
-            'job_type_one': form.job_type_one,
-            'job_profession': form.job_profession,
-            'job_designation': form.job_designation,
-            'company_name': form.company_name,
-            'profession': form.profession,
-            'job_working_state': form.job_working_state,
-            'job_working_location': form.job_working_location,
-            'job_designation_one': form.job_designation_one,
-            'latitude': form.latitude,
-            'longitude': form.longitude,
-            'location_address': form.location_address,
-            'location_url': form.location_url,
-            'face_base64': f"data:image/png;base64,{form.face_base64.decode('utf-8')}" if form.face_base64 else None,
-            'for_consider': form.for_consider,
-            'shift_to_EENADU': form.shift_to_EENADU,
-            'would_like_to_stay_with_existing_news_papar': form.Willing_to_Shift_to_EENADU,
-            'Start_Circulating': form.Start_Circulating,
-            'Agency': form.Agency,
-            'quantity': form.quantity,
-            'age': form.age,
-            'customer_type': form.customer_type,
-            'occupation': form.occupation
-        } for form in forms]
+        # Use search_read to fetch only required fields in one query (performance boost)
+        required_fields = [
+            'id', 'agent_name', 'agent_login', 'unit_name', 'date', 'time', 'family_head_name',
+            'father_name', 'mother_name', 'spouse_name', 'house_number', 'street_number',
+            'city', 'pin_code', 'address', 'mobile_number', 'eenadu_newspaper',
+            'feedback_to_improve_eenadu_paper', 'read_newspaper', 'current_newspaper',
+            'reason_for_not_taking_eenadu_newsPaper', 'reason_not_reading', 'free_offer_15_days',
+            'reason_not_taking_offer', 'employed', 'job_type', 'job_type_one', 'job_profession',
+            'job_designation', 'company_name', 'profession', 'job_working_state',
+            'job_working_location', 'job_designation_one', 'latitude', 'longitude',
+            'location_address', 'location_url', 'face_base64', 'for_consider', 'shift_to_EENADU',
+            'Willing_to_Shift_to_EENADU', 'Start_Circulating', 'Agency', 'quantity', 'age',
+            'customer_type', 'occupation'
+        ]
+        forms_data = request.env['customer.form'].sudo().search_read(
+            domain, fields=required_fields, order=order_by, limit=limit, offset=offset
+        )
+
+        # Post-process the data (minimal: only date str and face_base64 prefix)
+        result = []
+        for form in forms_data:
+            face_base64 = form.get('face_base64')
+            if face_base64:
+                # Assuming face_base64 is already a base64 string (Char field); no decode needed
+                # If it's Binary, Odoo search_read returns base64 str automatically
+                form['face_base64'] = f"data:image/png;base64,{face_base64}"
+            else:
+                form['face_base64'] = None
+            form['date'] = str(form['date'])  # Ensure date is string
+            form['would_like_to_stay_with_existing_news_papar'] = form.get('Willing_to_Shift_to_EENADU', False)
+            result.append(form)
 
         response = {
             'success': True,
             'records': result,
             'count': len(result),
+            'total_count': total_count,  # Added for pagination awareness
             'code': "200"
         }
 
         # Save to cache
         _cached_customer_form_filter_data[cache_key] = (response, now)
-        _logger.info(f"[CACHE] Data cached for filtered query key: {cache_key}")
+        _logger.info(
+            f"[CACHE] Data cached for filtered query key: {cache_key} (fetched {len(result)} of {total_count})")
 
         return response
 
