@@ -292,7 +292,7 @@ class UserPortal(http.Controller):
                 return {'error': 'Role is not valid for this user', 'code': "403"}
 
             # Field validation
-            required_fields = ['name', 'status', 'email', 'phone', 'password', 'role', 'unit_name', 'state']
+            required_fields = ['name','phone', ]
             missing = [field for field in required_fields if not kw.get(field)]
             if missing:
                 return {'error': f'Missing required fields: {", ".join(missing)}', 'code': "400"}
