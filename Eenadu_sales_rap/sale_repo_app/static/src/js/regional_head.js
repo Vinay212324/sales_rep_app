@@ -145,7 +145,7 @@ export class RegionalHeadDashboard extends Component {
                 ['role', '=', 'agent'],
                 ['unit_name', 'in', unitNames],
                 ['status', '=', 'active']
-            ], ['id', 'name', 'login', 'phone'], { limit: 100 });  // Limit to avoid too many
+            ], ['id', 'name', 'login', 'phone']);  // Limit to avoid too many
 
             const activeUsers = [];
             for (const user of users) {
