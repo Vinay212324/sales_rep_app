@@ -132,7 +132,7 @@ export class SalesCirculationIncharge extends Component {
                 ['role', '=', 'agent'],
                 ['unit_name', '=', unitName],
                 ['status', '=', 'active']
-            ], ['id', 'name', 'login', 'phone'], { limit: 100 });
+            ], ['id', 'name', 'login', 'phone']);
 
             const activeUsers = [];
             for (const user of users) {
