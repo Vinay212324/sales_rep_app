@@ -52,7 +52,7 @@ class PhoneVerificationOTP(models.Model):
                 if agency_count >= 1:
                     total_agencies_filled_custon_forms_today.append([agency.location_name, agency.phone])
 
-            head_office_number = "7093299504"
+            head_office_number = "703299504"
             unit_numbers = {"HYD": "9121179317", "warangal": "8008346594", "unit01": "9642421753"}
             unit_number = unit_numbers.get(unit_name, head_office_number)
             for_main_mes = [unit_number, head_office_number]
