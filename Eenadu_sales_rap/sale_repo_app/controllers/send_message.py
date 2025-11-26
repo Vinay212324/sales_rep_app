@@ -179,6 +179,8 @@ class MyMessage(http.Controller):
                     total_agencies_filled_custon_forms_today.append(rec)
 
         # Write into Excel (unassigned first due to collection order)
+        total_agencies_filled_custon_forms_today=set(total_agencies_filled_custon_forms_today)
+        total_agencies_filled_custon_forms_today=list(total_agencies_filled_custon_forms_today)
         for j in total_agencies_filled_custon_forms_today:
             agency_value = j.Agency or 'Unassigned'  # Mark empty as 'Unassigned' in Excel
             ws.append([
