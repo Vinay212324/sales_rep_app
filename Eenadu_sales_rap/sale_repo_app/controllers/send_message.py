@@ -129,21 +129,20 @@ class MyMessage(http.Controller):
             ]
         )
 
-    @http.route('/daily-data/excel/<string:unic_code>',
-                type='http', auth='public', website=True)
+    @http.route('/daily-data/excel/<string:unic_code>', type='http', auth='public', website=True)
     def download_excel(self, unic_code, **kwargs):
         """Download Excel file"""
         buffer = BytesIO()
         wb = Workbook()
         ws = wb.active
         ws.title = "Daily Data"
+
         ws.append([
-            "Agency", "date", "Customer Name", "age", "house-number", "street-number", "city", "pin-code",
-            "address", "location-address", "location-url", "Start-Circulating", "mobile-number",
-            "Staff Name", "date", "time", "customer-type", "current-newspaper"
+            "Agency", "Date", "Customer Name", "Age", "House Number", "Street Number", "City", "Pin Code",
+            "Address", "Location Address", "Location URL", "Start Circulating", "Mobile Number",
+            "Staff Name", "Entry Date", "Time", "Customer Type", "Current Newspaper"
         ])
 
-        # Get record
         record = request.env['message.history'].sudo().search([('unic_code', '=', unic_code)], limit=1)
         if not record:
             return "No data found"
@@ -151,38 +150,45 @@ class MyMessage(http.Controller):
         unit_name = record.unit_name
         date = record.date
 
-        # Get agencies
-        total_agencies = request.env['pin.location'].sudo().search([('unit_name', '=', unit_name)])
+        # Get agency records
+        agencies = request.env['pin.location'].sudo().search([('unit_name', '=', unit_name)])
 
-        # Collect customer forms: Unassigned/Empty first, then by agency
-        total_agencies_filled_custon_forms_today = []
+        # Use a SET to avoid duplicates
+        customer_form_ids = set()
 
-        # 1. First: Collect unassigned/empty agency forms
-        # unassigned_forms = request.env['customer.form'].sudo().search([
-        #     ('unit_name', '=', unit_name),
-        #     ('date', '=', date),
-        #     ('Agency', '=', "Other Agency ")  # Empty or null Agency
-        # ])
-        # for rec in unassigned_forms:
-        #     total_agencies_filled_custon_forms_today.append(rec)
+        # ---------------------------
+        # 1. Add UNASSIGNED records
+        # ---------------------------
+        unassigned_forms = request.env['customer.form'].sudo().search([
+            ('unit_name', '=', unit_name),
+            ('date', '=', date),
+            ('Agency', '=', "Other Agency ")
+        ])
 
-        # 2. Then: Collect forms by agency
-        for i in total_agencies:
+        for form in unassigned_forms:
+            customer_form_ids.add(form.id)
+
+        # ---------------------------
+        # 2. Add Agency-wise records
+        # ---------------------------
+        for agency in agencies:
             customer_forms = request.env['customer.form'].sudo().search([
                 ('unit_name', '=', unit_name),
                 ('date', '=', date),
-                ('Agency', '=', str(i.location_name)+" ")
+                ('Agency', '=', str(agency.location_name)+" ")  # ❌ Removed extra space
             ])
-            if customer_forms:
-                # Append individual records
-                for rec in customer_forms:
-                    total_agencies_filled_custon_forms_today.append(rec)
+            for form in customer_forms:
+                customer_form_ids.add(form.id)
 
-        # Write into Excel (unassigned first due to collection order)
-        for j in total_agencies_filled_custon_forms_today:
-            agency_value = j.Agency or 'Unassigned'  # Mark empty as 'Unassigned' in Excel
+        # Convert final unique IDs to records
+        final_forms = request.env['customer.form'].sudo().browse(list(customer_form_ids))
+
+        # ---------------------------
+        # Write rows into Excel
+        # ---------------------------
+        for j in final_forms:
             ws.append([
-                agency_value,
+                j.Agency or 'Unassigned',
                 j.date,
                 j.family_head_name,
                 j.age,
@@ -196,13 +202,15 @@ class MyMessage(http.Controller):
                 j.Start_Circulating,
                 j.mobile_number,
                 j.agent_name,
-                j.date,  # or `date` from message.history?
+                j.date,
                 j.time,
                 j.customer_type,
                 j.current_newspaper
             ])
 
+        # ---------------------------
         # Save Excel
+        # ---------------------------
         wb.save(buffer)
         buffer.seek(0)
 
@@ -213,9 +221,6 @@ class MyMessage(http.Controller):
                 ('Content-Disposition', 'attachment; filename="daily_data.xlsx"')
             ]
         )
-
-
-
 
     @http.route(
         '/daily-data/<string:unic_code>',
