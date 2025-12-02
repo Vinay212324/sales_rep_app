@@ -1189,7 +1189,6 @@ class UsersWizard(models.TransientModel):
         try:
             start_date = self.start_date
             end_date = self.end_date
-            print("vinay", start_date, end_date)
             if not start_date or not end_date:
                 raise UserError("Please select valid period details for the month.")
 
@@ -1284,8 +1283,10 @@ class UsersWizard(models.TransientModel):
             ws.column_dimensions[get_column_letter(p_col)].width = 8
             ws.column_dimensions[get_column_letter(unit_col)].width = 18
 
-            # Yellow fill for present cells
+            # Yellow fill for absent cells ('A')
             yellow_fill = PatternFill(start_color="FFFF00", end_color="FFFF00", fill_type="solid")
+            # Black font for readability on yellow background
+            black_font = Font(color="000000")
 
             # Data rows (starting row 3)
             row = 3
@@ -1312,11 +1313,13 @@ class UsersWizard(models.TransientModel):
                         present_count += 1
                         cell = ws.cell(row, day_col)
                         cell.value = cell_value
-                        cell.fill = yellow_fill
+                        # No fill for present (normal color)
                         cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
                     else:
                         cell = ws.cell(row, day_col)
                         cell.value = "A"
+                        cell.fill = yellow_fill  # Yellow for absent
+                        cell.font = black_font  # Black text for readability
                         cell.alignment = Alignment(horizontal="center", vertical="center",
                                                    wrap_text=True)  # Added wrap_text for consistency
 
