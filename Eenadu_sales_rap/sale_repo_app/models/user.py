@@ -1183,10 +1183,14 @@ class UsersWizard(models.TransientModel):
             execution_time = time.time() - start_time
             self._update_function_timing('download_attendance_report', execution_time)
 
+
     def download_monthly_attendance_report(self):
         start_time = time.time()
         try:
-            start_date, end_date = self._get_report_dates()
+
+            start_date = self.start_date
+            end_date = self.end_date
+            print("vinay", start_date,end_date)
             if not start_date or not end_date:
                 raise UserError("Please select valid period details for the month.")
 
