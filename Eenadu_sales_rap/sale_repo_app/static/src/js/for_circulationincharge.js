@@ -464,6 +464,10 @@ export class SalesCirculationIncharge extends Component {
     attendance_excel_report() {
         this.actionService.doAction("sale_repo_app.action_attendance_report_users_wizard_excel");
     }
+    attendance_excel_m_report() {
+        this.actionService.doAction("sale_repo_app.action_attendance_report_m_users_wizard_excel");
+    }
+
     async reg_head_cu_form() {
         try {
             const domain = [["unit_name", "=", this.state.unit_name]];

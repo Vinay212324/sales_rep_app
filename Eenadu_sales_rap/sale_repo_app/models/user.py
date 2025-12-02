@@ -5,6 +5,7 @@ from odoo.exceptions import AccessDenied, ValidationError
 from odoo.fields import Many2one
 from openpyxl.utils import get_column_letter
 from openpyxl.styles import Alignment, Font
+from openpyxl.styles import PatternFill
 import base64
 from odoo.exceptions import UserError
 from io import BytesIO
@@ -1181,3 +1182,171 @@ class UsersWizard(models.TransientModel):
         finally:
             execution_time = time.time() - start_time
             self._update_function_timing('download_attendance_report', execution_time)
+
+    def download_monthly_attendance_report(self):
+        start_time = time.time()
+        try:
+            start_date, end_date = self._get_report_dates()
+            if not start_date or not end_date:
+                raise UserError("Please select valid period details for the month.")
+
+            unit_name = self.env.user.unit_name
+            if not unit_name:
+                raise UserError("No unit assigned to the current user.")
+
+            # Fetch agents for the unit
+            agents = self.env["res.users"].sudo().search([
+                ('role', '=', 'agent'),
+                ('unit_name', '=', unit_name)
+            ])
+            if not agents:
+                raise UserError("No agents found for the selected unit.")
+
+            # Sort agents by name
+            agents = agents.sorted(key=lambda u: u.name)
+
+            # Date range for the month
+            date_range = [
+                start_date + timedelta(days=i)
+                for i in range((end_date - start_date).days + 1)
+            ]
+            num_days = len(date_range)
+
+            # Fetch relevant work sessions
+            sessions = self.env["work.session"].sudo().search([
+                ('user_id', 'in', agents.ids),
+                ('start_time', '>=', start_date),
+                ('start_time', '<=', end_date),
+            ])
+
+            # Prepare Excel
+            wb = Workbook()
+            ws = wb.active
+            ws.title = f"{unit_name.upper()} Attendance"
+
+            # Title row (row 1, merged)
+            month_year = start_date.strftime("%B %Y")
+            title = f"NIT-HYDERABAD {unit_name.upper()} UNIT CITY ATTENDANCE MONTH OF {month_year}"
+            last_col = 6 + num_days + 1  # A:SN, B:Code, C:Name, D:Join, E:Des, F to F+num_days-1: Days, then P%, Unit
+            last_col_letter = get_column_letter(last_col)
+            ws.merge_cells(f"A1:{last_col_letter}1")
+            title_cell = ws['A1']
+            title_cell.value = title
+            title_cell.alignment = Alignment(horizontal="center", vertical="center")
+            title_cell.font = Font(bold=True, size=14)
+
+            # Headers (row 2)
+            ws['A2'] = "S.No"
+            ws['B2'] = "CODE NUMBER"
+            ws['C2'] = "PROMOTER NAME"
+            ws['D2'] = "DATE OF JOINING"
+            ws['E2'] = "DESIGNATION"
+
+            # Day headers (row 2, starting from F2)
+            day_start_col = 6  # F
+            for i, d in enumerate(date_range):
+                day_col = day_start_col + i
+                ws.cell(row=2, column=day_col).value = d.strftime("%d")
+                ws.cell(row=2, column=day_col).alignment = Alignment(horizontal="center", vertical="center")
+
+            # P% header
+            p_col = day_start_col + num_days
+            ws.cell(row=2, column=p_col).value = "P%"
+            ws.cell(row=2, column=p_col).alignment = Alignment(horizontal="center", vertical="center")
+
+            # Unit header
+            unit_col = p_col + 1
+            ws.cell(row=2, column=unit_col).value = "UNIT CITY (DIST)"
+            ws.cell(row=2, column=unit_col).alignment = Alignment(horizontal="center", vertical="center")
+
+            # Bold and center all headers (row 2)
+            for col in range(1, unit_col + 1):
+                cell = ws.cell(row=2, column=col)
+                cell.font = Font(bold=True, size=11)
+                cell.alignment = Alignment(horizontal="center", vertical="center")
+
+            # Set column widths - Increased day column width for better visibility
+            ws.column_dimensions['A'].width = 5
+            ws.column_dimensions['B'].width = 12
+            ws.column_dimensions['C'].width = 20
+            ws.column_dimensions['D'].width = 15
+            ws.column_dimensions['E'].width = 12
+            for i in range(num_days):
+                day_col_letter = get_column_letter(day_start_col + i)
+                ws.column_dimensions[day_col_letter].width = 12  # Increased from 6 to 12 for "P (X.Xh)" visibility
+            ws.column_dimensions[get_column_letter(p_col)].width = 8
+            ws.column_dimensions[get_column_letter(unit_col)].width = 18
+
+            # Yellow fill for present cells
+            yellow_fill = PatternFill(start_color="FFFF00", end_color="FFFF00", fill_type="solid")
+
+            # Data rows (starting row 3)
+            row = 3
+            sn = 1
+            for agent in agents:
+                # Basic info
+                ws.cell(row, 1).value = sn
+                ws.cell(row, 2).value = agent.login or agent.id  # CODE NUMBER
+                ws.cell(row, 3).value = agent.name  # PROMOTER NAME
+                join_date_str = agent.create_date.strftime("%d/%m/%y") if agent.create_date else ""
+                ws.cell(row, 4).value = join_date_str  # DATE OF JOINING
+                ws.cell(row, 5).value = "ASM"  # DESIGNATION
+
+                # Day cells
+                present_count = 0
+                for i, d in enumerate(date_range):
+                    day_col = day_start_col + i
+                    day_sessions = sessions.filtered(
+                        lambda s: s.user_id.id == agent.id and s.start_time.date() == d
+                    )
+                    if day_sessions:
+                        total_duration = sum(s.duration for s in day_sessions)
+                        cell_value = f"P ({total_duration:.1f}h)"
+                        present_count += 1
+                        cell = ws.cell(row, day_col)
+                        cell.value = cell_value
+                        cell.fill = yellow_fill
+                        cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+                    else:
+                        cell = ws.cell(row, day_col)
+                        cell.value = "A"
+                        cell.alignment = Alignment(horizontal="center", vertical="center",
+                                                   wrap_text=True)  # Added wrap_text for consistency
+
+                # P%
+                p_percentage = (present_count / num_days * 100) if num_days > 0 else 0
+                ws.cell(row, p_col).value = f"{p_percentage:.0f}%"
+                ws.cell(row, p_col).alignment = Alignment(horizontal="center", vertical="center")
+
+                # Unit
+                ws.cell(row, unit_col).value = unit_name
+                ws.cell(row, unit_col).alignment = Alignment(horizontal="center", vertical="center")
+
+                sn += 1
+                row += 1
+
+            # Center align all data cells with wrap_text
+            for r in range(3, row):
+                for c in range(1, unit_col + 1):
+                    cell = ws.cell(row=r, column=c)
+                    if not cell.fill:  # Don't override yellow fill
+                        cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+
+            # Save to memory
+            file_stream = BytesIO()
+            wb.save(file_stream)
+            file_stream.seek(0)
+            file_data = base64.b64encode(file_stream.read())
+
+            self.write({
+                'dummy_file': file_data,
+                'dummy_file_name': f"{unit_name}_monthly_attendance_{start_date.strftime('%Y%m')}.xlsx"
+            })
+            return {
+                'type': 'ir.actions.act_url',
+                'url': f"/web/content/?model=users.wizard&id={self.id}&field=dummy_file&filename_field=dummy_file_name&download=true",
+                'target': 'new',
+            }
+        finally:
+            execution_time = time.time() - start_time
+            self._update_function_timing('download_monthly_attendance_report', execution_time)

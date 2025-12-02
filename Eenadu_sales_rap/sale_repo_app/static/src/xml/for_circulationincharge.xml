@@ -1,4 +1,4 @@
-<templates xml:space="preserve">
+    <templates xml:space="preserve">
   <t t-name="sale_repo_app.circulation_incharge_dashboard_template" owl="1">
 
     <!-- 🌐 Centering Container -->
@@ -55,12 +55,23 @@
           </button>
 
           <!-- 7 -->
-          <button t-on-click="attendance_excel_report"
-                  class="btn btn-outline-secondary"
+          <div class="btn btn-outline-secondary"
                   style="flex: 1 1 calc(25% - 12px); min-width: 180px; min-height: 100px; display: flex; align-items: center; justify-content: center; text-align: center;">
-            <i class="fa fa-calendar me-2" style="font-size: 1.5rem;"></i>
-            Attendance Report
-          </button>
+
+              <div>
+                  <button t-on-click="attendance_excel_m_report" type="button" style="font-size: 1.5rem; margin-bottom: 10px;">
+                    <i class="fa fa-calendar me-2" style="font-size: 1.5rem;"></i>
+                    Attendance-M Report
+                </button>
+
+
+                  <button t-on-click="attendance_excel_report">
+                      <i class="fa fa-calendar me-2" style="font-size: 1.5rem;"></i>
+                      Attendance Report
+                  </button>
+
+              </div>
+          </div>
 
           <!-- 8 -->
           <button t-on-click="reg_head_cu_form"

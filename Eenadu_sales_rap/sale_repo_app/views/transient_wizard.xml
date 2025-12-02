@@ -97,6 +97,30 @@
         </field>
     </record>
 
+    <record id="view_users_attendance_wizard_m_form_excel" model="ir.ui.view">
+        <field name="name">users.wizard.form</field>
+        <field name="model">users.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Attendance Excel Report">
+                <group>
+                    <group>
+                        <field name="start_date" />
+                        <field name="end_date" />
+
+                    </group>
+                    <group>
+                         <button string="Download Attendance Report" type="object"
+                                name="download_monthly_attendance_report"
+                                class="btn-secondary" />
+                    </group>
+                </group>
+                <footer>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
     <!-- Action to open wizard -->
     <record id="action_users_wizard" model="ir.actions.act_window">
         <field name="name">Create User</field>
@@ -124,12 +148,20 @@
         <field name="target">new</field>
     </record>
 
+    <record id="action_attendance_report_m_users_wizard_excel" model="ir.actions.act_window">
+        <field name="name">Excel Report</field>
+        <field name="res_model">users.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_users_attendance_wizard_m_form_excel"/>
+        <field name="target">new</field>
+    </record>
+
 
 <!--    <record id="action_res_users_view1" model="ir.actions.act_window.view">-->
 <!--        <field eval="10" name="sequence"/>-->
 <!--        <field name="view_mode">tree</field>-->
 <!--        <field name="view_id" ref="view_sales_rep_tree"/>-->
-<!--        <field name="act_window_id" ref="action_res_users_heirt"/>-->
+<!--        <field name="act_window_id" ref="action_res_users_3heirt"/>-->
 <!--    </record>-->
 <!--    <record id="action_res_users_view2" model="ir.actions.act_window.view">-->
 <!--        <field eval="20" name="sequence"/>-->
