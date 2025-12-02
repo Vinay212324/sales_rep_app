@@ -11,6 +11,7 @@ from odoo.exceptions import UserError
 from io import BytesIO
 from odoo.http import request
 import re
+from datetime import datetime as dt
 from openpyxl import Workbook
 from openpyxl.styles import Alignment, Font
 from odoo.tools import round
@@ -1183,14 +1184,12 @@ class UsersWizard(models.TransientModel):
             execution_time = time.time() - start_time
             self._update_function_timing('download_attendance_report', execution_time)
 
-
     def download_monthly_attendance_report(self):
         start_time = time.time()
         try:
-
             start_date = self.start_date
             end_date = self.end_date
-            print("vinay", start_date,end_date)
+            print("vinay", start_date, end_date)
             if not start_date or not end_date:
                 raise UserError("Please select valid period details for the month.")
 
@@ -1216,11 +1215,15 @@ class UsersWizard(models.TransientModel):
             ]
             num_days = len(date_range)
 
-            # Fetch relevant work sessions
+            # Convert dates to datetime for full day range in search
+            start_dt = dt.combine(start_date, dt.min.time())
+            end_dt = dt.combine(end_date, dt.max.time())
+
+            # Fetch relevant work sessions - FIXED: Use datetime range for accurate filtering
             sessions = self.env["work.session"].sudo().search([
                 ('user_id', 'in', agents.ids),
-                ('start_time', '>=', start_date),
-                ('start_time', '<=', end_date),
+                ('start_time', '>=', start_dt),
+                ('start_time', '<=', end_dt),
             ])
 
             # Prepare Excel
