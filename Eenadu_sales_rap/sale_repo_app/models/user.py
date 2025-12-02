@@ -1224,9 +1224,9 @@ class UsersWizard(models.TransientModel):
             ws = wb.active
             ws.title = f"{unit_name.upper()} Attendance"
 
-            # Title row (row 1, merged)
-            month_year = start_date.strftime("%B %Y")
-            title = f"NIT-HYDERABAD {unit_name.upper()} UNIT CITY ATTENDANCE MONTH OF {month_year}"
+            # Title row (row 1, merged) - Updated to show full date range
+            date_range_str = f"{start_date.strftime('%d/%m/%Y')} to {end_date.strftime('%d/%m/%Y')}"
+            title = f"NIT-HYDERABAD {unit_name.upper()} UNIT CITY ATTENDANCE FROM {date_range_str}"
             last_col = 6 + num_days + 1  # A:SN, B:Code, C:Name, D:Join, E:Des, F to F+num_days-1: Days, then P%, Unit
             last_col_letter = get_column_letter(last_col)
             ws.merge_cells(f"A1:{last_col_letter}1")
@@ -1340,7 +1340,7 @@ class UsersWizard(models.TransientModel):
 
             self.write({
                 'dummy_file': file_data,
-                'dummy_file_name': f"{unit_name}_monthly_attendance_{start_date.strftime('%Y%m')}.xlsx"
+                'dummy_file_name': f"{unit_name}_attendance_{start_date.strftime('%Y%m%d')}_to_{end_date.strftime('%Y%m%d')}.xlsx"
             })
             return {
                 'type': 'ir.actions.act_url',
