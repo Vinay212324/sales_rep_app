@@ -60,6 +60,30 @@
               action="action_res_users_heirt"
               sequence="3"/>
 
+    <menuitem id="for_users_circu_in"
+              name="User info"
+              parent="sale_repo_app.menu_circulation_incharge"
+              sequence="17"
+              groups="sale_repo_app.admin_group,sale_repo_app.circulation_head_group,sale_repo_app.region_head_group,sale_repo_app.unit_manager_group,sale_repo_app.segment_incharge_group,sale_repo_app.circulation_incharge_group,sale_repo_app.office_staff_group"/>
+
+    <menuitem id="create_users_id"
+              name="Create new User"
+              parent="for_users_circu_in"
+              action="action_res_users_create"
+              sequence="1"/>
+
+    <menuitem id="active_users_id"
+              name="Waiting Users"
+              parent="for_users_circu_in"
+              action="action_res_users_inactive"
+              sequence="2"/>
+
+    <menuitem id="unactive_users_id"
+              name="Approved Users"
+              parent="for_users_circu_in"
+              action="action_res_users_heirt"
+              sequence="3"/>
+
     <menuitem id="menu_verification_otp_root"
               name="OTP Management"
               parent="menu_sales_rep_main"
